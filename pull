@@ -97,7 +97,7 @@ mainGame:AddToggle({
                     if targetName and targetName ~= "" then
                         r.WinEvent_PVP:FireServer(targetName, true, true)
                     end
-                    task.wait(0.8)
+                    task.wait(0.7)
                 end
             end)
         end
@@ -105,7 +105,7 @@ mainGame:AddToggle({
 })
 
 mainGame:AddButton({
-    text = "PvP Burst (x100 Instant)",
+    text = "PvP Test (x2 Instant)",
     callback = function()
         local r = game.ReplicatedStorage.Remotes.Events
         local targetName = library.flags["PvPTarget"]
