@@ -104,6 +104,21 @@ mainGame:AddToggle({
     end
 })
 
+mainGame:AddButton({
+    text = "PvP Burst (x100 Instant)",
+    callback = function()
+        local r = game.ReplicatedStorage.Remotes.Events
+        local targetName = library.flags["PvPTarget"]
+        if targetName and targetName ~= "" then
+            -- Fire 100 PvP events immediately, no delay
+            for i = 1, 100 do
+                r.WinEvent_PVP:FireServer(targetName, true, true)
+            end
+        end
+    end
+})
+
+
 local dropdownRef
 dropdownRef = mainGame:AddList({
     text = "Select PvP Target",
