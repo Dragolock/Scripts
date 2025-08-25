@@ -97,7 +97,7 @@ mainGame:AddToggle({
                     if targetName and targetName ~= "" then
                         r.WinEvent_PVP:FireServer(targetName, true, true)
                     end
-                    task.wait(0.7)
+                    task.wait(0.9)
                 end
             end)
         end
