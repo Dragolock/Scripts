@@ -97,7 +97,7 @@ mainGame:AddToggle({
                     if targetName and targetName ~= "" then
                         r.WinEvent_PVP:FireServer(targetName, true, true)
                     end
-                    task.wait(10820)
+                    task.wait(0.8)
                 end
             end)
         end
@@ -110,8 +110,8 @@ mainGame:AddButton({
         local r = game.ReplicatedStorage.Remotes.Events
         local targetName = library.flags["PvPTarget"]
         if targetName and targetName ~= "" then
-            -- Fire 100 PvP events immediately, no delay
-            for i = 1, 30 do
+            -- Fire 2 PvP events immediately, no delay
+            for i = 1, 2 do
                 r.WinEvent_PVP:FireServer(targetName, true, true)
             end
         end
