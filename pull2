@@ -396,7 +396,7 @@ eventTab:AddToggle({
 
 local Players,CS=game:GetService("Players"),game:GetService("CollectionService")
 local lp,teleporting=Players.LocalPlayer,false
-local interval,distThresh=0.3,5
+local interval,distThresh=0.001,5
 
 -- Cache/tagging
 for _,p in ipairs(workspace:GetDescendants())do 
@@ -434,10 +434,17 @@ function teleportLoop()
 end
 
 function teleportCommander()
+    teleporting=true
     local hrp=lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
-    if hrp then hrp.CFrame=CFrame.new(4758,538,-1768) end
+    if not hrp then return end
+    task.spawn(function()
+        while teleporting and hrp do
+            hrp.CFrame=CFrame.new(4758,538,-1768)
+            hrp.AssemblyLinearVelocity,hrp.AssemblyAngularVelocity=Vector3.zero,Vector3.zero
+            task.wait()
+        end
+    end)
 end
-
 
 eventTab:AddToggle({
     text = "Enable Teleport",
