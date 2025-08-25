@@ -396,7 +396,7 @@ eventTab:AddToggle({
 
 local Players,CS=game:GetService("Players"),game:GetService("CollectionService")
 local lp,teleporting=Players.LocalPlayer,false
-local interval,distThresh=0.001,5
+local interval,distThresh=0.3,5
 
 -- Cache/tagging
 for _,p in ipairs(workspace:GetDescendants())do 
