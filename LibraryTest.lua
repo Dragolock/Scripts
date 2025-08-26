@@ -13,7 +13,7 @@ function Library.new(windowName)
 
     -- Create ScreenGui
     self.ScreenGui = Instance.new("ScreenGui")
-    self.ScreenGui.Name = windowName or "EazvyHub"
+    self.ScreenGui.Name = windowName or "."
     self.ScreenGui.ResetOnSpawn = false
     self.ScreenGui.Parent = PlayerGui
 
