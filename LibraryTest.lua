@@ -8,12 +8,12 @@ local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local Library = {}
 Library.__index = Library
 
-function Library.new()
+function Library.new(windowName)
     local self = setmetatable({}, Library)
 
     -- Create ScreenGui
     self.ScreenGui = Instance.new("ScreenGui")
-    self.ScreenGui.Name = "EazvyHub"
+    self.ScreenGui.Name = windowName or "EazvyHub"
     self.ScreenGui.ResetOnSpawn = false
     self.ScreenGui.Parent = PlayerGui
 
@@ -36,9 +36,9 @@ function Library.new()
     local topBarCorner = Instance.new("UICorner", self.TopBar)
     topBarCorner.CornerRadius = UDim.new(0, 15)
 
-    -- Title Label in top bar
+    -- Title Label in top bar - set text to windowName or default text
     local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Text = "EazvyHub"
+    TitleLabel.Text = windowName or "EazvyHub"
     TitleLabel.Size = UDim2.new(0.7, 0, 1, 0)
     TitleLabel.BackgroundTransparency = 1
     TitleLabel.Font = Enum.Font.GothamBold
@@ -206,7 +206,6 @@ function Library.new()
         -- UI Elements container per tab for toggles etc
         local elements = {}
 
-        -- Add toggle helper
         function tabContent:AddToggle(name, posY)
             local frame = Instance.new("Frame")
             frame.Size = UDim2.new(1, 0, 0, 40)
@@ -249,7 +248,6 @@ function Library.new()
             return toggleButton
         end
 
-        -- Add button helper
         function tabContent:AddButton(name, posY, callback)
             local btn = Instance.new("TextButton")
             btn.Size = UDim2.new(1, 0, 0, 40)
@@ -269,7 +267,6 @@ function Library.new()
             return btn
         end
 
-        -- Add label helper
         function tabContent:AddLabel(title, content, posY)
             local frame = Instance.new("Frame")
             frame.Size = UDim2.new(1, 0, 0, 50)
@@ -304,7 +301,6 @@ function Library.new()
             return frame
         end
 
-        -- Add dropdown helper
         function tabContent:AddDropdown(name, options, posY, callback)
             local frame = Instance.new("Frame")
             frame.Size = UDim2.new(1, 0, 0, 36)
@@ -380,20 +376,28 @@ function Library.new()
             return dropdown
         end
 
-        -- Initially hide tab content
         tabContent.Visible = false
 
-        -- Return functions on tabContent for easy access
+        table.insert(self.Tabs, {Button = tabButton, Content = tabContent})
+
+        tabButton.MouseButton1Click:Connect(function()
+            self:SwitchTab(#self.Tabs)
+        end)
+
         return tabContent
     end
 
-    -- Switch to first tab by default (if exists)
-    if #Window.Tabs > 0 then
-        Window:SwitchTab(1)
+    function self:SwitchTab(index)
+        for i, tab in ipairs(self.Tabs) do
+            local active = (i == index)
+            tab.Content.Visible = active
+            tab.Button.TextColor3 = active and Color3.new(1, 1, 1) or Color3.fromRGB(180, 180, 180)
+            self.CurrentTab = index
+        end
     end
 
-    setmetatable(Window, Window)
-    return Window
+    setmetatable(self, Library)
+    return self
 end
 
 setmetatable(Library, Library)
