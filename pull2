@@ -6,17 +6,17 @@ local Window = Library:Window({Text = "PAS - HUB"})
 
 -- ======= Tabs =======
 local MainGameTab = Window:Tab({Text = "Main Game"})
-local PvPTab = Window:Tab({Text = "PvP Stuff"})
+local PvPTab = Window:Tab({Text = "PvP Stuff"}) -- above Worlds
 local BossTab = Window:Tab({Text = "Bosses"})
 local WorldTab = Window:Tab({Text = "Worlds/Secret Worlds"})
 local EventTab = Window:Tab({Text = "Underworld Event"})
 
 -- ======= Sections =======
 local MainSection = MainGameTab:Section({Text = "Main Game"})
+local PvPSection = PvPTab:Section({Text = "PvP Controls"})
 local BossSection = BossTab:Section({Text = "Bosses"})
 local WorldSection = WorldTab:Section({Text = "Worlds"})
 local EventSection = EventTab:Section({Text = "Event"})
-local PvPSection = PvPTab:Section({Text = "PvP Controls"})
 
 -- ======= Helper Functions =======
 local function getPlayerNames()
@@ -463,10 +463,3 @@ EventSection:Dropdown({
         end
     end
 })
-
--- Select first tab
-MainGameTab:Select()
-PvPTab:Select()
-BossTab:Select()
-WorldTab:Select()
-EventTab:Select()
