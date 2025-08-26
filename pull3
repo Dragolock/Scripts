@@ -1,41 +1,31 @@
--- Load Rayfield
-local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Rayfield/main/source'))()
+-- Load library
+local _, library = pcall(loadstring(game:HttpGet("https://raw.githubusercontent.com/TrixAde/Osmium/main/OsmiumLibrary.lua")))
 
--- Main Window
-local Window = Rayfield:CreateWindow({
-   Name = "PAS - HUB",
-   LoadingTitle = "PAS - HUB",
-   LoadingSubtitle = "by Kaffe",
-   ConfigurationSaving = {Enabled = true, FolderName = nil, FileName = "PAS-HUB"},
-   Discord = {Enabled = false},
-   KeySystem = false
-})
+-- MAIN WINDOW
+local mainWindow = library:CreateWindow("PAS - HUB")
+local mainGameTab = mainWindow:CreateTab("Main Game")
+local bossTab = mainWindow:CreateTab("Bosses")
+local worldTab = mainWindow:CreateTab("Worlds/Secret Worlds")
+local pvpTab = mainWindow:CreateTab("PvP Stuff")
+mainWindow:CreateLabel("Creator = Not me")
 
--- Create Tabs
-local mainTab = Window:CreateTab("Main Game", 4483362458)
-local bossTab = Window:CreateTab("Bosses", 4483362458)
-local worldTab = Window:CreateTab("Worlds/Secret Worlds", 4483362458)
-local pvpTab = Window:CreateTab("PvP Stuff", 4483362458)
-local heraldTab = Window:CreateTab("Underworld Event", 4483362458)
+-- HERALD EVENT WINDOW
+local heraldWindow = library:CreateWindow("Underworld Event")
+local eventTab = heraldWindow:CreateTab("Event")
 
+--------------------------------------------------
 -- MAIN GAME
-local mainSection = mainTab:CreateSection("Main Game Features")
-
-mainTab:CreateToggle({
-   Name = "Auto Click",
-   CurrentValue = false,
-   Flag = "AutoClick",
-   Callback = function(state)
-       if state then
-           task.spawn(function()
-               while Rayfield.Flags.AutoClick do
-                   game.ReplicatedStorage.Remotes.Events.ClickEvent:FireServer()
-                   task.wait()
-               end
-           end)
-       end
-   end
-})
+--------------------------------------------------
+mainGameTab:CreateToggle("Auto Click", false, function(state)
+    if state then
+        task.spawn(function()
+            while library.flags["Auto Click"] do
+                game.ReplicatedStorage.Remotes.Events.ClickEvent:FireServer()
+                task.wait()
+            end
+        end)
+    end
+end)
 
 local eggList = {
     "W1E1","W2E1","W3E1","W4E1","W5E1","W6E1","W7E1","W8E1","W9E1","W10E1",
@@ -44,142 +34,108 @@ local eggList = {
     "W31E1","W32E1","W33E1","W34E1","W35E1","Common Egg"
 }
 
-mainTab:CreateToggle({
-    Name = "Hatch Nearest",
-    CurrentValue = false,
-    Flag = "HatchNearest",
-    Callback = function(state)
-        if state then
-            task.spawn(function()
-                while Rayfield.Flags.HatchNearest do
-                    for _, egg in ipairs(eggList) do
-                        game.ReplicatedStorage.GameClient.Events.RemoteFunction.BuyEgg:InvokeServer(egg,"Buy1")
-                    end
-                    task.wait(0.3)
+mainGameTab:CreateToggle("Hatch Nearest", false, function(state)
+    if state then
+        task.spawn(function()
+            while library.flags["Hatch Nearest"] do
+                for _, egg in ipairs(eggList) do
+                    game.ReplicatedStorage.GameClient.Events.RemoteFunction.BuyEgg:InvokeServer(egg,"Buy1")
                 end
-            end)
-        end
-    end
-})
-
-mainTab:CreateToggle({
-    Name = "Auto Spin Wheel",
-    CurrentValue = false,
-    Flag = "AutoSpinWheel",
-    Callback = function(state)
-        if state then
-            task.spawn(function()
-                while Rayfield.Flags.AutoSpinWheel do
-                    game:GetService("ReplicatedStorage").GameClient.Events.RemoteEvent.SpaceEggEvent:FireServer()
-                    task.wait(20)
-                end
-            end)
-        end
-    end
-})
-
-mainTab:CreateButton({
-    Name = "Complete Quests",
-    Callback = function()
-        local remotes = game:GetService("ReplicatedStorage").Remotes.Events
-        remotes.RemoveC:FireServer(1)
-        task.wait()
-        remotes.WorldWheelEvent:FireServer("5")
-        remotes.OnStandartShopRequest:FireServer("Buy", 2, 3)
-        remotes.OnStandartShopRequest:FireServer("Buy", 2, 1)
-        task.wait()
-        for i=1,3 do
-            remotes.PortalC:FireServer(tostring(i%2+1), true)
-            task.wait(1)
-        end
-        for i=1,10 do
-            remotes.WinEvent:FireServer("5")
-            task.wait(2)
-        end
-        for i=1,25 do
-            remotes.WinBossEvent:FireServer("Boss1")
-            task.wait(0.1)
-        end
-        remotes.RemoveC:FireServer(0)
-        task.wait(120)
-        local dailyArgs = {
-            {"Daily", "UseOnSideSystem"},{"Daily", "Defeat10Enemies"},{"Daily", "Pull10Swords"},
-            {"Daily", "Click1000Times"},{"Daily", "Win20MillionPower"},{"Daily", "GoTo5Worlds"},
-            {"Daily", "PlayFor60Minutes"},{"Daily", "BuyItemsAtStore"},{"Daily", "Complete10Quests"},
-        }
-        for _, args in ipairs(dailyArgs) do
-            remotes.ClaimQuest:FireServer(unpack(args))
-            task.wait(0.5)
-        end
-    end
-})
-
--- Bosses Section
-local bossSection = bossTab:CreateSection("Boss Features")
-
-bossTab:CreateToggle({
-    Name = "Generate Crystals",
-    CurrentValue = false,
-    Flag = "GenCrystals",
-    Callback = function(state)
-        local r = game.ReplicatedStorage.Remotes.Events
-        if state then
-            r.RemoveC:FireServer(1)
-            task.spawn(function()
-                while Rayfield.Flags.GenCrystals do
-                    for i=1,20 do
-                        r.WinMegaBossEvent:FireServer("Dragon6", "Chaos")
-                    end
-                    task.wait()
-                end
-            end)
-        else
-            r.RemoveC:FireServer(0)
-        end
-    end
-})
-
--- World Section
-local worldSection = worldTab:CreateSection("World Features")
-
-local worldOptions = {
-    {name="Castle",args={"2",true}}, {name="Volcano Cave",args={"1",true}},
-    {name="Glacier Peaks",args={"3",true}}, {name="Desert Island",args={"5",true}},
-    {name="The Lab",args={"7",true}}, {name="Ocean",args={"9",true}},
-    {name="Temple",args={"11",true}}, {name="Arcade",args={"13",true}},
-    {name="Underworld",args={"15",true}}, {name="Darkstar",args={"17",true}},
-    {name="Nyxra Place",args={"-6",false}}, {name="Anubis",args={"-8",false}},
-    {name="Viridian",args={"-14",false}}, {name="Ultra Prime",args={"-10",false}},
-}
-
-worldTab:CreateDropdown({
-    Name = "Select World",
-    Options = (function() local t={} for _,o in ipairs(worldOptions) do table.insert(t,o.name) end return t end)(),
-    CurrentOption = worldOptions[1].name,
-    Flag = "WorldTarget",
-    Callback = function(opt)
-        for _, optData in ipairs(worldOptions) do
-            if optData.name == opt then
-                game.ReplicatedStorage.Remotes.Events.PortalC:FireServer(unpack(optData.args))
+                task.wait(0.3)
             end
-        end
+        end)
     end
-})
+end)
 
--- Underworld Event Section
-local underworldSection = heraldTab:CreateSection("Underworld Event")
-heraldTab:CreateToggle({
-    Name = "Attack Aura",
-    CurrentValue = false,
-    Flag = "AttackAura",
-    Callback = function(state)
-        if state then
-            task.spawn(function()
-                while Rayfield.Flags.AttackAura do
-                    game:GetService("ReplicatedStorage").Remotes.Events.OnAttackMob:FireServer()
-                    task.wait()
-                end
-            end)
+mainGameTab:CreateToggle("Auto Spin Wheel", false, function(state)
+    if state then
+        task.spawn(function()
+            while library.flags["Auto Spin Wheel"] do
+                game:GetService("ReplicatedStorage").GameClient.Events.RemoteEvent.SpaceEggEvent:FireServer()
+                task.wait(20)
+            end
+        end)
+    end
+end)
+
+mainGameTab:CreateButton("Complete Quests", function()
+    local remotes = game:GetService("ReplicatedStorage").Remotes.Events
+    remotes.RemoveC:FireServer(1)
+    task.wait()
+    remotes.WorldWheelEvent:FireServer("5")
+    remotes.OnStandartShopRequest:FireServer("Buy", 2, 3)
+    remotes.OnStandartShopRequest:FireServer("Buy", 2, 1)
+    task.wait()
+    remotes.PortalC:FireServer("1", true)
+    task.wait(1)
+    remotes.PortalC:FireServer("2", true)
+    task.wait(1)
+    remotes.PortalC:FireServer("1", true)
+    task.wait(1)
+    remotes.PortalC:FireServer("2", true)
+    task.wait(1)
+    remotes.PortalC:FireServer("1", true)
+    task.wait(1)
+    remotes.PortalC:FireServer("2", true)
+    task.wait(2)
+    for i = 1, 10 do
+        remotes.WinEvent:FireServer("5")
+        task.wait(2)
+    end
+    task.wait(2)
+    for i = 1, 25 do
+        remotes.WinBossEvent:FireServer("Boss1")
+        task.wait(0.1)
+    end
+    remotes.RemoveC:FireServer(0)
+    task.wait(120)
+    local dailyArgs = {
+        {"Daily", "UseOnSideSystem"},
+        {"Daily", "Defeat10Enemies"},
+        {"Daily", "Pull10Swords"},
+        {"Daily", "Click1000Times"},
+        {"Daily", "Win20MillionPower"},
+        {"Daily", "GoTo5Worlds"},
+        {"Daily", "PlayFor60Minutes"},
+        {"Daily", "BuyItemsAtStore"},
+        {"Daily", "Complete10Quests"},
+    }
+    for _, args in ipairs(dailyArgs) do
+        remotes.ClaimQuest:FireServer(unpack(args))
+        task.wait(0.5)
+    end
+end)
+
+mainGameTab:CreateButton("Antiafk & Antilag", function()
+    game:GetService('Players').LocalPlayer.Idled:Connect(function()
+        game:GetService('VirtualUser'):CaptureController()
+        game:GetService('VirtualUser'):ClickButton2(Vector2.new())
+    end)
+    local g = game
+    local w = g.Workspace
+    local l = g.Lighting
+    local t = w.Terrain
+    t.WaterWaveSize, t.WaterWaveSpeed, t.WaterReflectance, t.WaterTransparency = 0,0,0,0
+    l.GlobalShadows, l.FogEnd, l.Brightness = false, 9e9, 0
+    settings().Rendering.QualityLevel = "Level01"
+    for i, v in pairs(g:GetDescendants()) do
+        if v:IsA("Part") or v:IsA("Union") or v:IsA("CornerWedgePart") or v:IsA("TrussPart") then
+            v.Material, v.Reflectance = "Plastic", 0
+        elseif v:IsA("Decal") or v:IsA("Texture") then
+            v.Transparency = 1
+        elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+            v.Lifetime = NumberRange.new(0)
+        elseif v:IsA("Explosion") then
+            v.BlastPressure, v.BlastRadius = 1,1
+        elseif v:IsA("Fire") or v:IsA("SpotLight") or v:IsA("Smoke") then
+            v.Enabled = false
+        elseif v:IsA("MeshPart") then
+            v.Material, v.Reflectance, v.TextureID = "Plastic", 0, ""
         end
     end
-})
+    for i, e in pairs(l:GetChildren()) do
+        if e:IsA("BlurEffect") or e:IsA("SunRaysEffect") or e:IsA("ColorCorrectionEffect") or e:IsA("BloomEffect") or e:IsA("DepthOfFieldEffect") then
+            e.Enabled = false
+        end
+    end
+end)
