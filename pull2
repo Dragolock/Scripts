@@ -1,31 +1,39 @@
--- Load Unnamed Rain-Design Library
-local Library = loadstring(game:HttpGet('https://raw.githubusercontent.com/Rain-Design/Unnamed/main/Library.lua'))()
-Library.Theme = "Dark"
+-- Load Shaman Library
+local Library = loadstring(game:HttpGet('https://raw.githubusercontent.com/Rain-Design/Libraries/main/Shaman/Library.lua'))()
 local Flags = Library.Flags
 
---------------------------------------------------
--- MAIN WINDOW
---------------------------------------------------
-local Window = Library:Window({
-    Text = "PAS - HUB"
-})
+local Window = Library:Window({Text = "PAS - HUB"})
 
---------------------------------------------------
--- MAIN GAME TAB
---------------------------------------------------
-local MainGameTab = Window:Tab({ Text = "Main Game" })
-local MainGameSection = MainGameTab:Section({ Text = "Main Features" })
+-- Tabs
+local MainGameTab = Window:Tab({Text = "Main Game"})
+local BossTab = Window:Tab({Text = "Bosses"})
+local WorldTab = Window:Tab({Text = "Worlds/Secret Worlds"})
+local EventTab = Window:Tab({Text = "Underworld Event"})
 
-local BossTab = Window:Tab({ Text = "Bosses" })
-local BossSection = BossTab:Section({ Text = "Boss Features" })
+-- Sections
+local MainSection = MainGameTab:Section({Text = "Main Game"})
+local BossSection = BossTab:Section({Text = "Bosses"})
+local WorldSection = WorldTab:Section({Text = "Worlds"})
+local EventSection = EventTab:Section({Text = "Event"})
 
--- Auto Click
-MainGameSection:Toggle({
+---------------------------
+-- MAIN GAME
+---------------------------
+
+local eggList = {
+    "W1E1","W2E1","W3E1","W4E1","W5E1","W6E1","W7E1","W8E1","W9E1","W10E1",
+    "W11E1","W12E1","W13E1","W14E1","W15E1","W16E1","W17E1","W18E1","W19E1","W20E1",
+    "W21E1","W22E1","W23E1","W24E1","W25E1","W26E1","W27E1","W28E1","W29E1","W30E1",
+    "W31E1","W32E1","W33E1","W34E1","W35E1","Common Egg"
+}
+
+MainSection:Toggle({
     Text = "Auto Click",
+    Flag = "AutoClick",
     Callback = function(state)
         if state then
             task.spawn(function()
-                while Flags["Auto Click"] do
+                while Flags.AutoClick do
                     game.ReplicatedStorage.Remotes.Events.ClickEvent:FireServer()
                     task.wait()
                 end
@@ -34,19 +42,13 @@ MainGameSection:Toggle({
     end
 })
 
--- Hatch Nearest
-local eggList = {
-    "W1E1","W2E1","W3E1","W4E1","W5E1","W6E1","W7E1","W8E1","W9E1","W10E1",
-    "W11E1","W12E1","W13E1","W14E1","W15E1","W16E1","W17E1","W18E1","W19E1","W20E1",
-    "W21E1","W22E1","W23E1","W24E1","W25E1","W26E1","W27E1","W28E1","W29E1","W30E1",
-    "W31E1","W32E1","W33E1","W34E1","W35E1","Common Egg"
-}
-MainGameSection:Toggle({
+MainSection:Toggle({
     Text = "Hatch Nearest",
+    Flag = "HatchNearest",
     Callback = function(state)
         if state then
             task.spawn(function()
-                while Flags["Hatch Nearest"] do
+                while Flags.HatchNearest do
                     for _, egg in ipairs(eggList) do
                         game.ReplicatedStorage.GameClient.Events.RemoteFunction.BuyEgg:InvokeServer(egg,"Buy1")
                     end
@@ -57,13 +59,13 @@ MainGameSection:Toggle({
     end
 })
 
--- Auto Spin Wheel
-MainGameSection:Toggle({
+MainSection:Toggle({
     Text = "Auto Spin Wheel",
+    Flag = "AutoSpinWheel",
     Callback = function(state)
         if state then
             task.spawn(function()
-                while Flags["Auto Spin Wheel"] do
+                while Flags.AutoSpinWheel do
                     game.ReplicatedStorage.GameClient.Events.RemoteEvent.SpaceEggEvent:FireServer()
                     task.wait(20)
                 end
@@ -72,8 +74,65 @@ MainGameSection:Toggle({
     end
 })
 
--- Quest Completer
-MainGameSection:Button({
+-- PvP
+local function getPlayerNames()
+    local t = {}
+    for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+        table.insert(t, player.Name)
+    end
+    return t
+end
+local playerNames = getPlayerNames()
+
+MainSection:Toggle({
+    Text = "Auto PvP",
+    Flag = "AutoPvP",
+    Callback = function(state)
+        if state then
+            task.spawn(function()
+                while Flags.AutoPvP do
+                    local r = game.ReplicatedStorage.Remotes.Events
+                    local targetName = Flags.PvPTarget
+                    if targetName and targetName ~= "" then
+                        r.WinEvent_PVP:FireServer(targetName, true, true)
+                    end
+                    task.wait(0.7)
+                end
+            end)
+        end
+    end
+})
+
+MainSection:Button({
+    Text = "PvP Test (x2 Instant)",
+    Callback = function()
+        local r = game.ReplicatedStorage.Remotes.Events
+        local targetName = Flags.PvPTarget
+        if targetName and targetName ~= "" then
+            for i = 1, 2 do
+                r.WinEvent_PVP:FireServer(targetName, true, true)
+            end
+        end
+    end
+})
+
+local PvPDropdown = MainSection:Dropdown({
+    Text = "Select PvP Target",
+    List = playerNames,
+    Flag = "PvPTarget",
+    Callback = function(v) Flags.PvPTarget = v end
+})
+
+MainSection:Button({
+    Text = "Refresh Players",
+    Callback = function()
+        playerNames = getPlayerNames()
+        PvPDropdown:Refresh(playerNames)
+    end
+})
+
+-- Complete Quests
+MainSection:Button({
     Text = "Complete Quests",
     Callback = function()
         local remotes = game.ReplicatedStorage.Remotes.Events
@@ -83,15 +142,26 @@ MainGameSection:Button({
         remotes.OnStandartShopRequest:FireServer("Buy", 2, 3)
         remotes.OnStandartShopRequest:FireServer("Buy", 2, 1)
         task.wait()
-        for i=1,3 do
-            remotes.PortalC:FireServer("1", true) task.wait(1)
-            remotes.PortalC:FireServer("2", true) task.wait(1)
-        end
+        remotes.PortalC:FireServer("1", true)
+        task.wait(1)
+        remotes.PortalC:FireServer("2", true)
+        task.wait(1)
+        remotes.PortalC:FireServer("1", true)
+        task.wait(1)
+        remotes.PortalC:FireServer("2", true)
+        task.wait(1)
+        remotes.PortalC:FireServer("1", true)
+        task.wait(1)
+        remotes.PortalC:FireServer("2", true)
+        task.wait(2)
         for i = 1, 10 do
-            remotes.WinEvent:FireServer("5") task.wait(2)
+            remotes.WinEvent:FireServer("5")
+            task.wait(2)
         end
+        task.wait(2)
         for i = 1, 25 do
-            remotes.WinBossEvent:FireServer("Boss1") task.wait(0.1)
+            remotes.WinBossEvent:FireServer("Boss1")
+            task.wait(0.1)
         end
         remotes.RemoveC:FireServer(0)
 
@@ -114,20 +184,22 @@ MainGameSection:Button({
     end
 })
 
--- Anti AFK & Anti Lag
-MainGameSection:Button({
+-- Anti AFK / Anti Lag
+MainSection:Button({
     Text = "Antiafk & Antilag",
     Callback = function()
-        game:GetService("Players").LocalPlayer.Idled:Connect(function()
-            game:GetService("VirtualUser"):CaptureController()
-            game:GetService("VirtualUser"):ClickButton2(Vector2.new())
+        game.Players.LocalPlayer.Idled:Connect(function()
+            game:GetService('VirtualUser'):CaptureController()
+            game:GetService('VirtualUser'):ClickButton2(Vector2.new())
         end)
         local g = game
-        local w, l, t = g.Workspace, g.Lighting, g.Workspace.Terrain
+        local w = g.Workspace
+        local l = g.Lighting
+        local t = w.Terrain
         t.WaterWaveSize, t.WaterWaveSpeed, t.WaterReflectance, t.WaterTransparency = 0,0,0,0
         l.GlobalShadows, l.FogEnd, l.Brightness = false, 9e9, 0
         settings().Rendering.QualityLevel = "Level01"
-        for _, v in pairs(g:GetDescendants()) do
+        for i, v in pairs(g:GetDescendants()) do
             if v:IsA("Part") or v:IsA("Union") or v:IsA("CornerWedgePart") or v:IsA("TrussPart") then
                 v.Material, v.Reflectance = "Plastic", 0
             elseif v:IsA("Decal") or v:IsA("Texture") then
@@ -142,7 +214,7 @@ MainGameSection:Button({
                 v.Material, v.Reflectance, v.TextureID = "Plastic", 0, ""
             end
         end
-        for _, e in pairs(l:GetChildren()) do
+        for i, e in pairs(l:GetChildren()) do
             if e:IsA("BlurEffect") or e:IsA("SunRaysEffect") or e:IsA("ColorCorrectionEffect") or e:IsA("BloomEffect") or e:IsA("DepthOfFieldEffect") then
                 e.Enabled = false
             end
@@ -150,18 +222,19 @@ MainGameSection:Button({
     end
 })
 
---------------------------------------------------
--- BOSSES TAB
---------------------------------------------------
--- Generate Crystals
+---------------------------
+-- BOSSES
+---------------------------
+
 BossSection:Toggle({
     Text = "Generate Crystals",
+    Flag = "GenCrystals",
     Callback = function(state)
         local r = game.ReplicatedStorage.Remotes.Events
         if state then
             r.RemoveC:FireServer(1)
             task.spawn(function()
-                while Flags["Generate Crystals"] do
+                while Flags.GenCrystals do
                     for i=1,20 do
                         r.WinMegaBossEvent:FireServer("Dragon6", "Chaos")
                     end
@@ -174,13 +247,13 @@ BossSection:Toggle({
     end
 })
 
--- Spin Crystal Wheels
 BossSection:Toggle({
     Text = "Spin Crystal Wheels",
+    Flag = "SpinWheel",
     Callback = function(state)
         if state then
             task.spawn(function()
-                while Flags["Spin Crystal Wheels"] do
+                while Flags.SpinWheel do
                     local r = game.ReplicatedStorage.Remotes.Events
                     r.WorldWheelEvent:FireServer("5")
                     r.SpinWheelSecret:FireServer("-8", "563")
@@ -192,28 +265,23 @@ BossSection:Toggle({
     end
 })
 
--- Kill Title Boss
-local bossMap = {
-    ["The King"]="Boss1",["Dravenar"]="Boss2",["Glacius"]="Boss3",["Anubis"]="Boss4",
-    ["Bossbot"]="Boss5",["Lazyfish"]="Boss6",["Yokai"]="Boss7",["Vort3x"]="Boss8",
-    ["Underlord"]="Boss9",["The Conquerer"]="Boss10",
-}
-BossSection:Dropdown({
-    Text = "Select Boss",
-    List = {"The King","Dravenar","Glacius","Anubis","Bossbot","Lazyfish","Yokai","Vort3x","Underlord","The Conquerer"},
-    Callback = function(v)
-        Flags["BossTarget"] = bossMap[v] or "Boss1"
-    end
-})
 BossSection:Toggle({
     Text = "Kill Title Boss",
+    Flag = "KillBoss",
     Callback = function(state)
         local r = game.ReplicatedStorage.Remotes.Events
         if state then
             r.RemoveC:FireServer(1)
+            task.wait(0.1)
+            local bossMap = {
+                ["The King"]="Boss1",["Dravenar"]="Boss2",["Glacius"]="Boss3",["Anubis"]="Boss4",
+                ["Bossbot"]="Boss5",["Lazyfish"]="Boss6",["Yokai"]="Boss7",["Vort3x"]="Boss8",
+                ["Underlord"]="Boss9",["The Conquerer"]="Boss10",
+            }
+            local chosen = bossMap[Flags.BossTarget] or "Boss1"
             task.spawn(function()
-                while Flags["Kill Title Boss"] do
-                    r.WinBossEvent:FireServer(Flags["BossTarget"] or "Boss1")
+                while Flags.KillBoss do
+                    r.WinBossEvent:FireServer(chosen)
                     task.wait(0.2)
                 end
             end)
@@ -223,11 +291,16 @@ BossSection:Toggle({
     end
 })
 
---------------------------------------------------
--- WORLDS / SECRET WORLDS TAB
---------------------------------------------------
-local WorldTab = Window:Tab({ Text = "Worlds/Secret Worlds" })
-local WorldSection = WorldTab:Section({ Text = "World Features" })
+BossSection:Dropdown({
+    Text = "Select Boss",
+    List = {"The King","Dravenar","Glacius","Anubis","Bossbot","Lazyfish","Yokai","Vort3x","Underlord","The Conquerer"},
+    Flag = "BossTarget",
+    Callback = function(v) Flags.BossTarget = v end
+})
+
+---------------------------
+-- WORLDS / SECRET WORLDS
+---------------------------
 
 local worldOptions = {
     {name="Castle",args={"2",true}}, {name="Volcano Cave",args={"1",true}},
@@ -238,149 +311,85 @@ local worldOptions = {
     {name="Nyxra Place",args={"-6",false}}, {name="Anubis",args={"-8",false}},
     {name="Viridian",args={"-14",false}}, {name="Ultra Prime",args={"-10",false}},
 }
-WorldSection:Dropdown({
-    Text = "Select World",
-    List = (function() local t={} for _,o in ipairs(worldOptions) do table.insert(t,o.name) end return t end)(),
-    Callback = function(v) Flags["WorldTarget"] = v end
-})
+
 WorldSection:Button({
     Text = "TP to World",
     Callback = function()
+        local selected = Flags.WorldTarget
         for _, opt in ipairs(worldOptions) do
-            if opt.name == Flags["WorldTarget"] then
+            if opt.name == selected then
                 game.ReplicatedStorage.Remotes.Events.PortalC:FireServer(unpack(opt.args))
+                break
             end
         end
     end
 })
 
--- Secret Boss
 local secretBossOptions = {
     {name="Nyxra",dragon="Dragon-3"},
     {name="RaZar",dragon="Dragon-4"},
     {name="Viridian",dragon="Dragon-5"},
     {name="Ultra Prime",dragon="Dragon-8"},
 }
-WorldSection:Dropdown({
-    Text = "Select Secret Boss",
-    List = (function() local t={} for _,b in ipairs(secretBossOptions)do table.insert(t,b.name)end return t end)(),
-    Callback = function(v) Flags["SecretBossTarget"] = v end
-})
-WorldSection:Dropdown({
-    Text = "Difficulty",
-    List = {"Normal","Hard","Chaos"},
-    Callback = function(v) Flags["SecretBossDifficulty"] = v end
-})
+local difficultyOptions = {"Normal","Hard","Chaos"}
+
 WorldSection:Toggle({
     Text = "Kill Secret Boss",
+    Flag = "KillSecretBoss",
     Callback = function(state)
         local remotes = game.ReplicatedStorage.Remotes.Events
         if state then
-            local boss
+            local boss=nil
             for _, b in ipairs(secretBossOptions) do
-                if Flags["SecretBossTarget"]==b.name then boss=b.dragon break end
+                if Flags.SecretBossTarget==b.name then boss=b.dragon break end
             end
-            local difficulty = Flags["SecretBossDifficulty"]
+            local difficulty = Flags.SecretBossDifficulty
             if boss and difficulty then
                 remotes.RemoveC:FireServer(1)
+                task.wait(0.2)
                 task.spawn(function()
-                    while Flags["Kill Secret Boss"] do
+                    while Flags.KillSecretBoss do
                         remotes.WinMegaBossEvent:FireServer(boss,difficulty)
                         task.wait(0.2)
                     end
                 end)
             end
-        else
-            remotes.RemoveC:FireServer(0)
-        end
+        else remotes.RemoveC:FireServer(0) end
     end
 })
 
---------------------------------------------------
--- PVP TAB
---------------------------------------------------
-local PvPTab = Window:Tab({ Text = "PvP Stuff" })
-local PvPSection = PvPTab:Section({ Text = "PvP Features" })
-
--- Buy Potions
-PvPSection:Toggle({
-    Text = "Buy Potions",
-    Callback = function(state)
-        if state then
-            task.spawn(function()
-                while Flags["Buy Potions"] do
-                    local r = game.ReplicatedStorage.Remotes.Events
-                    r.HalloweenShopEvent:FireServer("WinsPotions")
-                    r.HalloweenShopEvent:FireServer("ShinyPotions")
-                    task.wait()
-                end
-            end)
-        end
-    end
+WorldSection:Dropdown({
+    Text="Select World",
+    List=(function() local t={} for _,o in ipairs(worldOptions)do table.insert(t,o.name)end return t end)(),
+    Flag="WorldTarget",
+    Callback=function(v) Flags.WorldTarget=v end
 })
 
--- Auto PvP
-local function getPlayerNames()
-    local t = {}
-    for _, player in ipairs(game.Players:GetPlayers()) do
-        table.insert(t, player.Name)
-    end
-    return t
-end
-local playerNames = getPlayerNames()
-PvPSection:Dropdown({
-    Text = "Select PvP Target",
-    List = playerNames,
-    Callback = function(v) Flags["PvPTarget"] = v end
-})
-PvPSection:Toggle({
-    Text = "Auto PvP",
-    Callback = function(state)
-        if state then
-            task.spawn(function()
-                while Flags["Auto PvP"] do
-                    local r = game.ReplicatedStorage.Remotes.Events
-                    if Flags["PvPTarget"] and Flags["PvPTarget"] ~= "" then
-                        r.WinEvent_PVP:FireServer(Flags["PvPTarget"], true, true)
-                    end
-                    task.wait(0.7)
-                end
-            end)
-        end
-    end
-})
-PvPSection:Button({
-    Text = "PvP Test (x2 Instant)",
-    Callback = function()
-        local r = game.ReplicatedStorage.Remotes.Events
-        if Flags["PvPTarget"] and Flags["PvPTarget"] ~= "" then
-            for i = 1, 2 do
-                r.WinEvent_PVP:FireServer(Flags["PvPTarget"], true, true)
-            end
-        end
-    end
-})
-PvPSection:Button({
-    Text = "Refresh Players",
-    Callback = function()
-        playerNames = getPlayerNames()
-        -- dropdown refresh logic: re-open GUI to reload list
-    end
+WorldSection:Dropdown({
+    Text="Select Which Boss",
+    List=(function() local t={} for _,b in ipairs(secretBossOptions)do table.insert(t,b.name)end return t end)(),
+    Flag="SecretBossTarget",
+    Callback=function(v) Flags.SecretBossTarget=v end
 })
 
---------------------------------------------------
--- UNDERWORLD EVENT TAB
---------------------------------------------------
-local EventTab = Window:Tab({ Text = "Underworld Event" })
-local EventSection = EventTab:Section({ Text = "Event Features" })
+WorldSection:Dropdown({
+    Text="Difficulty",
+    List=difficultyOptions,
+    Flag="SecretBossDifficulty",
+    Callback=function(v) Flags.SecretBossDifficulty=v end
+})
 
--- Attack Aura
+---------------------------
+-- UNDERWORLD EVENT
+---------------------------
+
 EventSection:Toggle({
-    Text = "Attack Aura",
-    Callback = function(state)
+    Text="Attack Aura",
+    Flag="AttackAura",
+    Callback=function(state)
         if state then
             task.spawn(function()
-                while Flags["Attack Aura"] do
+                while Flags.AttackAura do
                     game.ReplicatedStorage.Remotes.Events.OnAttackMob:FireServer()
                     task.wait()
                 end
@@ -389,10 +398,9 @@ EventSection:Toggle({
     end
 })
 
--- Teleports
-local teleporting = false
-local Players,CS=game.Players,game.CollectionService
-local lp=Players.LocalPlayer
+-- Teleport Logic
+local Players,CS=game:GetService("Players"),game:GetService("CollectionService")
+local lp,teleporting=Players.LocalPlayer,false
 local interval,distThresh=0.3,5
 
 for _,p in ipairs(workspace:GetDescendants())do 
@@ -442,23 +450,33 @@ local function teleportCommander()
     end)
 end
 
-EventSection:Dropdown({
-    Text = "Select Target",
-    List = {"Skeletons","Commander Skeleton"},
-    Callback = function(v) Flags["TeleportTarget"]=v end
-})
 EventSection:Toggle({
     Text = "Enable Teleport",
+    Flag = "EnableTeleport",
     Callback = function(state)
-        teleporting=false
+        teleporting = false
         if state then
-            if Flags["TeleportTarget"]=="Skeletons" then teleportLoop()
-            elseif Flags["TeleportTarget"]=="Commander Skeleton" then teleportCommander() end
+            if Flags.TeleportTarget == "Skeletons" then
+                teleportLoop()
+            elseif Flags.TeleportTarget == "Commander Skeleton" then
+                teleportCommander()
+            end
         end
     end
 })
 
---------------------------------------------------
--- INIT
---------------------------------------------------
-Window:Select()
+EventSection:Dropdown({
+    Text = "Select Target",
+    List = {"Skeletons", "Commander Skeleton"},
+    Flag = "TeleportTarget",
+    Callback = function(v)
+        teleporting = false
+        if Flags.EnableTeleport then
+            if v == "Skeletons" then
+                teleportLoop()
+            elseif v == "Commander Skeleton" then
+                teleportCommander()
+            end
+        end
+    end
+})
