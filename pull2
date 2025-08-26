@@ -466,3 +466,7 @@ EventSection:Dropdown({
 
 -- Select first tab
 MainGameTab:Select()
+PvPTab:Select()
+BossTab:Select()
+WorldTab:Select()
+EventTab:Select()
