@@ -9,6 +9,7 @@ local mainTab = library:CreateWindow("PAS - HUB")
 local mainGame = mainTab:AddFolder("Main Game")
 local bossTab  = mainTab:AddFolder("Bosses")
 local worldTab = mainTab:AddFolder("Worlds/Secret Worlds")
+local pvpTab  = mainTab:AddFolder("PvP Stuff")
 
 mainTab:AddLabel({ text = "Creator = Not me", type = "label" })
 
@@ -71,54 +72,6 @@ mainGame:AddToggle({
                     task.wait(20)
                 end
             end)
-        end
-    end
-})
-
--- PvP Auto
-local function getPlayerNames()
-    local t = {}
-    for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
-        table.insert(t, player.Name)
-    end
-    return t
-end
-local playerNames = getPlayerNames()
-
-mainGame:AddToggle({
-    text = "Auto PvP",
-    flag = "AutoPvP",
-    callback = function(state)
-        if state then
-            task.spawn(function()
-                while library.flags["AutoPvP"] do
-                    local r = game.ReplicatedStorage.Remotes.Events
-                    local targetName = library.flags["PvPTarget"]
-                    if targetName and targetName ~= "" then
-                        r.WinEvent_PVP:FireServer(targetName, true, true)
-                    end
-                    task.wait(10820)
-                end
-            end)
-        end
-    end
-})
-
-local dropdownRef
-dropdownRef = mainGame:AddList({
-    text = "Select PvP Target",
-    values = playerNames,
-    flag = "PvPTarget",
-    value = playerNames[1] or ""
-})
-
-mainGame:AddButton({
-    text = "Refresh Players",
-    callback = function()
-        playerNames = getPlayerNames()
-        if dropdownRef then
-            dropdownRef.values = playerNames
-            dropdownRef:SetValue(playerNames[1] or "")
         end
     end
 })
@@ -375,6 +328,96 @@ worldTab:AddList({
     value=difficultyOptions[1]
 })
 
+--------------------------------------------------
+-- PVP stuff
+--------------------------------------------------
+
+pvpTab:AddToggle({
+    text = "Buy Potions",
+    flag = "BuyPotions",
+    callback = function(state)
+        if state then
+            task.spawn(function()
+                while library.flags["BuyPotions"] do
+                    local remotes = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events")
+                    remotes.HalloweenShopEvent:FireServer("WinsPotions")
+                    remotes.HalloweenShopEvent:FireServer("ShinyPotions")
+                    task.wait() -- minimal yield, no manual delay
+                end
+            end)
+        end
+    end
+})
+
+-- grab all player names
+local function getPlayerNames()
+    local t = {}
+    for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+        table.insert(t, player.Name)
+    end
+    return t
+end
+local playerNames = getPlayerNames()
+
+-- Auto PvP toggle
+pvpTab:AddToggle({
+    text = "Auto PvP",
+    flag = "AutoPvP",
+    callback = function(state)
+        if state then
+            task.spawn(function()
+                while library.flags["AutoPvP"] do
+                    local r = game.ReplicatedStorage.Remotes.Events
+                    local targetName = library.flags["PvPTarget"]
+                    if targetName and targetName ~= "" then
+                        r.WinEvent_PVP:FireServer(targetName, true, true)
+                    end
+                    task.wait(0.7)
+                end
+            end)
+        end
+    end
+})
+
+-- PvP Test Button
+pvpTab:AddButton({
+    text = "PvP Test (x2 Instant)",
+    callback = function()
+        local r = game.ReplicatedStorage.Remotes.Events
+        local targetName = library.flags["PvPTarget"]
+        if targetName and targetName ~= "" then
+            for i = 1, 2 do
+                r.WinEvent_PVP:FireServer(targetName, true, true)
+            end
+        end
+    end
+})
+
+-- Dropdown to pick player
+local dropdownRef
+dropdownRef = pvpTab:AddList({
+    text = "Select PvP Target",
+    values = playerNames,
+    flag = "PvPTarget",
+    value = playerNames[1] or ""
+})
+
+-- Refresh Players Button
+pvpTab:AddButton({
+    text = "Refresh Players",
+    callback = function()
+        playerNames = getPlayerNames()
+        if dropdownRef then
+            dropdownRef.values = playerNames
+            dropdownRef:SetValue(playerNames[1] or "")
+        end
+    end
+})
+
+--------------------------------------------------
+-- UNDERWORLD EVENT
+--------------------------------------------------
+
 eventTab:AddToggle({
     text="Attack Aura.",
     flag="AttackAura",
@@ -406,6 +449,7 @@ workspace.DescendantAdded:Connect(function(p)
     if p:IsA("BasePart")and p.Name=="UpperTorso1"then CS:AddTag(p,"SkeletonTarget")end 
 end)
 
+-- Teleport to the nearest UpperTorso1
 local function nearestTorso(hrp,radius)
     local best,d=nil,math.huge
     for _,p in ipairs(CS:GetTagged("SkeletonTarget"))do
