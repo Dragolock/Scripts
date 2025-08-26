@@ -18,7 +18,6 @@ local MainGameSection = MainGameTab:Section({ Text = "Main Features" })
 
 local BossTab = Window:Tab({ Text = "Bosses" })
 local BossSection = BossTab:Section({ Text = "Boss Features" })
-BossSection:Label({ Text = "TP Lab/Ocean = Crystals." })
 
 -- Auto Click
 MainGameSection:Toggle({
