@@ -13,7 +13,7 @@ function Library.new(windowName)
 
     -- Create ScreenGui
     self.ScreenGui = Instance.new("ScreenGui")
-    self.ScreenGui.Name = windowName or "."
+    self.ScreenGui.Name = windowName or "test1"
     self.ScreenGui.ResetOnSpawn = false
     self.ScreenGui.Parent = PlayerGui
 
@@ -24,8 +24,7 @@ function Library.new(windowName)
     self.MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     self.MainFrame.BorderSizePixel = 0
     self.MainFrame.Parent = self.ScreenGui
-    local mainCorner = Instance.new("UICorner", self.MainFrame)
-    mainCorner.CornerRadius = UDim.new(0, 15)
+    Instance.new("UICorner", self.MainFrame).CornerRadius = UDim.new(0, 15)
 
     -- Draggable Top Bar
     self.TopBar = Instance.new("Frame")
@@ -33,10 +32,9 @@ function Library.new(windowName)
     self.TopBar.Position = UDim2.new(0, 0, 0, 0)
     self.TopBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     self.TopBar.Parent = self.MainFrame
-    local topBarCorner = Instance.new("UICorner", self.TopBar)
-    topBarCorner.CornerRadius = UDim.new(0, 15)
+    Instance.new("UICorner", self.TopBar).CornerRadius = UDim.new(0, 15)
 
-    -- Title Label in top bar - set text to windowName or default text
+    -- Title Label in top bar
     local TitleLabel = Instance.new("TextLabel")
     TitleLabel.Text = windowName or "EazvyHub"
     TitleLabel.Size = UDim2.new(0.7, 0, 1, 0)
@@ -48,7 +46,7 @@ function Library.new(windowName)
     TitleLabel.Position = UDim2.new(0, 15, 0, 0)
     TitleLabel.Parent = self.TopBar
 
-    -- Make the window draggable via TopBar
+    -- Draggable functionality
     local dragging = false
     local dragInput, dragStart, startPos
 
@@ -81,12 +79,12 @@ function Library.new(windowName)
                 startPos.Y.Scale,
                 startPos.Y.Offset + delta.Y
             )
-            -- Also move tabs to match new position
+            -- Keep tabs container aligned below top bar
             self.TabsContainer.Position = UDim2.new(
                 self.MainFrame.Position.X.Scale,
                 self.MainFrame.Position.X.Offset,
                 self.MainFrame.Position.Y.Scale,
-                self.MainFrame.Position.Y.Offset + 40 -- Below topbar
+                self.MainFrame.Position.Y.Offset + 40
             )
         end
     end)
@@ -97,10 +95,9 @@ function Library.new(windowName)
     self.TabsContainer.Position = UDim2.new(0, 0, 0, 40)
     self.TabsContainer.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
     self.TabsContainer.Parent = self.MainFrame
-    local tabsCorner = Instance.new("UICorner", self.TabsContainer)
-    tabsCorner.CornerRadius = UDim.new(0, 15)
+    Instance.new("UICorner", self.TabsContainer).CornerRadius = UDim.new(0, 15)
 
-    -- ScrollingFrame for tabs with layout
+    -- ScrollingFrame for tabs with vertical layout
     self.TabsList = Instance.new("ScrollingFrame")
     self.TabsList.Size = UDim2.new(1, 0, 1, 0)
     self.TabsList.BackgroundTransparency = 1
@@ -117,52 +114,65 @@ function Library.new(windowName)
     self.ContentContainer.Position = UDim2.new(0, 140, 0, 40)
     self.ContentContainer.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     self.ContentContainer.Parent = self.MainFrame
-    local contentCorner = Instance.new("UICorner", self.ContentContainer)
-    contentCorner.CornerRadius = UDim.new(0, 15)
+    Instance.new("UICorner", self.ContentContainer).CornerRadius = UDim.new(0, 15)
 
-    -- Close button with white bg and X symbol
+    -- Close Button with rounded corners and transparency
     self.CloseButton = Instance.new("TextButton")
     self.CloseButton.Text = "X"
     self.CloseButton.Size = UDim2.new(0, 30, 0, 30)
     self.CloseButton.Position = UDim2.new(1, -40, 0, 5)
     self.CloseButton.BackgroundColor3 = Color3.new(1, 1, 1)
+    self.CloseButton.BackgroundTransparency = 0.6
     self.CloseButton.TextColor3 = Color3.fromRGB(40, 40, 40)
     self.CloseButton.Font = Enum.Font.GothamBold
     self.CloseButton.TextSize = 22
     self.CloseButton.Parent = self.TopBar
+    Instance.new("UICorner", self.CloseButton).CornerRadius = UDim.new(0, 8)
     self.CloseButton.AutoButtonColor = true
     self.CloseButton.MouseButton1Click:Connect(function()
         self.ScreenGui.Enabled = false
     end)
 
-    -- Minimize button as thick horizontal white line next to close
+    -- Minimize button with rounded corners, transparency, and larger hitbox
     self.MinimizeButton = Instance.new("TextButton")
     self.MinimizeButton.Text = ""
     self.MinimizeButton.Size = UDim2.new(0, 30, 0, 10)
     self.MinimizeButton.Position = UDim2.new(1, -80, 0, 15)
     self.MinimizeButton.BackgroundColor3 = Color3.new(1, 1, 1)
+    self.MinimizeButton.BackgroundTransparency = 0.6
     self.MinimizeButton.AutoButtonColor = true
     self.MinimizeButton.TextTransparency = 1
     self.MinimizeButton.Parent = self.TopBar
+    Instance.new("UICorner", self.MinimizeButton).CornerRadius = UDim.new(0, 8)
+
     local minimizeLine = Instance.new("Frame")
     minimizeLine.Size = UDim2.new(0, 20, 0, 5)
     minimizeLine.Position = UDim2.new(0.5, -10, 0.5, -2.5)
     minimizeLine.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     minimizeLine.Parent = self.MinimizeButton
-    local minLineCorner = Instance.new("UICorner", minimizeLine)
-    minLineCorner.CornerRadius = UDim.new(1, 0)
+    Instance.new("UICorner", minimizeLine).CornerRadius = UDim.new(1, 0)
 
-    -- Store and manage UI elements for showing/hiding on minimize
+    -- Larger invisible hitbox for minimize button
+    local minHitbox = Instance.new("TextButton")
+    minHitbox.Size = UDim2.new(0, 50, 0, 30)
+    minHitbox.Position = self.MinimizeButton.Position - UDim2.new(0,10,0,10)
+    minHitbox.BackgroundTransparency = 1
+    minHitbox.Text = ""
+    minHitbox.ZIndex = self.MinimizeButton.ZIndex - 1
+    minHitbox.Parent = self.TopBar
+    minHitbox.MouseButton1Click:Connect(function()
+        self.MinimizeButton.MouseButton1Click:Wait()
+    end)
+
+    -- Store UI elements to toggle visibility on minimize
     self.UIElements = {}
 
     self.isMinimized = false
     self.originalSize = self.MainFrame.Size
 
-    -- Function to toggle minimize
     self.MinimizeButton.MouseButton1Click:Connect(function()
         if not self.isMinimized then
             TweenService:Create(self.MainFrame, TweenInfo.new(0.35), {Size = UDim2.new(self.MainFrame.Size.X.Scale, self.MainFrame.Size.X.Offset, 0, 50)}):Play()
-            -- Hide content, tabs and controls except top bar
             for _, elem in pairs(self.UIElements) do
                 elem.Visible = false
             end
@@ -180,22 +190,27 @@ function Library.new(windowName)
         end
     end)
 
-    -- Tab Management -
-
     self.Tabs = {}
     self.CurrentTab = nil
 
-    -- Add a tab function
     function self:AddTab(name)
+        -- Rounded background frame for tab button
+        local tabButtonBackground = Instance.new("Frame")
+        tabButtonBackground.Size = UDim2.new(1, -20, 0, 40)
+        tabButtonBackground.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        tabButtonBackground.Parent = self.TabsList
+        Instance.new("UICorner", tabButtonBackground).CornerRadius = UDim.new(0, 12)
+
+        -- Centered text button on top of background
         local tabButton = Instance.new("TextButton")
-        tabButton.Size = UDim2.new(1, -20, 0, 35)
+        tabButton.Size = UDim2.new(1, 0, 1, 0)
         tabButton.Text = name
-        tabButton.TextColor3 = Color3.fromRGB(180, 180, 180)
+        tabButton.TextColor3 = Color3.new(1, 1, 1)
         tabButton.BackgroundTransparency = 1
         tabButton.Font = Enum.Font.GothamSemibold
         tabButton.TextSize = 15
-        tabButton.TextXAlignment = Enum.TextXAlignment.Left
-        tabButton.Parent = self.TabsList
+        tabButton.TextXAlignment = Enum.TextXAlignment.Center
+        tabButton.Parent = tabButtonBackground
 
         local tabContent = Instance.new("Frame")
         tabContent.Size = UDim2.new(1, 0, 1, 0)
@@ -203,7 +218,6 @@ function Library.new(windowName)
         tabContent.Visible = false
         tabContent.Parent = self.ContentContainer
 
-        -- UI Elements container per tab for toggles etc
         local elements = {}
 
         function tabContent:AddToggle(name, posY)
@@ -230,8 +244,7 @@ function Library.new(windowName)
             toggleButton.Position = UDim2.new(1, -44, 0.5, -16)
             toggleButton.BackgroundColor3 = Color3.fromRGB(120, 0, 30)
             toggleButton.Parent = frame
-            local toggleCorner = Instance.new("UICorner", toggleButton)
-            toggleCorner.CornerRadius = UDim.new(0, 11)
+            Instance.new("UICorner", toggleButton).CornerRadius = UDim.new(0, 11)
 
             local toggled = false
             toggleButton.MouseButton1Click:Connect(function()
@@ -297,7 +310,6 @@ function Library.new(windowName)
 
             table.insert(elements, frame)
             table.insert(self.UIElements, frame)
-
             return frame
         end
 
@@ -378,7 +390,7 @@ function Library.new(windowName)
 
         tabContent.Visible = false
 
-        table.insert(self.Tabs, {Button = tabButton, Content = tabContent})
+        table.insert(self.Tabs, {Button = tabButtonBackground, Content = tabContent})
 
         tabButton.MouseButton1Click:Connect(function()
             self:SwitchTab(#self.Tabs)
@@ -391,7 +403,7 @@ function Library.new(windowName)
         for i, tab in ipairs(self.Tabs) do
             local active = (i == index)
             tab.Content.Visible = active
-            tab.Button.TextColor3 = active and Color3.new(1, 1, 1) or Color3.fromRGB(180, 180, 180)
+            tab.Button.BackgroundColor3 = active and Color3.fromRGB(100, 100, 100) or Color3.fromRGB(60, 60, 60)
             self.CurrentTab = index
         end
     end
