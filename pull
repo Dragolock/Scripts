@@ -414,7 +414,7 @@ eventTab:AddToggle({
                          :WaitForChild("Events")
                          :WaitForChild("ClaimGiftFromUnderworld")
                          :FireServer()
-                    task.wait(3)
+                    task.wait()
                 end
             end)
         end
@@ -442,6 +442,7 @@ local function nearestTorso(hrp,radius)
     end
     return best
 end
+
 function teleportLoop()
     teleporting=true
     local hrp=lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
@@ -457,6 +458,7 @@ function teleportLoop()
         end
     end)
 end
+
 function teleportCommander()
     teleporting=true
     local hrp=lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
@@ -469,6 +471,7 @@ function teleportCommander()
         end
     end)
 end
+
 function teleportHollowKing()
     teleporting = true
     local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
@@ -488,6 +491,11 @@ eventTab:AddToggle({
     callback = function(state)
         teleporting = false
         if state then
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v.Name:lower() == "monster" then
+                    v:Destroy()
+                end
+            end
             if library.flags["TeleportTarget"] == "Skeletons" then
                 teleportLoop()
             elseif library.flags["TeleportTarget"] == "Commander Skeleton" then
@@ -498,6 +506,7 @@ eventTab:AddToggle({
         end
     end,
 })
+
 
 eventTab:AddList({
     text = "Select Target",
@@ -515,6 +524,16 @@ eventTab:AddList({
                 teleportHollowKing()
             end
         end
+    end,
+})
+
+eventTab:AddButton({
+    text = "Set WalkSpeed to 70",
+    callback = function()
+        local plr = game.Players.LocalPlayer
+        local char = plr.Character or plr.CharacterAdded:Wait()
+        local humanoid = char:WaitForChild("Humanoid")
+        humanoid.WalkSpeed = 70
     end,
 })
 
