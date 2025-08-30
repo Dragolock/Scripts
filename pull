@@ -450,6 +450,19 @@ function teleportCommander()
         end
     end)
 end
+function teleportHollowKing()
+    teleporting = true
+    local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    task.spawn(function()
+        while teleporting and hrp do
+            hrp.CFrame = CFrame.new(4508, 551, -1528)
+            hrp.AssemblyLinearVelocity, hrp.AssemblyAngularVelocity = Vector3.zero, Vector3.zero
+            task.wait()
+        end
+    end)
+end
+
 eventTab:AddToggle({
     text = "Enable Teleport",
     flag = "EnableTeleport",
@@ -466,7 +479,7 @@ eventTab:AddToggle({
 })
 eventTab:AddList({
     text = "Select Target",
-    values = {"Skeletons", "Commander Skeleton"},
+    values = {"Skeletons", "Commander Skeleton", "Hollow King"},
     flag = "TeleportTarget",
     value = "Skeletons",
     callback = function(value)
@@ -476,10 +489,13 @@ eventTab:AddList({
                 teleportLoop()
             elseif value == "Commander Skeleton" then
                 teleportCommander()
+            elseif value == "Hollow King" then
+                teleportHollowKing()
             end
         end
     end,
 })
+
 --------------------------------------------------
 -- INIT WINDOWS
 --------------------------------------------------
