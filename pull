@@ -404,7 +404,7 @@ eventTab:AddToggle({
 })
 local Players,CS=game:GetService("Players"),game:GetService("CollectionService")
 local lp,teleporting=Players.LocalPlayer,false
-local interval,distThresh=0.3,5
+local interval,distThresh=0.3,10
 -- Cache/tagging
 for _,p in ipairs(workspace:GetDescendants())do 
     if p:IsA("BasePart")and p.Name=="UpperTorso"then CS:AddTag(p,"SkeletonTarget")end 
@@ -429,7 +429,7 @@ function teleportLoop()
     if not hrp then return end
     task.spawn(function()
         while teleporting and hrp do
-            local t=nearestTorso(hrp,200)
+            local t=nearestTorso(hrp,300)
             if t and (hrp.Position-t.Position).Magnitude>distThresh then
                 hrp.CFrame=CFrame.new(t.Position)
                 hrp.AssemblyLinearVelocity,hrp.AssemblyAngularVelocity=Vector3.zero,Vector3.zero
