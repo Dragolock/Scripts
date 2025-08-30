@@ -448,7 +448,7 @@ function teleportLoop()
     if not hrp then return end
     task.spawn(function()
         while teleporting and hrp do
-            local t=nearestTorso(hrp,300)
+            local t=nearestTorso(hrp,150)
             if t and (hrp.Position-t.Position).Magnitude>distThresh then
                 hrp.CFrame=CFrame.new(t.Position)
                 hrp.AssemblyLinearVelocity,hrp.AssemblyAngularVelocity=Vector3.zero,Vector3.zero
