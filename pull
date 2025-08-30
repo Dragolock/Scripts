@@ -407,10 +407,10 @@ local lp,teleporting=Players.LocalPlayer,false
 local interval,distThresh=0.3,5
 -- Cache/tagging
 for _,p in ipairs(workspace:GetDescendants())do 
-    if p:IsA("BasePart")and p.Name=="HumanoidRootPart"then CS:AddTag(p,"SkeletonTarget")end 
+    if p:IsA("BasePart")and p.Name=="UpperTorso"then CS:AddTag(p,"SkeletonTarget")end 
 end
 workspace.DescendantAdded:Connect(function(p)
-    if p:IsA("BasePart")and p.Name=="UpperTorso1"then CS:AddTag(p,"SkeletonTarget")end 
+    if p:IsA("BasePart")and p.Name=="UpperTorso"then CS:AddTag(p,"SkeletonTarget")end 
 end)
 -- Teleport to the nearest UpperTorso1
 local function nearestTorso(hrp,radius)
