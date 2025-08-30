@@ -473,10 +473,13 @@ eventTab:AddToggle({
                 teleportLoop()
             elseif library.flags["TeleportTarget"] == "Commander Skeleton" then
                 teleportCommander()
+            elseif library.flags["TeleportTarget"] == "Hollow King" then
+                teleportHollowKing()
             end
         end
     end,
 })
+
 eventTab:AddList({
     text = "Select Target",
     values = {"Skeletons", "Commander Skeleton", "Hollow King"},
