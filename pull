@@ -402,6 +402,25 @@ eventTab:AddToggle({
         end
     end
 })
+
+eventTab:AddToggle({
+    text = "Buy Gifts",
+    flag = "BuyGifts",
+    callback = function(state)
+        if state then
+            spawn(function()
+                while library.flags["BuyGifts"] do
+                    game:GetService("ReplicatedStorage"):WaitForChild("Remotes")
+                         :WaitForChild("Events")
+                         :WaitForChild("ClaimGiftFromUnderworld")
+                         :FireServer()
+                    task.wait(3)
+                end
+            end)
+        end
+    end,
+})
+
 local Players,CS=game:GetService("Players"),game:GetService("CollectionService")
 local lp,teleporting=Players.LocalPlayer,false
 local interval,distThresh=0.3,10
@@ -496,6 +515,17 @@ eventTab:AddList({
                 teleportHollowKing()
             end
         end
+    end,
+})
+
+eventTab:AddButton({
+    text = "Buy HP Upgrade",
+    callback = function()
+        local args = {"Health"}
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes")
+             :WaitForChild("Events")
+             :WaitForChild("OnUpgradedRequests")
+             :FireServer(unpack(args))
     end,
 })
 
