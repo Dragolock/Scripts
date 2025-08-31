@@ -405,37 +405,23 @@ eventTab:AddToggle({
 
 local RunService = game:GetService("RunService")
 local player = game.Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Noclipping = nil
-local Clip = true
+local remoteEvent = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("ClaimGiftFromUnderworld")
 
 local function enableNoclip()
-    Clip = false
     if Noclipping then Noclipping:Disconnect() end
     Noclipping = RunService.Stepped:Connect(function()
-        if not Clip and player.Character then
+        if player.Character then
             for _, child in pairs(player.Character:GetDescendants()) do
                 if child:IsA("BasePart") and child.CanCollide then
                     child.CanCollide = false
                 end
             end
+            remoteEvent:FireServer()
         end
     end)
-end
-
-local function disableNoclip()
-    Clip = true
-    if Noclipping then
-        Noclipping:Disconnect()
-        Noclipping = nil
-    end
-    if player.Character then
-        for _, child in pairs(player.Character:GetDescendants()) do
-            if child:IsA("BasePart") then
-                child.CanCollide = true
-            end
-        end
-    end
 end
 
 eventTab:AddToggle({
@@ -444,13 +430,15 @@ eventTab:AddToggle({
     callback = function(state)
         if state then
             enableNoclip()
-            print("Noclip Enabled")
         else
-            disableNoclip()
-            print("Noclip Disabled")
+            if Noclipping then
+                Noclipping:Disconnect()
+                Noclipping = nil
+            end
         end
     end,
 })
+
 
 
 local Players,CS=game:GetService("Players"),game:GetService("CollectionService")
