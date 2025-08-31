@@ -343,7 +343,7 @@ pvpTab:AddToggle({
                     if targetName and targetName ~= "" then
                         r.WinEvent_PVP:FireServer(targetName, true, true)
                     end
-                    task.wait(0.9)
+                    task.wait(0.7)
                 end
             end)
         end
@@ -403,23 +403,55 @@ eventTab:AddToggle({
     end
 })
 
+local RunService = game:GetService("RunService")
+local player = game.Players.LocalPlayer
+
+local Noclipping = nil
+local Clip = true
+
+local function enableNoclip()
+    Clip = false
+    if Noclipping then Noclipping:Disconnect() end
+    Noclipping = RunService.Stepped:Connect(function()
+        if not Clip and player.Character then
+            for _, child in pairs(player.Character:GetDescendants()) do
+                if child:IsA("BasePart") and child.CanCollide then
+                    child.CanCollide = false
+                end
+            end
+        end
+    end)
+end
+
+local function disableNoclip()
+    Clip = true
+    if Noclipping then
+        Noclipping:Disconnect()
+        Noclipping = nil
+    end
+    if player.Character then
+        for _, child in pairs(player.Character:GetDescendants()) do
+            if child:IsA("BasePart") then
+                child.CanCollide = true
+            end
+        end
+    end
+end
+
 eventTab:AddToggle({
     text = "Buy Gifts",
     flag = "BuyGifts",
     callback = function(state)
         if state then
-            spawn(function()
-                while library.flags["BuyGifts"] do
-                    game:GetService("ReplicatedStorage"):WaitForChild("Remotes")
-                         :WaitForChild("Events")
-                         :WaitForChild("ClaimGiftFromUnderworld")
-                         :FireServer()
-                    task.wait(3)
-                end
-            end)
+            enableNoclip()
+            print("Noclip Enabled")
+        else
+            disableNoclip()
+            print("Noclip Disabled")
         end
     end,
 })
+
 
 local Players,CS=game:GetService("Players"),game:GetService("CollectionService")
 local lp,teleporting=Players.LocalPlayer,false
