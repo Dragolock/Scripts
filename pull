@@ -403,23 +403,43 @@ eventTab:AddToggle({
     end
 })
 
+local RunService = game:GetService("RunService")
+local player = game.Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Noclipping = nil
+local remoteEvent = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("ClaimGiftFromUnderworld")
+
+local function enableNoclip()
+    if Noclipping then Noclipping:Disconnect() end
+    Noclipping = RunService.Stepped:Connect(function()
+        if player.Character then
+            for _, child in pairs(player.Character:GetDescendants()) do
+                if child:IsA("BasePart") and child.CanCollide then
+                    child.CanCollide = false
+                end
+            end
+            remoteEvent:FireServer()
+        end
+    end)
+end
+
 eventTab:AddToggle({
     text = "Buy Gifts",
     flag = "BuyGifts",
     callback = function(state)
         if state then
-            spawn(function()
-                while library.flags["BuyGifts"] do
-                    game:GetService("ReplicatedStorage"):WaitForChild("Remotes")
-                         :WaitForChild("Events")
-                         :WaitForChild("ClaimGiftFromUnderworld")
-                         :FireServer()
-                    task.wait()
-                end
-            end)
+            enableNoclip()
+        else
+            if Noclipping then
+                Noclipping:Disconnect()
+                Noclipping = nil
+            end
         end
     end,
 })
+
+
 
 local Players,CS=game:GetService("Players"),game:GetService("CollectionService")
 local lp,teleporting=Players.LocalPlayer,false
