@@ -1,14 +1,11 @@
 -- PAS-HUB using Wizard Library
-
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/bloodball/-back-ups-for-libs/main/wizard"))()
-
 -- Main Window and Sections
 local Window = Library:NewWindow("PAS - HUB")
 local MainGame = Window:NewSection("Main Game")
 local Bosses = Window:NewSection("Bosses")
 local Worlds = Window:NewSection("Worlds/Secret Worlds")
 local PvP = Window:NewSection("PvP Stuff")
-
 -- Underworld Event Window/Section
 local EventWindow = Library:NewWindow("Underworld Event")
 local EventSection = EventWindow:NewSection("Event")
@@ -17,20 +14,20 @@ local EventSection = EventWindow:NewSection("Event")
 -- MAIN GAME
 --------------------
 
--- Auto Click
+local autoClickEnabled = false
 MainGame:CreateToggle("Auto Click", function(state)
+    autoClickEnabled = state
     if state then
         spawn(function()
-            while state do
+            while autoClickEnabled do
                 game.ReplicatedStorage.Remotes.Events.ClickEvent:FireServer()
                 wait()
-                if not state then break end
             end
         end)
     end
 end)
 
--- Egg list for hatching
+local hatchNearestEnabled = false
 local eggList = {
     "W1E1","W2E1","W3E1","W4E1","W5E1","W6E1","W7E1","W8E1","W9E1","W10E1",
     "W11E1","W12E1","W13E1","W14E1","W15E1","W16E1","W17E1","W18E1","W19E1","W20E1",
@@ -38,26 +35,27 @@ local eggList = {
     "W31E1","W32E1","W33E1","W34E1","W35E1","Common Egg"
 }
 MainGame:CreateToggle("Hatch Nearest", function(state)
+    hatchNearestEnabled = state
     if state then
         spawn(function()
-            while state do
+            while hatchNearestEnabled do
                 for _, egg in ipairs(eggList) do
                     game.ReplicatedStorage.GameClient.Events.RemoteFunction.BuyEgg:InvokeServer(egg,"Buy1")
                 end
                 wait(0.3)
-                if not state then break end
             end
         end)
     end
 end)
 
+local autoSpinWheelEnabled = false
 MainGame:CreateToggle("Auto Spin Wheel", function(state)
+    autoSpinWheelEnabled = state
     if state then
         spawn(function()
-            while state do
+            while autoSpinWheelEnabled do
                 game:GetService("ReplicatedStorage").GameClient.Events.RemoteEvent.SpaceEggEvent:FireServer()
                 wait(20)
-                if not state then break end
             end
         end)
     end
@@ -160,51 +158,56 @@ Bosses:CreateDropdown("Select Boss", bossList, 1, function(boss)
     _G.SelectedBoss = boss
 end)
 
+local generateCrystalsEnabled = false
 Bosses:CreateToggle("Generate Crystals", function(state)
+    generateCrystalsEnabled = state
     local r = game.ReplicatedStorage.Remotes.Events
     if state then
         r.RemoveC:FireServer(1)
         spawn(function()
-            while state do
+            while generateCrystalsEnabled do
                 for i=1,20 do
                     r.WinMegaBossEvent:FireServer("Dragon6", "Chaos")
                 end
                 wait()
-                if not state then r.RemoveC:FireServer(0) break end
             end
+            r.RemoveC:FireServer(0)
         end)
     else
         r.RemoveC:FireServer(0)
     end
 end)
 
+local spinCrystalWheelsEnabled = false
 Bosses:CreateToggle("Spin Crystal Wheels", function(state)
+    spinCrystalWheelsEnabled = state
     if state then
         spawn(function()
-            while state do
+            while spinCrystalWheelsEnabled do
                 local r = game.ReplicatedStorage.Remotes.Events
                 r.WorldWheelEvent:FireServer("5")
                 r.SpinWheelSecret:FireServer("-8", "563")
                 r.WorldWheelEvent:FireServer("6")
                 wait(1)
-                if not state then break end
             end
         end)
     end
 end)
 
+local killTitleBossEnabled = false
 Bosses:CreateToggle("Kill Title Boss", function(state)
+    killTitleBossEnabled = state
     local r = game.ReplicatedStorage.Remotes.Events
     if state then
         r.RemoveC:FireServer(1)
         wait(0.1)
         local chosen = bossMap[_G.SelectedBoss] or "Boss1"
         spawn(function()
-            while state do
+            while killTitleBossEnabled do
                 r.WinBossEvent:FireServer(chosen)
                 wait(0.2)
-                if not state then r.RemoveC:FireServer(0) break end
             end
+            r.RemoveC:FireServer(0)
         end)
     else
         r.RemoveC:FireServer(0)
@@ -238,7 +241,6 @@ Worlds:CreateButton("TP to World", function()
         end
     end
 end)
-
 local secretBossOptions = {
     {name="Nyxra",dragon="Dragon-3"},
     {name="RaZar",dragon="Dragon-4"},
@@ -256,7 +258,10 @@ _G.SecretBossDifficulty = difficultyOptions[1]
 Worlds:CreateDropdown("Difficulty", difficultyOptions, 1, function(selected)
     _G.SecretBossDifficulty = selected
 end)
+
+local killSecretBossEnabled = false
 Worlds:CreateToggle("Kill Secret Boss", function(state)
+    killSecretBossEnabled = state
     local remotes = game.ReplicatedStorage.Remotes.Events
     if state then
         local boss=nil
@@ -268,11 +273,11 @@ Worlds:CreateToggle("Kill Secret Boss", function(state)
             remotes.RemoveC:FireServer(1)
             wait(0.2)
             spawn(function()
-                while state do
+                while killSecretBossEnabled do
                     remotes.WinMegaBossEvent:FireServer(boss,difficulty)
                     wait(0.2)
-                    if not state then remotes.RemoveC:FireServer(0) break end
                 end
+                remotes.RemoveC:FireServer(0)
             end)
         end
     else remotes.RemoveC:FireServer(0) end
@@ -294,34 +299,39 @@ _G.PvPTarget = playerNames[1] or ""
 PvP:CreateDropdown("Select PvP Target", playerNames, 1, function(selected)
     _G.PvPTarget = selected
 end)
+
+local buyPotionsEnabled = false
 PvP:CreateToggle("Buy Potions", function(state)
+    buyPotionsEnabled = state
     if state then
         spawn(function()
-            while state do
+            while buyPotionsEnabled do
                 local remotes = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events")
                 remotes.HalloweenShopEvent:FireServer("WinsPotions")
                 remotes.HalloweenShopEvent:FireServer("ShinyPotions")
                 wait()
-                if not state then break end
             end
         end)
     end
 end)
+
+local autoPvPEnabled = false
 PvP:CreateToggle("Auto PvP", function(state)
+    autoPvPEnabled = state
     if state then
         spawn(function()
-            while state do
+            while autoPvPEnabled do
                 local r = game.ReplicatedStorage.Remotes.Events
                 local targetName = _G.PvPTarget
                 if targetName and targetName ~= "" then
                     r.WinEvent_PVP:FireServer(targetName, true, true)
                 end
                 wait(0.7)
-                if not state then break end
             end
         end)
     end
 end)
+
 PvP:CreateButton("PvP Test (x2 Instant)", function()
     local r = game.ReplicatedStorage.Remotes.Events
     local targetName = _G.PvPTarget
@@ -331,6 +341,7 @@ PvP:CreateButton("PvP Test (x2 Instant)", function()
         end
     end
 end)
+
 PvP:CreateButton("Refresh Players", function()
     local names = getPlayerNames()
     _G.PvPTarget = names[1] or ""
@@ -340,25 +351,26 @@ end)
 -- UNDERWORLD EVENT
 --------------------
 
+local attackAuraEnabled = false
 EventSection:CreateToggle("Attack Aura.", function(state)
+    attackAuraEnabled = state
     if state then
         spawn(function()
-            while state do
+            while attackAuraEnabled do
                 game:GetService("ReplicatedStorage")
                     .Remotes.Events.OnAttackMob:FireServer()
                 wait()
-                if not state then break end
             end
         end)
     end
 end)
 
--- Noclip Gifts Toggle
 local RunService = game:GetService("RunService")
 local player = game.Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Noclipping = nil
 local remoteEvent = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("ClaimGiftFromUnderworld")
+local buyGiftsEnabled = false
 local function enableNoclip()
     if Noclipping then Noclipping:Disconnect() end
     Noclipping = RunService.Stepped:Connect(function()
@@ -373,6 +385,7 @@ local function enableNoclip()
     end)
 end
 EventSection:CreateToggle("Buy Gifts", function(state)
+    buyGiftsEnabled = state
     if state then
         enableNoclip()
     else
@@ -383,7 +396,6 @@ EventSection:CreateToggle("Buy Gifts", function(state)
     end
 end)
 
--- Event Teleports
 local teleporting = false
 local function teleportLoop()
     teleporting = true
@@ -424,16 +436,18 @@ local function teleportHollowKing()
         end
     end)
 end
-
 local eventTargets = {"Skeletons", "Commander Skeleton", "Hollow King"}
 _G.TeleportTarget = eventTargets[1]
 EventSection:CreateDropdown("Select Target", eventTargets, 1, function(target)
     _G.TeleportTarget = target
 end)
 
+local enableTeleportEnabled = false
 EventSection:CreateToggle("Enable Teleport", function(state)
+    enableTeleportEnabled = state
     teleporting = false
     if state then
+        teleporting = true
         if _G.TeleportTarget == "Skeletons" then
             teleportLoop()
         elseif _G.TeleportTarget == "Commander Skeleton" then
@@ -441,6 +455,8 @@ EventSection:CreateToggle("Enable Teleport", function(state)
         elseif _G.TeleportTarget == "Hollow King" then
             teleportHollowKing()
         end
+    else
+        teleporting = false
     end
 end)
 
