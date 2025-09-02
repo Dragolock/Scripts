@@ -1,12 +1,11 @@
--- PAS-HUB using Wizard Library
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/bloodball/-back-ups-for-libs/main/wizard"))()
--- Main Window and Sections
 local Window = Library:NewWindow("PAS - HUB")
 local MainGame = Window:NewSection("Main Game")
 local Bosses = Window:NewSection("Bosses")
 local Worlds = Window:NewSection("Worlds/Secret Worlds")
 local PvP = Window:NewSection("PvP Stuff")
--- Underworld Event Window/Section
+
+
 local EventWindow = Library:NewWindow("Underworld Event")
 local EventSection = EventWindow:NewSection("Event")
 
