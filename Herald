@@ -2,44 +2,22 @@ local player = game.Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
 local hrp = char:WaitForChild("HumanoidRootPart")
 
-local monstersFolder = workspace:WaitForChild("DEV"):WaitForChild("MonsterCollisions")
+-- how far in front of the player
+local offset = 2
 
--- Function to get nearest monster model
-local function getNearestMonster()
-    local nearest
-    local shortest = math.huge
-
-    for _, monster in ipairs(monstersFolder:GetDescendants()) do
-        if monster:IsA("Model") and monster:FindFirstChild("HumanoidRootPart") then
-            local dist = (hrp.Position - monster.HumanoidRootPart.Position).Magnitude
-            if dist < shortest then
-                shortest = dist
-                nearest = monster
-            end
+-- function to move models
+local function moveMonsters()
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("Model") and obj.Name == "MonsterCollisions" and obj.PrimaryPart then
+            -- position 5 studs in front of the player
+            local newCFrame = hrp.CFrame * CFrame.new(0, 0, -offset)
+            obj:SetPrimaryPartCFrame(newCFrame)
         end
     end
-
-    return nearest
 end
 
--- Attack loop
-while task.wait(0.1) do
-    local target = getNearestMonster()
-    if target then
-        local args = {
-            { target },
-            "WoodSword" -- change to your weapon name if needed
-        }
+-- run once
+moveMonsters()
 
-        game:GetService("ReplicatedStorage")
-            :WaitForChild("packages")
-            :WaitForChild("_Index")
-            :WaitForChild("sleitnick_knit@1.5.1")
-            :WaitForChild("knit")
-            :WaitForChild("Services")
-            :WaitForChild("FighterService")
-            :WaitForChild("RF")
-            :WaitForChild("DamageRequest")
-            :InvokeServer(unpack(args))
-    end
-end
+-- if you want it to keep moving them as you move, uncomment this:
+-- game:GetService("RunService").Heartbeat:Connect(moveMonsters)
