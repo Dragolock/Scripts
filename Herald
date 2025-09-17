@@ -1,44 +1,45 @@
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebertsx/Tora-Library/main/src/librarynew", true))()
-local tab = library:CreateWindow("Your Title")
-local folder = tab:AddFolder("Folder")
+local player = game.Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
 
-local teleportY = 0 -- default Y coordinate
+local monstersFolder = workspace:WaitForChild("DEV"):WaitForChild("MonsterCollisions")
 
-folder:AddBox({
-    text = "Enter Y Coordinate (use 'inf' for infinitely high)",
-    flag = "y_coordinate",
-    value = tostring(teleportY),
-    callback = function(value)
-        if string.lower(value) == "inf" then
-            teleportY = math.huge -- infinite height
-            print("Y coordinate set to infinite height")
-        else
-            local num = tonumber(value)
-            if num then
-                teleportY = num
-                print("Y coordinate updated to", teleportY)
-            else
-                print("Invalid number entered")
+-- Function to get nearest monster model
+local function getNearestMonster()
+    local nearest
+    local shortest = math.huge
+
+    for _, monster in ipairs(monstersFolder:GetDescendants()) do
+        if monster:IsA("Model") and monster:FindFirstChild("HumanoidRootPart") then
+            local dist = (hrp.Position - monster.HumanoidRootPart.Position).Magnitude
+            if dist < shortest then
+                shortest = dist
+                nearest = monster
             end
         end
     end
-})
 
-folder:AddButton({
-    text = "Generate Money",
-    flag = "generate_money_button",
-    callback = function()
-        local player = game:GetService("Players").LocalPlayer
-        if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local hrp = player.Character.HumanoidRootPart
-            local currentPos = hrp.Position
-            local yPos = teleportY == math.huge and 9e9 or teleportY -- avoid literal infinity by using a very large number
-            hrp.CFrame = CFrame.new(currentPos.X, yPos, currentPos.Z)
-            print("Player teleported to:", currentPos.X, yPos, currentPos.Z)
-        else
-            warn("Player character or HumanoidRootPart not found")
-        end
+    return nearest
+end
+
+-- Attack loop
+while task.wait(0.1) do
+    local target = getNearestMonster()
+    if target then
+        local args = {
+            { target },
+            "WoodSword" -- change to your weapon name if needed
+        }
+
+        game:GetService("ReplicatedStorage")
+            :WaitForChild("packages")
+            :WaitForChild("_Index")
+            :WaitForChild("sleitnick_knit@1.5.1")
+            :WaitForChild("knit")
+            :WaitForChild("Services")
+            :WaitForChild("FighterService")
+            :WaitForChild("RF")
+            :WaitForChild("DamageRequest")
+            :InvokeServer(unpack(args))
     end
-})
-
-library:Init()
+end
