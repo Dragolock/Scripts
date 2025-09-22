@@ -3,7 +3,7 @@ local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebe
 --------------------------------------------------
 -- MAIN WINDOW
 --------------------------------------------------
-local mainTab = library:CreateWindow("skibidi - HUB")
+local mainTab = library:CreateWindow("PAS - HUB")
 local mainGame = mainTab:AddFolder("Main Game")
 local bossTab  = mainTab:AddFolder("Bosses")
 local worldTab = mainTab:AddFolder("Worlds/Secret Worlds")
