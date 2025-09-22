@@ -432,7 +432,7 @@ eventTab:AddToggle({
 
         if state then
             for _, part in pairs(character:GetDescendants()) do
-                if part:IsA("BasePart") and not part.Anchored then
+                if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" and not part.Anchored then
                     part.Anchored = true
                 end
             end
@@ -448,7 +448,7 @@ eventTab:AddToggle({
                                     humanoid.Sit = false
                                 end
                                 if v.PrimaryPart then
-                                    hrp.CFrame = v.PrimaryPart.CFrame + Vector3.new(0, 0, 0)
+                                    hrp.CFrame = v.PrimaryPart.CFrame + Vector3.new(0, 5, 0)
                                 end
                             end
                         end
@@ -466,6 +466,7 @@ eventTab:AddToggle({
         end
     end,
 })
+
 
 
 
