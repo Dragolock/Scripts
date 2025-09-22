@@ -480,7 +480,7 @@ eventTab:AddToggle({
                     if humanoid and humanoid.Sit then
                         humanoid.Sit = false
                     end
-                    hrp.CFrame = nearestSket.PrimaryPart.CFrame + Vector3.new(0, 8, 0)
+                    hrp.CFrame = nearestSket.PrimaryPart.CFrame + Vector3.new(0, 11, 0)
                 end
 
                 task.wait(0.1)
