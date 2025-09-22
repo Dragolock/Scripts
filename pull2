@@ -474,7 +474,7 @@ local teleporting = false
 
 local interval = 0.03
 local distThresh = 1
-local lerpAlpha = 0.15
+local lerpAlpha = 0.2
 
 for _, p in ipairs(workspace:GetDescendants()) do 
     if p:IsA("BasePart") and p.Name == "UpperTorso" then
@@ -509,7 +509,7 @@ function teleportLoop()
         while teleporting and hrp do
             local t = nearestTorso(hrp, 150)
             if t then
-                local targetPos = t.Position + Vector3.new(0, 9, 0)
+                local targetPos = t.Position + Vector3.new(0, 8, 0)
                 if (hrp.Position - targetPos).Magnitude > distThresh then
                     hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), lerpAlpha)
                     hrp.AssemblyLinearVelocity = Vector3.zero
