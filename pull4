@@ -496,39 +496,54 @@ eventTab:AddToggle({
     end,
 })
 
+local Players = game:GetService("Players")
+local CS = game:GetService("CollectionService")
+local lp = Players.LocalPlayer
+local teleporting = false
 
-local Players,CS=game:GetService("Players"),game:GetService("CollectionService")
-local lp,teleporting=Players.LocalPlayer,false
-local interval,distThresh=0.3,10
--- Cache/tagging
-for _,p in ipairs(workspace:GetDescendants())do 
-    if p:IsA("BasePart")and p.Name=="UpperTorso"then CS:AddTag(p,"SkeletonTarget")end 
+local interval = 0.03
+local distThresh = 1
+local lerpAlpha = 0.25
+
+for _, p in ipairs(workspace:GetDescendants()) do 
+    if p:IsA("BasePart") and p.Name == "UpperTorso" then
+        CS:AddTag(p, "SkeletonTarget")
+    end 
 end
+
 workspace.DescendantAdded:Connect(function(p)
-    if p:IsA("BasePart")and p.Name=="UpperTorso"then CS:AddTag(p,"SkeletonTarget")end 
+    if p:IsA("BasePart") and p.Name == "UpperTorso" then
+        CS:AddTag(p, "SkeletonTarget")
+    end 
 end)
--- Teleport to the nearest UpperTorso1
-local function nearestTorso(hrp,radius)
-    local best,d=nil,math.huge
-    for _,p in ipairs(CS:GetTagged("SkeletonTarget"))do
-        if p:IsDescendantOf(workspace)and not Players:GetPlayerFromCharacter(p.Parent)then
-            local m=(p.Position-hrp.Position).Magnitude
-            if m<d and m<=radius then d,best=m,p end
+
+local function nearestTorso(hrp, radius)
+    local best, d = nil, math.huge
+    for _, p in ipairs(CS:GetTagged("SkeletonTarget")) do
+        if p:IsDescendantOf(workspace) and not Players:GetPlayerFromCharacter(p.Parent) then
+            local m = (p.Position - hrp.Position).Magnitude
+            if m < d and m <= radius then
+                d, best = m, p
+            end
         end
     end
     return best
 end
 
 function teleportLoop()
-    teleporting=true
-    local hrp=lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+    teleporting = true
+    local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
     task.spawn(function()
         while teleporting and hrp do
-            local t=nearestTorso(hrp,150)
-            if t and (hrp.Position-t.Position).Magnitude>distThresh then
-                hrp.CFrame=CFrame.new(t.Position)
-                hrp.AssemblyLinearVelocity,hrp.AssemblyAngularVelocity=Vector3.zero,Vector3.zero
+            local t = nearestTorso(hrp, 150)
+            if t then
+                local targetPos = t.Position + Vector3.new(0, 7, 0)
+                if (hrp.Position - targetPos).Magnitude > distThresh then
+                    hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), lerpAlpha)
+                    hrp.AssemblyLinearVelocity = Vector3.zero
+                    hrp.AssemblyAngularVelocity = Vector3.zero
+                end
             end
             task.wait(interval)
         end
