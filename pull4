@@ -501,9 +501,9 @@ local CS = game:GetService("CollectionService")
 local lp = Players.LocalPlayer
 local teleporting = false
 
-local interval = 0.03
+local interval = 0.02
 local distThresh = 1
-local lerpAlpha = 0.25
+local lerpAlpha = 0.35
 
 for _, p in ipairs(workspace:GetDescendants()) do 
     if p:IsA("BasePart") and p.Name == "UpperTorso" then
@@ -538,7 +538,7 @@ function teleportLoop()
         while teleporting and hrp do
             local t = nearestTorso(hrp, 150)
             if t then
-                local targetPos = t.Position + Vector3.new(0, 7, 0)
+                local targetPos = t.Position + Vector3.new(0, 7.5, 0)
                 if (hrp.Position - targetPos).Magnitude > distThresh then
                     hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), lerpAlpha)
                     hrp.AssemblyLinearVelocity = Vector3.zero
