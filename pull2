@@ -505,12 +505,11 @@ function teleportLoop()
     teleporting = true
     local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
-
     task.spawn(function()
         while teleporting and hrp do
             local t = nearestTorso(hrp, 150)
             if t then
-                local targetPos = t.Position + Vector3.new(0, 0, 0)
+                local targetPos = t.Position + Vector3.new(0, 9, 0)
                 if (hrp.Position - targetPos).Magnitude > distThresh then
                     hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), lerpAlpha)
                     hrp.AssemblyLinearVelocity = Vector3.zero
