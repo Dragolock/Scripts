@@ -484,68 +484,82 @@ function teleportLoop()
     end)
 end
 
+local teleportingCommander = false
+local teleportingHK350 = false
+local teleportingHK700 = false
+
 function teleportCommander()
-    teleporting=true
-    local hrp=lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+    teleportingCommander = true
+    local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
     task.spawn(function()
-        while teleporting and hrp do
-            hrp.CFrame=CFrame.new(4758,538,-1768)
-            hrp.AssemblyLinearVelocity,hrp.AssemblyAngularVelocity=Vector3.zero,Vector3.zero
+        while teleportingCommander and hrp do
+            hrp.CFrame = CFrame.new(4758, 538, -1768)
+            hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+            hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
             task.wait()
         end
     end)
 end
 
 function teleportHollowKing()
-    teleporting = true
+    teleportingHK350 = true
     local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
     task.spawn(function()
-        while teleporting and hrp do
+        while teleportingHK350 and hrp do
             hrp.CFrame = CFrame.new(4508, 551, -1528)
-            hrp.AssemblyLinearVelocity, hrp.AssemblyAngularVelocity = Vector3.zero, Vector3.zero
+            hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+            hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
             task.wait()
         end
     end)
 end
 
 function teleportHollowKing700()
-    teleporting = true
+    teleportingHK700 = true
     local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
     task.spawn(function()
-        while teleporting and hrp do
+        while teleportingHK700 and hrp do
             hrp.CFrame = CFrame.new(-3756, 665, -1161)
-            hrp.AssemblyLinearVelocity, hrp.AssemblyAngularVelocity = Vector3.zero, Vector3.zero
+            hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+            hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
             task.wait()
         end
     end)
 end
 
+function stopAllTeleports()
+    teleportingCommander = false
+    teleportingHK350 = false
+    teleportingHK700 = false
+end
 
 eventTab:AddToggle({
     text = "Enable Teleport",
     flag = "EnableTeleport",
     callback = function(state)
-        teleporting = false
+        stopAllTeleports()
         if state then
             for _, v in pairs(workspace:GetDescendants()) do
                 if v.Name:lower() == "monster" then
                     v:Destroy()
                 end
             end
-            if library.flags["TeleportTarget"] == "Skeletons" then
+            local target = library.flags["TeleportTarget"]
+            if target == "Skeletons" then
                 teleportLoop()
-            elseif library.flags["TeleportTarget"] == "Commander Skeleton" then
+            elseif target == "Commander Skeleton" then
                 teleportCommander()
-            elseif library.flags["TeleportTarget"] == "Hollow King" then
+            elseif target == "Hollow King (350)" then
                 teleportHollowKing()
+            elseif target == "Hollow King (700)" then
+                teleportHollowKing700()
             end
         end
     end,
 })
-
 
 eventTab:AddList({
     text = "Select Target",
@@ -553,7 +567,7 @@ eventTab:AddList({
     flag = "TeleportTarget",
     value = "Skeletons",
     callback = function(value)
-        teleporting = false
+        stopAllTeleports()
         if library.flags["EnableTeleport"] then
             if value == "Skeletons" then
                 teleportLoop()
