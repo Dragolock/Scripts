@@ -422,6 +422,30 @@ eventTab:AddToggle({
     end,
 })
 
+eventTab:AddToggle({
+    text = "TP to Skets",
+    flag = "TpSkets",
+    callback = function(state)
+        if state then
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v.Name:lower() == "skets" and v:IsA("Model") and v.PrimaryPart then
+                    local char = speaker.Character
+                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                    local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+                    if humanoid and humanoid.SeatPart then
+                        humanoid.Sit = false
+                    end
+                    if hrp then
+                        hrp.CFrame = v.PrimaryPart.CFrame * CFrame.new(0, 10, 0)
+                    end
+                    break
+                end
+            end
+        end
+    end,
+})
+
+
 local Players,CS=game:GetService("Players"),game:GetService("CollectionService")
 local lp,teleporting=Players.LocalPlayer,false
 local interval,distThresh=0.3,10
