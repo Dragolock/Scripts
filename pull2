@@ -427,10 +427,17 @@ eventTab:AddToggle({
     text = "Sket Teleport",
     flag = "SketTeleport",
     callback = function(state)
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+
         if state then
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") and not part.Anchored then
+                    part.Anchored = true
+                end
+            end
+
             task.spawn(function()
-                local player = game.Players.LocalPlayer
-                local character = player.Character or player.CharacterAdded:Wait()
                 while library.flags["SketTeleport"] do
                     for _, v in pairs(workspace:GetDescendants()) do
                         if v:IsA("Model") and v.Name:lower() == "sket" then
@@ -441,7 +448,7 @@ eventTab:AddToggle({
                                     humanoid.Sit = false
                                 end
                                 if v.PrimaryPart then
-                                    hrp.CFrame = v.PrimaryPart.CFrame + Vector3.new(0, 1, 0)
+                                    hrp.CFrame = v.PrimaryPart.CFrame + Vector3.new(0, 0, 0)
                                 end
                             end
                         end
@@ -449,9 +456,17 @@ eventTab:AddToggle({
                     task.wait(0.5)
                 end
             end)
+
+        else
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") and part.Anchored then
+                    part.Anchored = false
+                end
+            end
         end
     end,
 })
+
 
 
 local Players,CS=game:GetService("Players"),game:GetService("CollectionService")
