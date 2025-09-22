@@ -403,43 +403,24 @@ eventTab:AddToggle({
     end
 })
 
-local RunService = game:GetService("RunService")
-local player = game.Players.LocalPlayer
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
-local Noclipping = nil
-local remoteEvent = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("ClaimGiftFromUnderworld")
-
-local function enableNoclip()
-    if Noclipping then Noclipping:Disconnect() end
-    Noclipping = RunService.Stepped:Connect(function()
-        if player.Character then
-            for _, child in pairs(player.Character:GetDescendants()) do
-                if child:IsA("BasePart") and child.CanCollide then
-                    child.CanCollide = false
-                end
-            end
-            remoteEvent:FireServer()
-        end
-    end)
-end
+local dungeonAttackActive = false
+local remote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("Dungeon"):WaitForChild("OnDungeonClick")
 
 eventTab:AddToggle({
-    text = "Buy Gifts",
-    flag = "BuyGifts",
+    text = "Dungeon Attack",
+    flag = "DungeonAttack",
     callback = function(state)
+        dungeonAttackActive = state
         if state then
-            enableNoclip()
-        else
-            if Noclipping then
-                Noclipping:Disconnect()
-                Noclipping = nil
-            end
+            task.spawn(function()
+                while dungeonAttackActive do
+                    remote:FireServer()
+                    task.wait(0.01)
+                end
+            end)
         end
     end,
 })
-
-
 
 local Players,CS=game:GetService("Players"),game:GetService("CollectionService")
 local lp,teleporting=Players.LocalPlayer,false
@@ -505,6 +486,20 @@ function teleportHollowKing()
     end)
 end
 
+function teleportHollowKing700()
+    teleporting = true
+    local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    task.spawn(function()
+        while teleporting and hrp do
+            hrp.CFrame = CFrame.new(-3756, 665, -1161)
+            hrp.AssemblyLinearVelocity, hrp.AssemblyAngularVelocity = Vector3.zero, Vector3.zero
+            task.wait()
+        end
+    end)
+end
+
+
 eventTab:AddToggle({
     text = "Enable Teleport",
     flag = "EnableTeleport",
@@ -530,7 +525,7 @@ eventTab:AddToggle({
 
 eventTab:AddList({
     text = "Select Target",
-    values = {"Skeletons", "Commander Skeleton", "Hollow King"},
+    values = {"Skeletons", "Commander Skeleton", "Hollow King (350)", "Hollow King (700)"},
     flag = "TeleportTarget",
     value = "Skeletons",
     callback = function(value)
@@ -540,12 +535,15 @@ eventTab:AddList({
                 teleportLoop()
             elseif value == "Commander Skeleton" then
                 teleportCommander()
-            elseif value == "Hollow King" then
+            elseif value == "Hollow King (350)" then
                 teleportHollowKing()
+            elseif value == "Hollow King (700)" then
+                teleportHollowKing700()
             end
         end
     end,
 })
+
 
 eventTab:AddButton({
     text = "Set WalkSpeed to 70",
@@ -554,17 +552,6 @@ eventTab:AddButton({
         local char = plr.Character or plr.CharacterAdded:Wait()
         local humanoid = char:WaitForChild("Humanoid")
         humanoid.WalkSpeed = 70
-    end,
-})
-
-eventTab:AddButton({
-    text = "Buy HP Upgrade",
-    callback = function()
-        local args = {"Health"}
-        game:GetService("ReplicatedStorage"):WaitForChild("Remotes")
-             :WaitForChild("Events")
-             :WaitForChild("OnUpgradedRequests")
-             :FireServer(unpack(args))
     end,
 })
 
