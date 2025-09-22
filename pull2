@@ -424,31 +424,33 @@ eventTab:AddToggle({
 })
 
 eventTab:AddToggle({
-    text = "Sket Teleport",
-    flag = "SketTeleport",
+    text = "Sket Teleport + Float",
+    flag = "SketTeleportFloat",
     callback = function(state)
         local player = game.Players.LocalPlayer
         local character = player.Character or player.CharacterAdded:Wait()
+        local hrp = character:WaitForChild("HumanoidRootPart")
 
         if state then
-            for _, part in pairs(character:GetDescendants()) do
-                if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" and not part.Anchored then
-                    part.Anchored = true
-                end
+            if not hrp:FindFirstChild("SketFloat") then
+                local bodyVelocity = Instance.new("BodyVelocity")
+                bodyVelocity.Name = "SketFloat"
+                bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+                bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+                bodyVelocity.Parent = hrp
             end
 
             task.spawn(function()
-                while library.flags["SketTeleport"] do
+                while library.flags["SketTeleportFloat"] do
                     for _, v in pairs(workspace:GetDescendants()) do
                         if v:IsA("Model") and v.Name:lower() == "sket" then
-                            local hrp = character:FindFirstChild("HumanoidRootPart")
                             if hrp then
                                 local humanoid = character:FindFirstChildOfClass("Humanoid")
                                 if humanoid and humanoid.SeatPart then
                                     humanoid.Sit = false
                                 end
                                 if v.PrimaryPart then
-                                    hrp.CFrame = v.PrimaryPart.CFrame + Vector3.new(0, 5, 0)
+                                    hrp.CFrame = v.PrimaryPart.CFrame + Vector3.new(0, 0, 0)
                                 end
                             end
                         end
@@ -456,19 +458,13 @@ eventTab:AddToggle({
                     task.wait(0.5)
                 end
             end)
-
         else
-            for _, part in pairs(character:GetDescendants()) do
-                if part:IsA("BasePart") and part.Anchored then
-                    part.Anchored = false
-                end
+            if hrp:FindFirstChild("SketFloat") then
+                hrp.SketFloat:Destroy()
             end
         end
     end,
 })
-
-
-
 
 local Players,CS=game:GetService("Players"),game:GetService("CollectionService")
 local lp,teleporting=Players.LocalPlayer,false
