@@ -385,9 +385,9 @@ pvpTab:AddButton({
 -- UNDERWORLD EVENT
 --------------------------------------------------
 eventTab:AddToggle({
-    text="Attack Aura.",
-    flag="AttackAura",
-    callback=function(state)
+    text = "Attack Aura",
+    flag = "AttackAura",
+    callback = function(state)
         if state then
             task.spawn(function()
                 while library.flags["AttackAura"] do
@@ -400,16 +400,17 @@ eventTab:AddToggle({
                 end
             end)
         end
-    end
+    end,
 })
 
+
 eventTab:AddToggle({
-    text = "Dungeon Attack",
-    flag = "DungeonAttack",
+    text = "Dungeon Fast Attack",
+    flag = "DungeonFastAttack",
     callback = function(state)
         if state then
             task.spawn(function()
-                while library.flags["DungeonAttack"] do
+                while library.flags["DungeonFastAttack"] do
                     game:GetService("ReplicatedStorage")
                         :WaitForChild("Remotes")
                         :WaitForChild("Events")
@@ -423,9 +424,10 @@ eventTab:AddToggle({
     end,
 })
 
+
 eventTab:AddToggle({
-    text = "Sket Teleport + Float",
-    flag = "SketTeleportFloat",
+    text = "TweenTP Sketies",
+    flag = "TweenTPSketies",
     callback = function(state)
         local player = game.Players.LocalPlayer
         local character = player.Character or player.CharacterAdded:Wait()
@@ -462,7 +464,7 @@ eventTab:AddToggle({
         end)
 
         task.spawn(function()
-            while library.flags["SketTeleportFloat"] and character.Parent do
+            while library.flags["TweenTPSketies"] and character.Parent do
                 local nearestSket
                 local nearestDistance = math.huge
 
@@ -573,8 +575,8 @@ function teleportHollowKing700()
 end
 
 eventTab:AddToggle({
-    text = "Enable Teleport",
-    flag = "EnableTeleport",
+    text = "Teleport",
+    flag = "Teleport",
     callback = function(state)
         teleporting = false
         if state then
