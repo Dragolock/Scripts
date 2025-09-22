@@ -449,12 +449,12 @@ eventTab:AddToggle({
                                     humanoid.Sit = false
                                 end
                                 if v.PrimaryPart then
-                                    humanoidRootPart.CFrame = v.PrimaryPart.CFrame + Vector3.new(0, 5, 0)
+                                    humanoidRootPart.CFrame = v.PrimaryPart.CFrame + Vector3.new(0, 8, 0)
                                 end
                             end
                         end
                     end
-                    task.wait(0.4)
+                    task.wait()
                 end
             end)
         else
