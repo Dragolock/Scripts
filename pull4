@@ -483,7 +483,7 @@ eventTab:AddToggle({
                         humanoid.Sit = false
                     end
                     local targetPos = nearestSket.PrimaryPart.Position + Vector3.new(0, 8, 0)
-                    hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), 0.2)
+                    hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), 0.22)
                 end
 
                 task.wait(0.03)
