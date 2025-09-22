@@ -484,6 +484,7 @@ function teleportLoop()
     end)
 end
 
+local teleportLoop = false
 local teleportingCommander = false
 local teleportingHK350 = false
 local teleportingHK700 = false
@@ -531,6 +532,7 @@ function teleportHollowKing700()
 end
 
 function stopAllTeleports()
+    teleportLoop = false
     teleportingCommander = false
     teleportingHK350 = false
     teleportingHK700 = false
