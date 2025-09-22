@@ -473,8 +473,8 @@ local lp = Players.LocalPlayer
 local teleporting = false
 
 local interval = 0.03
-local distThresh = 10
-local lerpAlpha = 0.25
+local distThresh = 15
+local lerpAlpha = 0.1
 
 for _, p in ipairs(workspace:GetDescendants()) do 
     if p:IsA("BasePart") and p.Name == "UpperTorso" then
@@ -615,6 +615,21 @@ eventTab:AddButton({
         local char = plr.Character or plr.CharacterAdded:Wait()
         local humanoid = char:WaitForChild("Humanoid")
         humanoid.WalkSpeed = 70
+    end,
+})
+
+eventTab:AddButton({
+    text = "TP to Altar",
+    callback = function()
+        local args = {
+            "-236",
+            false
+        }
+        game:GetService("ReplicatedStorage")
+            :WaitForChild("Remotes")
+            :WaitForChild("Events")
+            :WaitForChild("PortalC")
+            :FireServer(unpack(args))
     end,
 })
 
