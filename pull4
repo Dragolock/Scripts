@@ -12,8 +12,8 @@ mainTab:AddLabel({ text = "Creator = Not me", type = "label" })
 --------------------------------------------------
 -- HERALD EVENT WINDOW
 --------------------------------------------------
-local heraldWindow = library:CreateWindow("Underworld Event")
-local eventTab     = heraldWindow:AddFolder("Event")
+local heraldWindow = library:CreateWindow("Abbys Event")
+local eventTab     = heraldWindow:AddFolder("Event Features")
 --------------------------------------------------
 -- MAIN GAME
 --------------------------------------------------
