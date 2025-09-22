@@ -12,8 +12,8 @@ mainTab:AddLabel({ text = "Creator = Not me", type = "label" })
 --------------------------------------------------
 -- HERALD EVENT WINDOW
 --------------------------------------------------
-local heraldWindow = library:CreateWindow("Underworld Event")
-local eventTab     = heraldWindow:AddFolder("Event")
+local heraldWindow = library:CreateWindow("Abbys Event")
+local eventTab     = heraldWindow:AddFolder("Event Features")
 --------------------------------------------------
 -- MAIN GAME
 --------------------------------------------------
@@ -385,9 +385,9 @@ pvpTab:AddButton({
 -- UNDERWORLD EVENT
 --------------------------------------------------
 eventTab:AddToggle({
-    text="Attack Aura.",
-    flag="AttackAura",
-    callback=function(state)
+    text = "Attack Aura",
+    flag = "AttackAura",
+    callback = function(state)
         if state then
             task.spawn(function()
                 while library.flags["AttackAura"] do
@@ -400,45 +400,101 @@ eventTab:AddToggle({
                 end
             end)
         end
-    end
+    end,
 })
 
-local RunService = game:GetService("RunService")
-local player = game.Players.LocalPlayer
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
-local Noclipping = nil
-local remoteEvent = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("ClaimGiftFromUnderworld")
-
-local function enableNoclip()
-    if Noclipping then Noclipping:Disconnect() end
-    Noclipping = RunService.Stepped:Connect(function()
-        if player.Character then
-            for _, child in pairs(player.Character:GetDescendants()) do
-                if child:IsA("BasePart") and child.CanCollide then
-                    child.CanCollide = false
-                end
-            end
-            remoteEvent:FireServer()
-        end
-    end)
-end
 
 eventTab:AddToggle({
-    text = "Buy Gifts",
-    flag = "BuyGifts",
+    text = "Dungeon Fast Attack",
+    flag = "DungeonFastAttack",
     callback = function(state)
         if state then
-            enableNoclip()
-        else
-            if Noclipping then
-                Noclipping:Disconnect()
-                Noclipping = nil
-            end
+            task.spawn(function()
+                while library.flags["DungeonFastAttack"] do
+                    game:GetService("ReplicatedStorage")
+                        :WaitForChild("Remotes")
+                        :WaitForChild("Events")
+                        :WaitForChild("Dungeon")
+                        :WaitForChild("OnDungeonClick")
+                        :FireServer()
+                    task.wait()
+                end
+            end)
         end
     end,
 })
 
+
+eventTab:AddToggle({
+    text = "TweenTP Sketies",
+    flag = "TweenTPSketies",
+    callback = function(state)
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local hrp = character:WaitForChild("HumanoidRootPart")
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+        if state then
+            if not hrp:FindFirstChild("SketVelocity") then
+                local bodyVelocity = Instance.new("BodyVelocity")
+                bodyVelocity.Name = "SketVelocity"
+                bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+                bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+                bodyVelocity.Parent = hrp
+            end
+        else
+            if hrp:FindFirstChild("SketVelocity") then
+                hrp.SketVelocity:Destroy()
+            end
+            return
+        end
+
+        local skets = {}
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("Model") and v.Name:lower() == "sket" then
+                table.insert(skets, v)
+            end
+        end
+
+        local sketAddedConnection
+        sketAddedConnection = workspace.DescendantAdded:Connect(function(v)
+            if v:IsA("Model") and v.Name:lower() == "sket" then
+                table.insert(skets, v)
+            end
+        end)
+
+        task.spawn(function()
+            while library.flags["TweenTPSketies"] and character.Parent do
+                local nearestSket
+                local nearestDistance = math.huge
+
+                for _, sket in ipairs(skets) do
+                    if sket.PrimaryPart then
+                        local distance = (hrp.Position - sket.PrimaryPart.Position).Magnitude
+                        if distance < nearestDistance then
+                            nearestDistance = distance
+                            nearestSket = sket
+                        end
+                    end
+                end
+
+                if nearestSket and nearestSket.PrimaryPart then
+                    if humanoid and humanoid.Sit then
+                        humanoid.Sit = false
+                    end
+                    local targetPos = nearestSket.PrimaryPart.Position + Vector3.new(0, 8, 0)
+                    hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), 0.22)
+                end
+
+                task.wait(0.03)
+            end
+
+            if sketAddedConnection then
+                sketAddedConnection:Disconnect()
+            end
+        end)
+    end,
+})
 
 
 local Players,CS=game:GetService("Players"),game:GetService("CollectionService")
@@ -505,9 +561,22 @@ function teleportHollowKing()
     end)
 end
 
+function teleportHollowKing700()
+    teleporting = true
+    local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    task.spawn(function()
+        while teleporting and hrp do
+            hrp.CFrame = CFrame.new(-3765, 665, -1161)
+            hrp.AssemblyLinearVelocity, hrp.AssemblyAngularVelocity = Vector3.zero, Vector3.zero
+            task.wait()
+        end
+    end)
+end
+
 eventTab:AddToggle({
-    text = "Enable Teleport",
-    flag = "EnableTeleport",
+    text = "Teleport",
+    flag = "Teleport",
     callback = function(state)
         teleporting = false
         if state then
@@ -516,21 +585,23 @@ eventTab:AddToggle({
                     v:Destroy()
                 end
             end
-            if library.flags["TeleportTarget"] == "Skeletons" then
+            local target = library.flags["TeleportTarget"]
+            if target == "Skeletons" then
                 teleportLoop()
-            elseif library.flags["TeleportTarget"] == "Commander Skeleton" then
+            elseif target == "Commander Skeleton" then
                 teleportCommander()
-            elseif library.flags["TeleportTarget"] == "Hollow King" then
+            elseif target == "Hollow King" then
                 teleportHollowKing()
+            elseif target == "Hollow King (700)" then
+                teleportHollowKing700()
             end
         end
     end,
 })
 
-
 eventTab:AddList({
     text = "Select Target",
-    values = {"Skeletons", "Commander Skeleton", "Hollow King"},
+    values = {"Skeletons", "Commander Skeleton", "Hollow King", "Hollow King (700)"},
     flag = "TeleportTarget",
     value = "Skeletons",
     callback = function(value)
@@ -542,10 +613,13 @@ eventTab:AddList({
                 teleportCommander()
             elseif value == "Hollow King" then
                 teleportHollowKing()
+            elseif value == "Hollow King (700)" then
+                teleportHollowKing700()
             end
         end
     end,
 })
+
 
 eventTab:AddButton({
     text = "Set WalkSpeed to 70",
@@ -558,15 +632,20 @@ eventTab:AddButton({
 })
 
 eventTab:AddButton({
-    text = "Buy HP Upgrade",
+    text = "TP to Altar",
     callback = function()
-        local args = {"Health"}
-        game:GetService("ReplicatedStorage"):WaitForChild("Remotes")
-             :WaitForChild("Events")
-             :WaitForChild("OnUpgradedRequests")
-             :FireServer(unpack(args))
+        local args = {
+            "-236",
+            false
+        }
+        game:GetService("ReplicatedStorage")
+            :WaitForChild("Remotes")
+            :WaitForChild("Events")
+            :WaitForChild("PortalC")
+            :FireServer(unpack(args))
     end,
 })
+
 
 --------------------------------------------------
 -- INIT WINDOWS
