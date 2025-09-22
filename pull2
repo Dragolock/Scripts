@@ -473,8 +473,8 @@ local lp = Players.LocalPlayer
 local teleporting = false
 
 local interval = 0.03
-local distThresh = 15
-local lerpAlpha = 0.1
+local distThresh = 1
+local lerpAlpha = 0.15
 
 for _, p in ipairs(workspace:GetDescendants()) do 
     if p:IsA("BasePart") and p.Name == "UpperTorso" then
