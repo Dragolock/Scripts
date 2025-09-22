@@ -430,41 +430,53 @@ eventTab:AddToggle({
         local player = game.Players.LocalPlayer
         local character = player.Character or player.CharacterAdded:Wait()
         local hrp = character:WaitForChild("HumanoidRootPart")
+        local currentSket
+
+        local function teleportToSket(model)
+            if hrp and model and model.PrimaryPart then
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                if humanoid and humanoid.SeatPart then
+                    humanoid.Sit = false
+                end
+                hrp.CFrame = model.PrimaryPart.CFrame + Vector3.new(0, 0, 0)
+            end
+        end
 
         if state then
-            if not hrp:FindFirstChild("SketFloat") then
+            if not hrp:FindFirstChild("WRDBodyVelocity") then
                 local bodyVelocity = Instance.new("BodyVelocity")
-                bodyVelocity.Name = "SketFloat"
-                bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-                bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+                bodyVelocity.Name = "WRDBodyVelocity"
                 bodyVelocity.Parent = hrp
             end
 
+            currentSket = workspace:FindFirstChild("Sket")
+            if currentSket then
+                teleportToSket(currentSket)
+            end
+
+            workspace.DescendantAdded:Connect(function(desc)
+                if desc:IsA("Model") and desc.Name:lower() == "sket" then
+                    currentSket = desc
+                    teleportToSket(currentSket)
+                end
+            end)
+
             task.spawn(function()
                 while library.flags["SketTeleportFloat"] do
-                    for _, v in pairs(workspace:GetDescendants()) do
-                        if v:IsA("Model") and v.Name:lower() == "sket" then
-                            if hrp then
-                                local humanoid = character:FindFirstChildOfClass("Humanoid")
-                                if humanoid and humanoid.SeatPart then
-                                    humanoid.Sit = false
-                                end
-                                if v.PrimaryPart then
-                                    hrp.CFrame = v.PrimaryPart.CFrame + Vector3.new(0, 0, 0)
-                                end
-                            end
-                        end
+                    if currentSket then
+                        teleportToSket(currentSket)
                     end
                     task.wait(0.5)
                 end
             end)
         else
-            if hrp:FindFirstChild("SketFloat") then
-                hrp.SketFloat:Destroy()
+            if hrp:FindFirstChild("WRDBodyVelocity") then
+                hrp.WRDBodyVelocity:Destroy()
             end
         end
     end,
 })
+
 
 local Players,CS=game:GetService("Players"),game:GetService("CollectionService")
 local lp,teleporting=Players.LocalPlayer,false
