@@ -10,7 +10,7 @@ local worldTab = mainTab:AddFolder("Worlds/Secret Worlds")
 local pvpTab  = mainTab:AddFolder("PvP Stuff")
 mainTab:AddLabel({ text = "Creator = Not me", type = "label" })
 --------------------------------------------------
--- HERALD EVENT WINDOW
+-- ABYSS EVENT WINDOW (Old name was herald, too lazy to change)
 --------------------------------------------------
 local heraldWindow = library:CreateWindow("Abyss Event")
 local eventTab     = heraldWindow:AddFolder("Event Features")
@@ -417,7 +417,7 @@ eventTab:AddToggle({
                         :WaitForChild("Dungeon")
                         :WaitForChild("OnDungeonClick")
                         :FireServer()
-                    task.wait()
+                    task.wait(0.05)
                 end
             end)
         end
@@ -483,7 +483,7 @@ eventTab:AddToggle({
                         humanoid.Sit = false
                     end
                     local targetPos = nearestSket.PrimaryPart.Position + Vector3.new(0, 8, 0)
-                    hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), 0.22)
+                    hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), 0.3)
                 end
 
                 task.wait(0.03)
@@ -503,7 +503,7 @@ local teleporting = false
 
 local interval = 0.02
 local distThresh = 1
-local lerpAlpha = 0.35
+local lerpAlpha = 0.4
 
 for _, p in ipairs(workspace:GetDescendants()) do 
     if p:IsA("BasePart") and p.Name == "UpperTorso" then
