@@ -538,7 +538,7 @@ function teleportLoop()
         while teleporting and hrp do
             local t = nearestTorso(hrp, 150)
             if t then
-                local targetPos = t.Position + Vector3.new(0, 7.5, 0)
+                local targetPos = t.Position + Vector3.new(0, 7.8, 0)
                 if (hrp.Position - targetPos).Magnitude > distThresh then
                     hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), lerpAlpha)
                     hrp.AssemblyLinearVelocity = Vector3.zero
