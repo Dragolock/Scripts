@@ -12,8 +12,9 @@ mainTab:AddLabel({ text = "Creator = Not me", type = "label" })
 --------------------------------------------------
 -- ABYSS EVENT WINDOW (Old name was herald, too lazy to change)
 --------------------------------------------------
-local heraldWindow = library:CreateWindow("Abyss Event")
-local eventTab     = heraldWindow:AddFolder("Event Features")
+local heraldWindow = library:CreateWindow("Events")
+local eventTab     = heraldWindow:AddFolder("Abyss Features")
+local fishTab     = fischingWindow:AddFolder("Fishing Features")
 --------------------------------------------------
 -- MAIN GAME
 --------------------------------------------------
@@ -482,11 +483,11 @@ eventTab:AddToggle({
                     if humanoid and humanoid.Sit then
                         humanoid.Sit = false
                     end
-                    local targetPos = nearestSket.PrimaryPart.Position + Vector3.new(0, 8, 0)
-                    hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), 0.3)
+                    local targetPos = nearestSket.PrimaryPart.Position + Vector3.new(0, 7.7, 0)
+                    hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), 0.33)
                 end
 
-                task.wait(0.03)
+                task.wait(0.02)
             end
 
             if sketAddedConnection then
