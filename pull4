@@ -14,7 +14,7 @@ mainTab:AddLabel({ text = "Creator = Not me", type = "label" })
 --------------------------------------------------
 local heraldWindow = library:CreateWindow("Events")
 local eventTab = heraldWindow:AddFolder("Abyss Event")
-local fishingTab = eventTab:AddFolder("Fishing Event")
+local fishingTab = heraldWindow:AddFolder("Fishing Event")
 --------------------------------------------------
 -- MAIN GAME
 --------------------------------------------------
