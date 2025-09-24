@@ -12,8 +12,8 @@ mainTab:AddLabel({ text = "Creator = Not me", type = "label" })
 --------------------------------------------------
 -- ABYSS EVENT WINDOW (Old name was herald, too lazy to change)
 --------------------------------------------------
-local heraldWindow = library:CreateWindow("Abyss Event")
-local eventTab     = heraldWindow:AddFolder("Event Features")
+local heraldWindow = library:CreateWindow("Events")
+local eventTab     = heraldWindow:AddFolder("Abyss Features")
 --------------------------------------------------
 -- MAIN GAME
 --------------------------------------------------
@@ -482,11 +482,11 @@ eventTab:AddToggle({
                     if humanoid and humanoid.Sit then
                         humanoid.Sit = false
                     end
-                    local targetPos = nearestSket.PrimaryPart.Position + Vector3.new(0, 8, 0)
-                    hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), 0.3)
+                    local targetPos = nearestSket.PrimaryPart.Position + Vector3.new(0, 7.7, 0)
+                    hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), 0.33)
                 end
 
-                task.wait(0.03)
+                task.wait(0.02)
             end
 
             if sketAddedConnection then
@@ -534,6 +534,14 @@ function teleportLoop()
     teleporting = true
     local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
+
+    local args = {"-234", false}
+    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("PortalC"):FireServer(unpack(args))
+
+    task.wait(0.2)
+
+    hrp.CFrame = CFrame.new(4857, 539, -1773)
+
     task.spawn(function()
         while teleporting and hrp do
             local t = nearestTorso(hrp, 150)
@@ -550,43 +558,43 @@ function teleportLoop()
     end)
 end
 
-function teleportCommander()
-    teleporting=true
-    local hrp=lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+local function smoothTeleportLoop(targetPos)
+    teleporting = true
+    local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
+
     task.spawn(function()
         while teleporting and hrp do
-            hrp.CFrame=CFrame.new(4758,538,-1768)
-            hrp.AssemblyLinearVelocity,hrp.AssemblyAngularVelocity=Vector3.zero,Vector3.zero
-            task.wait()
+            if (hrp.Position - targetPos).Magnitude > distThresh then
+                hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), lerpAlpha)
+                hrp.AssemblyLinearVelocity = Vector3.zero
+                hrp.AssemblyAngularVelocity = Vector3.zero
+            end
+            task.wait(interval)
         end
     end)
 end
 
-function teleportHollowKing()
-    teleporting = true
-    local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-    task.spawn(function()
-        while teleporting and hrp do
-            hrp.CFrame = CFrame.new(4508, 551, -1528)
-            hrp.AssemblyLinearVelocity, hrp.AssemblyAngularVelocity = Vector3.zero, Vector3.zero
-            task.wait()
-        end
-    end)
+function teleportCommander()
+    local args = { "-234", false }
+    game:GetService("ReplicatedStorage")
+        :WaitForChild("Remotes")
+        :WaitForChild("Events")
+        :WaitForChild("PortalC")
+        :FireServer(unpack(args))
+
+    smoothTeleportLoop(Vector3.new(4758, 538, -1768))
 end
 
 function teleportHollowKing700()
-    teleporting = true
-    local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-    task.spawn(function()
-        while teleporting and hrp do
-            hrp.CFrame = CFrame.new(-3765, 665, -1161)
-            hrp.AssemblyLinearVelocity, hrp.AssemblyAngularVelocity = Vector3.zero, Vector3.zero
-            task.wait()
-        end
-    end)
+    local args = { "-236", false }
+    game:GetService("ReplicatedStorage")
+        :WaitForChild("Remotes")
+        :WaitForChild("Events")
+        :WaitForChild("PortalC")
+        :FireServer(unpack(args))
+
+    smoothTeleportLoop(Vector3.new(-3765, 665, -1161))
 end
 
 eventTab:AddToggle({
@@ -605,8 +613,6 @@ eventTab:AddToggle({
                 teleportLoop()
             elseif target == "Commander Skeleton" then
                 teleportCommander()
-            elseif target == "Hollow King" then
-                teleportHollowKing()
             elseif target == "Hollow King (700)" then
                 teleportHollowKing700()
             end
@@ -616,7 +622,7 @@ eventTab:AddToggle({
 
 eventTab:AddList({
     text = "Select Target",
-    values = {"Skeletons", "Commander Skeleton", "Hollow King", "Hollow King (700)"},
+    values = {"Skeletons", "Commander Skeleton", "Hollow King (700)"},
     flag = "TeleportTarget",
     value = "Skeletons",
     callback = function(value)
@@ -626,8 +632,6 @@ eventTab:AddList({
                 teleportLoop()
             elseif value == "Commander Skeleton" then
                 teleportCommander()
-            elseif value == "Hollow King" then
-                teleportHollowKing()
             elseif value == "Hollow King (700)" then
                 teleportHollowKing700()
             end
@@ -635,32 +639,15 @@ eventTab:AddList({
     end,
 })
 
-
 eventTab:AddButton({
     text = "Set WalkSpeed to 70",
     callback = function()
         local plr = game.Players.LocalPlayer
         local char = plr.Character or plr.CharacterAdded:Wait()
         local humanoid = char:WaitForChild("Humanoid")
-        humanoid.WalkSpeed = 70
+        humanoid.WalkSpeed = 65
     end,
 })
-
-eventTab:AddButton({
-    text = "TP to Altar",
-    callback = function()
-        local args = {
-            "-236",
-            false
-        }
-        game:GetService("ReplicatedStorage")
-            :WaitForChild("Remotes")
-            :WaitForChild("Events")
-            :WaitForChild("PortalC")
-            :FireServer(unpack(args))
-    end,
-})
-
 
 --------------------------------------------------
 -- INIT WINDOWS
