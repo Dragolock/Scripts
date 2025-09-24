@@ -13,6 +13,8 @@ mainTab:AddLabel({ text = "Creator = Not me", type = "label" })
 -- ABYSS EVENT WINDOW (Old name was herald, too lazy to change)
 --------------------------------------------------
 local heraldWindow = library:CreateWindow("Events")
+local fishingWindow = library:CreateWindow("Fishing Event")
+
 local eventTab     = heraldWindow:AddFolder("Abyss Features")
 local fishTab     = fischingWindow:AddFolder("Fishing Features")
 --------------------------------------------------
