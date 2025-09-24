@@ -10,7 +10,7 @@ local worldTab = mainTab:AddFolder("Worlds/Secret Worlds")
 local pvpTab  = mainTab:AddFolder("PvP Stuff")
 mainTab:AddLabel({ text = "Creator = Not me", type = "label" })
 --------------------------------------------------
--- HERALD EVENT WINDOW
+-- ABYSS EVENT WINDOW (Old name was herald, too lazy to change)
 --------------------------------------------------
 local heraldWindow = library:CreateWindow("Abyss Event")
 local eventTab     = heraldWindow:AddFolder("Event Features")
@@ -417,7 +417,7 @@ eventTab:AddToggle({
                         :WaitForChild("Dungeon")
                         :WaitForChild("OnDungeonClick")
                         :FireServer()
-                    task.wait()
+                    task.wait(0.05)
                 end
             end)
         end
@@ -483,7 +483,7 @@ eventTab:AddToggle({
                         humanoid.Sit = false
                     end
                     local targetPos = nearestSket.PrimaryPart.Position + Vector3.new(0, 8, 0)
-                    hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), 0.22)
+                    hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), 0.3)
                 end
 
                 task.wait(0.03)
@@ -503,7 +503,7 @@ local teleporting = false
 
 local interval = 0.02
 local distThresh = 1
-local lerpAlpha = 0.35
+local lerpAlpha = 0.4
 
 for _, p in ipairs(workspace:GetDescendants()) do 
     if p:IsA("BasePart") and p.Name == "UpperTorso" then
@@ -538,7 +538,7 @@ function teleportLoop()
         while teleporting and hrp do
             local t = nearestTorso(hrp, 150)
             if t then
-                local targetPos = t.Position + Vector3.new(0, 7.5, 0)
+                local targetPos = t.Position + Vector3.new(0, 7.8, 0)
                 if (hrp.Position - targetPos).Magnitude > distThresh then
                     hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), lerpAlpha)
                     hrp.AssemblyLinearVelocity = Vector3.zero
@@ -550,43 +550,47 @@ function teleportLoop()
     end)
 end
 
-function teleportCommander()
-    teleporting=true
-    local hrp=lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+local function smoothTeleportLoop(targetPos)
+    teleporting = true
+    local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
+
     task.spawn(function()
         while teleporting and hrp do
-            hrp.CFrame=CFrame.new(4758,538,-1768)
-            hrp.AssemblyLinearVelocity,hrp.AssemblyAngularVelocity=Vector3.zero,Vector3.zero
-            task.wait()
+            if (hrp.Position - targetPos).Magnitude > distThresh then
+                hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), lerpAlpha)
+                hrp.AssemblyLinearVelocity = Vector3.zero
+                hrp.AssemblyAngularVelocity = Vector3.zero
+            end
+            task.wait(interval)
         end
     end)
+end
+
+function teleportCommander()
+    local args = { "-234", false }
+    game:GetService("ReplicatedStorage")
+        :WaitForChild("Remotes")
+        :WaitForChild("Events")
+        :WaitForChild("PortalC")
+        :FireServer(unpack(args))
+
+    smoothTeleportLoop(Vector3.new(4758, 538, -1768))
 end
 
 function teleportHollowKing()
-    teleporting = true
-    local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-    task.spawn(function()
-        while teleporting and hrp do
-            hrp.CFrame = CFrame.new(4508, 551, -1528)
-            hrp.AssemblyLinearVelocity, hrp.AssemblyAngularVelocity = Vector3.zero, Vector3.zero
-            task.wait()
-        end
-    end)
+    smoothTeleportLoop(Vector3.new(4508, 551, -1528))
 end
 
 function teleportHollowKing700()
-    teleporting = true
-    local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-    task.spawn(function()
-        while teleporting and hrp do
-            hrp.CFrame = CFrame.new(-3765, 665, -1161)
-            hrp.AssemblyLinearVelocity, hrp.AssemblyAngularVelocity = Vector3.zero, Vector3.zero
-            task.wait()
-        end
-    end)
+    local args = { "-236", false }
+    game:GetService("ReplicatedStorage")
+        :WaitForChild("Remotes")
+        :WaitForChild("Events")
+        :WaitForChild("PortalC")
+        :FireServer(unpack(args))
+
+    smoothTeleportLoop(Vector3.new(-3765, 665, -1161))
 end
 
 eventTab:AddToggle({
@@ -645,22 +649,6 @@ eventTab:AddButton({
         humanoid.WalkSpeed = 70
     end,
 })
-
-eventTab:AddButton({
-    text = "TP to Altar",
-    callback = function()
-        local args = {
-            "-236",
-            false
-        }
-        game:GetService("ReplicatedStorage")
-            :WaitForChild("Remotes")
-            :WaitForChild("Events")
-            :WaitForChild("PortalC")
-            :FireServer(unpack(args))
-    end,
-})
-
 
 --------------------------------------------------
 -- INIT WINDOWS
