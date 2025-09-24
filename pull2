@@ -384,6 +384,92 @@ pvpTab:AddButton({
 --------------------------------------------------
 -- UNDERWORLD EVENT
 --------------------------------------------------
+
+-- Textbox for model name
+eventTab:AddBox({
+    text = "Model Name",
+    flag = "ModelName",
+    value = "sket", -- default text
+    callback = function(v)
+        print("Model name set to:", v)
+    end
+})
+
+-- TweenTP Toggle
+eventTab:AddToggle({
+    text = "TweenTP Model",
+    flag = "TweenTPModel",
+    callback = function(state)
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local hrp = character:WaitForChild("HumanoidRootPart")
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+        local modelName = library.flags["ModelName"] -- pulls name from textbox
+
+        if state then
+            if not hrp:FindFirstChild("BodyVelocity_" .. modelName) then
+                local bodyVelocity = Instance.new("BodyVelocity")
+                bodyVelocity.Name = "BodyVelocity_" .. modelName
+                bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+                bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+                bodyVelocity.Parent = hrp
+            end
+        else
+            if hrp:FindFirstChild("BodyVelocity_" .. modelName) then
+                hrp["BodyVelocity_" .. modelName]:Destroy()
+            end
+            return
+        end
+
+        local targets = {}
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("Model") and v.Name:lower() == modelName:lower() then
+                table.insert(targets, v)
+            end
+        end
+
+        local addedConnection
+        addedConnection = workspace.DescendantAdded:Connect(function(v)
+            if v:IsA("Model") and v.Name:lower() == modelName:lower() then
+                table.insert(targets, v)
+            end
+        end)
+
+        task.spawn(function()
+            while library.flags["TweenTPModel"] and character.Parent do
+                local nearestTarget
+                local nearestDistance = math.huge
+
+                for _, target in ipairs(targets) do
+                    if target.PrimaryPart then
+                        local distance = (hrp.Position - target.PrimaryPart.Position).Magnitude
+                        if distance < nearestDistance then
+                            nearestDistance = distance
+                            nearestTarget = target
+                        end
+                    end
+                end
+
+                if nearestTarget and nearestTarget.PrimaryPart then
+                    if humanoid and humanoid.Sit then
+                        humanoid.Sit = false
+                    end
+                    local targetPos = nearestTarget.PrimaryPart.Position + Vector3.new(0, 0, 0)
+                    hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), 0.5)
+                end
+
+                task.wait(0.02)
+            end
+
+            if addedConnection then
+                addedConnection:Disconnect()
+            end
+        end)
+    end,
+})
+
+
 eventTab:AddToggle({
     text="Attack Aura.",
     flag="AttackAura",
