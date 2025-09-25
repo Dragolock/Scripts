@@ -3,17 +3,18 @@ local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebe
 --------------------------------------------------
 -- MAIN WINDOW
 --------------------------------------------------
-local mainTab = library:CreateWindow("skibidi - HUB")
+local mainTab = library:CreateWindow("PAS - HUB")
 local mainGame = mainTab:AddFolder("Main Game")
 local bossTab  = mainTab:AddFolder("Bosses")
 local worldTab = mainTab:AddFolder("Worlds/Secret Worlds")
 local pvpTab  = mainTab:AddFolder("PvP Stuff")
 mainTab:AddLabel({ text = "Creator = Not me", type = "label" })
 --------------------------------------------------
--- HERALD EVENT WINDOW
+-- ABYSS EVENT WINDOW (Old name was herald, too lazy to change)
 --------------------------------------------------
-local heraldWindow = library:CreateWindow("Underworld Event")
-local eventTab     = heraldWindow:AddFolder("Event")
+local heraldWindow = library:CreateWindow("Events")
+local eventTab = heraldWindow:AddFolder("Abyss Event")
+local fishingTab = heraldWindow:AddFolder("Fishing Event")
 --------------------------------------------------
 -- MAIN GAME
 --------------------------------------------------
@@ -385,9 +386,9 @@ pvpTab:AddButton({
 -- UNDERWORLD EVENT
 --------------------------------------------------
 eventTab:AddToggle({
-    text="Attack Aura.",
-    flag="AttackAura",
-    callback=function(state)
+    text = "Attack Aura",
+    flag = "AttackAura",
+    callback = function(state)
         if state then
             task.spawn(function()
                 while library.flags["AttackAura"] do
@@ -400,16 +401,17 @@ eventTab:AddToggle({
                 end
             end)
         end
-    end
+    end,
 })
 
+
 eventTab:AddToggle({
-    text = "Dungeon Attack",
-    flag = "DungeonAttack",
+    text = "Dungeon Fast Attack",
+    flag = "DungeonFastAttack",
     callback = function(state)
         if state then
             task.spawn(function()
-                while library.flags["DungeonAttack"] do
+                while library.flags["DungeonFastAttack"] do
                     game:GetService("ReplicatedStorage")
                         :WaitForChild("Remotes")
                         :WaitForChild("Events")
@@ -423,19 +425,50 @@ eventTab:AddToggle({
     end,
 })
 
+function NormalMode()
+    local args = {"Normal"}
+    game:GetService("ReplicatedStorage")
+        :WaitForChild("Remotes")
+        :WaitForChild("Events")
+        :WaitForChild("Dungeon")
+        :WaitForChild("OnJoinDungeon")
+        :FireServer(unpack(args))
+end
+
+function HardMode()
+    local args = {"Hard"}
+    game:GetService("ReplicatedStorage")
+        :WaitForChild("Remotes")
+        :WaitForChild("Events")
+        :WaitForChild("Dungeon")
+        :WaitForChild("OnJoinDungeon")
+        :FireServer(unpack(args))
+end
+
+function ChaosMode()
+    local args = {"Chaos"}
+    game:GetService("ReplicatedStorage")
+        :WaitForChild("Remotes")
+        :WaitForChild("Events")
+        :WaitForChild("Dungeon")
+        :WaitForChild("OnJoinDungeon")
+        :FireServer(unpack(args))
+end
+
 eventTab:AddToggle({
-    text = "Sket Teleport + Float",
-    flag = "SketTeleportFloat",
+    text = "TweenTP Sketies",
+    flag = "TweenTPSketies",
     callback = function(state)
         local player = game.Players.LocalPlayer
         local character = player.Character or player.CharacterAdded:Wait()
         local hrp = character:WaitForChild("HumanoidRootPart")
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
 
         if state then
             if not hrp:FindFirstChild("SketVelocity") then
                 local bodyVelocity = Instance.new("BodyVelocity")
                 bodyVelocity.Name = "SketVelocity"
-                bodyVelocity.MaxForce = Vector3.new(0, math.huge, 0)
+                bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
                 bodyVelocity.Velocity = Vector3.new(0, 0, 0)
                 bodyVelocity.Parent = hrp
             end
@@ -461,7 +494,7 @@ eventTab:AddToggle({
         end)
 
         task.spawn(function()
-            while library.flags["SketTeleportFloat"] and character.Parent do
+            while library.flags["TweenTPSketies"] and character.Parent do
                 local nearestSket
                 local nearestDistance = math.huge
 
@@ -476,14 +509,14 @@ eventTab:AddToggle({
                 end
 
                 if nearestSket and nearestSket.PrimaryPart then
-                    local humanoid = character:FindFirstChildOfClass("Humanoid")
                     if humanoid and humanoid.Sit then
                         humanoid.Sit = false
                     end
-                    hrp.CFrame = nearestSket.PrimaryPart.CFrame + Vector3.new(0, 11, 0)
+                    local targetPos = nearestSket.PrimaryPart.Position + Vector3.new(0, 9, 0)
+                    hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), 0.30)
                 end
 
-                task.wait(0.1)
+                task.wait(0.02)
             end
 
             if sketAddedConnection then
@@ -493,39 +526,101 @@ eventTab:AddToggle({
     end,
 })
 
+eventTab:AddToggle({
+    text = "Join Gamemode",
+    flag = "JoinGamemode",
+    callback = function(state)
+        if state then
+            task.spawn(function()
+                while library.flags["JoinGamemode"] do
+                    local target = library.flags["TeleportTarget"]
+                    if target == "Normal" then
+                        NormalMode()
+                    elseif target == "Hard" then
+                        HardMode()
+                    elseif target == "Chaos" then
+                        ChaosMode()
+                    end
+                    task.wait(0.2)
+                end
+            end)
+        end
+    end,
+})
 
-local Players,CS=game:GetService("Players"),game:GetService("CollectionService")
-local lp,teleporting=Players.LocalPlayer,false
-local interval,distThresh=0.3,10
--- Cache/tagging
-for _,p in ipairs(workspace:GetDescendants())do 
-    if p:IsA("BasePart")and p.Name=="UpperTorso"then CS:AddTag(p,"SkeletonTarget")end 
+local Players = game:GetService("Players")
+local CS = game:GetService("CollectionService")
+local lp = Players.LocalPlayer
+local teleporting = false
+
+local interval = 0.02
+local distThresh = 1
+local lerpAlpha = 0.4
+
+for _, p in ipairs(workspace:GetDescendants()) do 
+    if p:IsA("BasePart") and p.Name == "UpperTorso" then
+        CS:AddTag(p, "SkeletonTarget")
+    end 
 end
+
 workspace.DescendantAdded:Connect(function(p)
-    if p:IsA("BasePart")and p.Name=="UpperTorso"then CS:AddTag(p,"SkeletonTarget")end 
+    if p:IsA("BasePart") and p.Name == "UpperTorso" then
+        CS:AddTag(p, "SkeletonTarget")
+    end 
 end)
--- Teleport to the nearest UpperTorso1
-local function nearestTorso(hrp,radius)
-    local best,d=nil,math.huge
-    for _,p in ipairs(CS:GetTagged("SkeletonTarget"))do
-        if p:IsDescendantOf(workspace)and not Players:GetPlayerFromCharacter(p.Parent)then
-            local m=(p.Position-hrp.Position).Magnitude
-            if m<d and m<=radius then d,best=m,p end
+
+local function nearestTorso(hrp, radius)
+    local best, d = nil, math.huge
+    for _, p in ipairs(CS:GetTagged("SkeletonTarget")) do
+        if p:IsDescendantOf(workspace) and not Players:GetPlayerFromCharacter(p.Parent) then
+            local m = (p.Position - hrp.Position).Magnitude
+            if m < d and m <= radius then
+                d, best = m, p
+            end
         end
     end
     return best
 end
 
 function teleportLoop()
-    teleporting=true
-    local hrp=lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+    teleporting = true
+    local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
+
+    local args = {"-234", false}
+    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("PortalC"):FireServer(unpack(args))
+
+    task.wait(0.2)
+
+    hrp.CFrame = CFrame.new(4857, 539, -1773)
+
     task.spawn(function()
         while teleporting and hrp do
-            local t=nearestTorso(hrp,150)
-            if t and (hrp.Position-t.Position).Magnitude>distThresh then
-                hrp.CFrame=CFrame.new(t.Position)
-                hrp.AssemblyLinearVelocity,hrp.AssemblyAngularVelocity=Vector3.zero,Vector3.zero
+            local t = nearestTorso(hrp, 150)
+            if t then
+                local targetPos = t.Position + Vector3.new(0, 7.8, 0)
+                if (hrp.Position - targetPos).Magnitude > distThresh then
+                    hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), lerpAlpha)
+                    hrp.AssemblyLinearVelocity = Vector3.zero
+                    hrp.AssemblyAngularVelocity = Vector3.zero
+                end
+            end
+            task.wait(interval)
+        end
+    end)
+end
+
+local function smoothTeleportLoop(targetPos)
+    teleporting = true
+    local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    task.spawn(function()
+        while teleporting and hrp do
+            if (hrp.Position - targetPos).Magnitude > distThresh then
+                hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), lerpAlpha)
+                hrp.AssemblyLinearVelocity = Vector3.zero
+                hrp.AssemblyAngularVelocity = Vector3.zero
             end
             task.wait(interval)
         end
@@ -533,47 +628,30 @@ function teleportLoop()
 end
 
 function teleportCommander()
-    teleporting=true
-    local hrp=lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-    task.spawn(function()
-        while teleporting and hrp do
-            hrp.CFrame=CFrame.new(4758,538,-1768)
-            hrp.AssemblyLinearVelocity,hrp.AssemblyAngularVelocity=Vector3.zero,Vector3.zero
-            task.wait()
-        end
-    end)
-end
+    local args = { "-234", false }
+    game:GetService("ReplicatedStorage")
+        :WaitForChild("Remotes")
+        :WaitForChild("Events")
+        :WaitForChild("PortalC")
+        :FireServer(unpack(args))
 
-function teleportHollowKing()
-    teleporting = true
-    local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-    task.spawn(function()
-        while teleporting and hrp do
-            hrp.CFrame = CFrame.new(4508, 551, -1528)
-            hrp.AssemblyLinearVelocity, hrp.AssemblyAngularVelocity = Vector3.zero, Vector3.zero
-            task.wait()
-        end
-    end)
+    smoothTeleportLoop(Vector3.new(4758, 538, -1768))
 end
 
 function teleportHollowKing700()
-    teleporting = true
-    local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-    task.spawn(function()
-        while teleporting and hrp do
-            hrp.CFrame = CFrame.new(-3765, 665, -1161)
-            hrp.AssemblyLinearVelocity, hrp.AssemblyAngularVelocity = Vector3.zero, Vector3.zero
-            task.wait()
-        end
-    end)
+    local args = { "-236", false }
+    game:GetService("ReplicatedStorage")
+        :WaitForChild("Remotes")
+        :WaitForChild("Events")
+        :WaitForChild("PortalC")
+        :FireServer(unpack(args))
+
+    smoothTeleportLoop(Vector3.new(-3765, 665, -1161))
 end
 
 eventTab:AddToggle({
-    text = "Enable Teleport",
-    flag = "EnableTeleport",
+    text = "Teleport",
+    flag = "Teleport",
     callback = function(state)
         teleporting = false
         if state then
@@ -587,8 +665,6 @@ eventTab:AddToggle({
                 teleportLoop()
             elseif target == "Commander Skeleton" then
                 teleportCommander()
-            elseif target == "Hollow King" then
-                teleportHollowKing()
             elseif target == "Hollow King (700)" then
                 teleportHollowKing700()
             end
@@ -598,7 +674,7 @@ eventTab:AddToggle({
 
 eventTab:AddList({
     text = "Select Target",
-    values = {"Skeletons", "Commander Skeleton", "Hollow King", "Hollow King (700)"},
+    values = {"Skeletons", "Commander Skeleton", "Hollow King (700)"},
     flag = "TeleportTarget",
     value = "Skeletons",
     callback = function(value)
@@ -608,8 +684,6 @@ eventTab:AddList({
                 teleportLoop()
             elseif value == "Commander Skeleton" then
                 teleportCommander()
-            elseif value == "Hollow King" then
-                teleportHollowKing()
             elseif value == "Hollow King (700)" then
                 teleportHollowKing700()
             end
@@ -617,14 +691,20 @@ eventTab:AddList({
     end,
 })
 
+eventTab:AddList({
+    text = "Select Gamemode",
+    values = {"Normal", "Hard", "Chaos"},
+    flag = "TeleportTarget",
+    value = "Normal",
+})
 
 eventTab:AddButton({
-    text = "Set WalkSpeed to 70",
+    text = "Set WalkSpeed to 65",
     callback = function()
         local plr = game.Players.LocalPlayer
         local char = plr.Character or plr.CharacterAdded:Wait()
         local humanoid = char:WaitForChild("Humanoid")
-        humanoid.WalkSpeed = 70
+        humanoid.WalkSpeed = 65
     end,
 })
 
