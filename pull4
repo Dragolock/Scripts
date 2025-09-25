@@ -425,6 +425,52 @@ eventTab:AddToggle({
     end,
 })
 
+function NormalMode()
+    local args = {"Normal"}
+    game:GetService("ReplicatedStorage")
+        :WaitForChild("Remotes")
+        :WaitForChild("Events")
+        :WaitForChild("Dungeon")
+        :WaitForChild("OnJoinDungeon")
+        :FireServer(unpack(args))
+end
+
+function HardMode()
+    local args = {"Hard"}
+    game:GetService("ReplicatedStorage")
+        :WaitForChild("Remotes")
+        :WaitForChild("Events")
+        :WaitForChild("Dungeon")
+        :WaitForChild("OnJoinDungeon")
+        :FireServer(unpack(args))
+end
+
+function ChaosMode()
+    local args = {"Chaos"}
+    game:GetService("ReplicatedStorage")
+        :WaitForChild("Remotes")
+        :WaitForChild("Events")
+        :WaitForChild("Dungeon")
+        :WaitForChild("OnJoinDungeon")
+        :FireServer(unpack(args))
+end
+
+eventTab:AddToggle({
+    text = "Join Gamemode",
+    flag = "JoinGamemode",
+    callback = function(state)
+        if state then
+            local target = library.flags["TeleportTarget"]
+            if target == "Normal" then
+                NormalMode()
+            elseif target == "Hard" then
+                HardMode()
+            elseif target == "Chaos" then
+                ChaosMode()
+            end
+        end
+    end,
+})
 
 eventTab:AddToggle({
     text = "TweenTP Sketies",
@@ -483,7 +529,7 @@ eventTab:AddToggle({
                     if humanoid and humanoid.Sit then
                         humanoid.Sit = false
                     end
-                    local targetPos = nearestSket.PrimaryPart.Position + Vector3.new(0, 7.7, 0)
+                    local targetPos = nearestSket.PrimaryPart.Position + Vector3.new(0, 7.8, 0)
                     hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), 0.33)
                 end
 
@@ -638,6 +684,13 @@ eventTab:AddList({
             end
         end
     end,
+})
+
+eventTab:AddList({
+    text = "Select Gamemode",
+    values = {"Normal", "Hard", "Chaos"},
+    flag = "TeleportTarget",
+    value = "Normal",
 })
 
 eventTab:AddButton({
