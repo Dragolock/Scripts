@@ -757,11 +757,11 @@ if not partEspTrigger then
         end
     end)
 end
---------------------------------------------------
--- INIT WINDOWS / HIGHLIGHT SHII
---------------------------------------------------
 
 library:OnFlagChanged("TweenTPSketies", updateHighlights)
 library:OnFlagChanged("Teleport", updateHighlights)
 
+--------------------------------------------------
+-- INIT WINDOWS
+--------------------------------------------------
 library:Init()
