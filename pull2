@@ -32,11 +32,11 @@ folder:AddToggle({
                                 npcPart.Anchored = true
                                 
                                 -- Move in front of player
-                                npcPart.CFrame = rootPart.CFrame * CFrame.new(0, 0, -4)
+                                npcPart.CFrame = rootPart.CFrame * CFrame.new(0, 0, -2)
                             end
                         end
                     end
-                    task.wait(0.1)
+                    task.wait(2)
                 end
             end)
         else
