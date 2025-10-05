@@ -587,11 +587,6 @@ function teleportLoop()
     local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
 
-    local args = {"-234", false}
-    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("PortalC"):FireServer(unpack(args))
-
-    task.wait(0.2)
-
     hrp.CFrame = CFrame.new(4857, 539, -1773)
 
     task.spawn(function()
@@ -609,6 +604,7 @@ function teleportLoop()
         end
     end)
 end
+
 
 local function smoothTeleportLoop(targetPos)
     teleporting = true
