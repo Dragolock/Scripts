@@ -1,14 +1,5 @@
-local p=game.Players.LocalPlayer
-local c=p.Character or p.CharacterAdded:Wait()
-while task.wait(5)do
-pcall(function()
-local hrp=c:FindFirstChild("HumanoidRootPart")
-if hrp then
 for _,v in pairs(workspace:GetDescendants())do
-if v:IsA("BasePart")and v.Name:lower()=="uppertorso"and(v.Position-hrp.Position).Magnitude<=200 then
-v.CFrame=hrp.CFrame*CFrame.new(0,0,-3)
+if v:IsA("BasePart")and v.Name:lower()=="uppertorso"then
+v.Size=v.Size*5
 end
-end
-end
-end)
 end
