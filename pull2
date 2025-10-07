@@ -1,5 +1,8 @@
+local p=game.Players.LocalPlayer
 for _,v in pairs(workspace:GetDescendants())do
-if v:IsA("BasePart")and v.Name:lower()=="uppertorso"then
-v.Size=v.Size*5
+if v:IsA("BasePart")and v.Name:lower()=="uppertorso"and not v:IsDescendantOf(p.Character)then
+v.Size=v.Size*20
+v.Transparency=0.6
+v.CanCollide=false
 end
 end
