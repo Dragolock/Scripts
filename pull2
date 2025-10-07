@@ -1,98 +1,12 @@
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebertsx/Tora-Library/main/src/librarynew",true))()
-
-local tab = library:CreateWindow("Bodybuilder")
-local folder = tab:AddFolder("Main")
-
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-
-local teleportNPCs = false
-local infiniteRebirths = false
-local infiniteMoney = false
-
--- Teleport NPCs Toggle
-folder:AddToggle({
-    text = "Teleport NPCs",
-    flag = "teleport_npcs",
-    callback = function(v)
-        teleportNPCs = v
-        if v then
-            task.spawn(function()
-                while teleportNPCs do
-                    local character = player.Character or player.CharacterAdded:Wait()
-                    local rootPart = character:FindFirstChild("HumanoidRootPart")
-                    local npcFolder = workspace:FindFirstChild("NPCs")
-
-                    if rootPart and npcFolder then
-                        for _, npcPart in ipairs(npcFolder:GetDescendants()) do
-                            if npcPart:IsA("BasePart") then
-                                npcPart.Transparency = 0.9
-                                npcPart.CanCollide = false
-                                npcPart.Anchored = true
-                                
-                                npcPart.CFrame = rootPart.CFrame * CFrame.new(0, 0, -2)
-                            end
-                        end
-                    end
-                    task.wait(2)
-                end
-            end)
-        else
-            local npcFolder = workspace:FindFirstChild("NPCs")
-            if npcFolder then
-                for _, npcPart in ipairs(npcFolder:GetDescendants()) do
-                    if npcPart:IsA("BasePart") then
-                        npcPart.Transparency = 0
-                        npcPart.CanCollide = true
-                        npcPart.Anchored = false
-                    end
-                end
-            end
-        end
-    end
-})
-
-folder:AddToggle({
-    text = "Infinite Rebirths",
-    flag = "infinite_rebirths",
-    callback = function(v)
-        infiniteRebirths = v
-        if v then
-            task.spawn(function()
-                local event = game:GetService("ReplicatedStorage"):WaitForChild("RebirthEvent")
-                while infiniteRebirths do
-                    local args = {
-                        -1000000,
-                        9000176548
-                    }
-                    event:FireServer(unpack(args))
-                    task.wait(1) -- every second
-                end
-            end)
-        end
-    end
-})
-
--- Infinite Money Toggle
-folder:AddToggle({
-    text = "Infinite Money",
-    flag = "infinite_money",
-    callback = function(v)
-        infiniteMoney = v
-        if v then
-            task.spawn(function()
-                local event = game:GetService("ReplicatedStorage"):WaitForChild("ShopBought")
-                while infiniteMoney do
-                    local args = {
-                        "Gravity",
-                        -9e9
-                    }
-                    event:FireServer(unpack(args))
-                    task.wait()
-                end
-            end)
-        end
-    end
-})
-
-library:Init()
+local p=game.Players.LocalPlayer
+local c=p.Character or p.CharacterAdded:Wait()
+while task.wait(0.1)do
+pcall(function()
+for _,v in pairs(workspace:GetDescendants())do
+if v:IsA("BasePart")and v.Name:lower()=="uppertorso"then
+local hrp=c:FindFirstChild("HumanoidRootPart")
+if hrp then v.CFrame=hrp.CFrame end
+end
+end
+end)
+end
