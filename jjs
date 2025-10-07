@@ -1,0 +1,13 @@
+local p=game.Players.LocalPlayer
+local c=p.Character or p.CharacterAdded:Wait()
+while task.wait(0.1)do
+pcall(function()
+for _,v in pairs(workspace:GetDescendants())do
+if v:IsA("Model")and v.Name:lower()=="fruit"then
+local r=v:FindFirstChild("HumanoidRootPart")or v:FindFirstChild("PrimaryPart")or v:FindFirstChildWhichIsA("BasePart")
+local cr=c:FindFirstChild("HumanoidRootPart")
+if r and cr then r.CFrame=cr.CFrame end
+end
+end
+end)
+end
