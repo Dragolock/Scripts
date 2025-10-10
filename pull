@@ -456,8 +456,8 @@ function ChaosMode()
 end
 
 eventTab:AddToggle({
-    text = "TweenTP Sketies",
-    flag = "TweenTPSketies",
+    text = "InstantTP Sketies",
+    flag = "InstantTPSketies",
     callback = function(state)
         local player = game.Players.LocalPlayer
         local character = player.Character or player.CharacterAdded:Wait()
@@ -494,7 +494,7 @@ eventTab:AddToggle({
         end)
 
         task.spawn(function()
-            while library.flags["TweenTPSketies"] and character.Parent do
+            while library.flags["InstantTPSketies"] and character.Parent do
                 local nearestSket
                 local nearestDistance = math.huge
 
@@ -512,11 +512,10 @@ eventTab:AddToggle({
                     if humanoid and humanoid.Sit then
                         humanoid.Sit = false
                     end
-                    local targetPos = nearestSket.PrimaryPart.Position + Vector3.new(0, 9, 0)
-                    hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), 0.30)
+                    hrp.CFrame = CFrame.new(nearestSket.PrimaryPart.Position + Vector3.new(0, 8.7, 0))
                 end
 
-                task.wait(0.02)
+                task.wait()
             end
 
             if sketAddedConnection then
