@@ -552,8 +552,6 @@ local CS = game:GetService("CollectionService")
 local lp = Players.LocalPlayer
 local teleporting = false
 
-local distThresh = 5
-
 for _, p in ipairs(workspace:GetDescendants()) do 
     if p:IsA("BasePart") and p.Name == "UpperTorso" then
         CS:AddTag(p, "SkeletonTarget")
@@ -578,6 +576,31 @@ local function nearestTorso(hrp, radius)
     end
     return best
 end
+
+function teleportLoop(state)
+    local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    if state then
+        teleporting = true
+        task.spawn(function()
+            while teleporting and hrp do
+                local t = nearestTorso(hrp, 150)
+                if t then
+                    local targetPos = t.Position + Vector3.new(0, 7.8, 0)
+                    hrp.CFrame = CFrame.new(targetPos)
+                    hrp.AssemblyLinearVelocity = Vector3.zero
+                    hrp.AssemblyAngularVelocity = Vector3.zero
+                end
+                task.wait()
+            end
+        end)
+    else
+        teleporting = false
+        return
+    end
+end
+
 
 function teleportLoop()
     teleporting = true
