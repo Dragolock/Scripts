@@ -385,25 +385,6 @@ pvpTab:AddButton({
 --------------------------------------------------
 -- UNDERWORLD EVENT
 --------------------------------------------------
-eventTab:AddToggle({
-    text = "Attack Aura",
-    flag = "AttackAura",
-    callback = function(state)
-        if state then
-            task.spawn(function()
-                while library.flags["AttackAura"] do
-                    game:GetService("ReplicatedStorage")
-                        :WaitForChild("Remotes")
-                        :WaitForChild("Events")
-                        :WaitForChild("OnAttackMob")
-                        :FireServer()
-                    task.wait()
-                end
-            end)
-        end
-    end,
-})
-
 
 eventTab:AddToggle({
     text = "Dungeon Fast Attack",
@@ -424,6 +405,84 @@ eventTab:AddToggle({
         end
     end,
 })
+
+eventTab:AddToggle({
+    text = "Generate Souls",
+    flag = "GenerateSouls",
+    callback = function(state)
+        if state then
+            task.spawn(function()
+                local ReplicatedStorage = game:GetService("ReplicatedStorage")
+                local Players = game:GetService("Players")
+                local Workspace = game:GetService("Workspace")
+
+                local player = Players.LocalPlayer
+                local character = player.Character or player.CharacterAdded:Wait()
+                local hrp = character:WaitForChild("HumanoidRootPart")
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+                if not hrp:FindFirstChild("SketVelocity") then
+                    local bodyVelocity = Instance.new("BodyVelocity")
+                    bodyVelocity.Name = "SketVelocity"
+                    bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+                    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+                    bodyVelocity.Parent = hrp
+                end
+
+                local skets = {}
+                for _, v in pairs(Workspace:GetDescendants()) do
+                    if v:IsA("Model") and v.Name:lower() == "sket" then
+                        table.insert(skets, v)
+                    end
+                end
+
+                local sketAddedConnection
+                sketAddedConnection = Workspace.DescendantAdded:Connect(function(v)
+                    if v:IsA("Model") and v.Name:lower() == "sket" then
+                        table.insert(skets, v)
+                    end
+                end)
+
+                local function teleportToNearestSket()
+                    local nearestSket
+                    local nearestDistance = math.huge
+
+                    for _, sket in ipairs(skets) do
+                        if sket.PrimaryPart then
+                            local distance = (hrp.Position - sket.PrimaryPart.Position).Magnitude
+                            if distance < nearestDistance then
+                                nearestDistance = distance
+                                nearestSket = sket
+                            end
+                        end
+                    end
+
+                    if nearestSket and nearestSket.PrimaryPart then
+                        if humanoid and humanoid.Sit then
+                            humanoid.Sit = false
+                        end
+                        hrp.CFrame = CFrame.new(nearestSket.PrimaryPart.Position + Vector3.new(0, 8.7, 0))
+                    end
+                end
+
+                local Remotes = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("Dungeon")
+
+                while library.flags["GenerateSouls"] do
+                    Remotes:WaitForChild("OnJoinDungeon"):FireServer("Normal")
+                    local startTime = tick()
+                    while tick() - startTime < 1.3 do
+                        teleportToNearestSket()
+                        Remotes:WaitForChild("OnDungeonClick"):FireServer()
+                        task.wait()
+                    end
+                    Remotes:WaitForChild("OnLeaveDungeon"):FireServer(true)
+                    task.wait(0.1)
+                end
+            end)
+        end
+    end,
+})
+
 
 function NormalMode()
     local args = {"Normal"}
