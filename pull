@@ -410,17 +410,17 @@ eventTab:AddToggle({
     text = "Generate Souls",
     flag = "GenerateSouls",
     callback = function(state)
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local Players = game:GetService("Players")
+        local Workspace = game:GetService("Workspace")
+
+        local player = Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local hrp = character:WaitForChild("HumanoidRootPart")
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+
         if state then
             task.spawn(function()
-                local ReplicatedStorage = game:GetService("ReplicatedStorage")
-                local Players = game:GetService("Players")
-                local Workspace = game:GetService("Workspace")
-
-                local player = Players.LocalPlayer
-                local character = player.Character or player.CharacterAdded:Wait()
-                local hrp = character:WaitForChild("HumanoidRootPart")
-                local humanoid = character:FindFirstChildOfClass("Humanoid")
-
                 if not hrp:FindFirstChild("SketVelocity") then
                     local bodyVelocity = Instance.new("BodyVelocity")
                     bodyVelocity.Name = "SketVelocity"
@@ -470,7 +470,7 @@ eventTab:AddToggle({
                 while library.flags["GenerateSouls"] do
                     Remotes:WaitForChild("OnJoinDungeon"):FireServer("Normal")
                     local startTime = tick()
-                    while tick() - startTime < 1.3 do
+                    while tick() - startTime < 1 do
                         teleportToNearestSket()
                         Remotes:WaitForChild("OnDungeonClick"):FireServer()
                         task.wait()
@@ -478,11 +478,21 @@ eventTab:AddToggle({
                     Remotes:WaitForChild("OnLeaveDungeon"):FireServer(true)
                     task.wait(0.1)
                 end
+
+                if hrp:FindFirstChild("SketVelocity") then
+                    hrp.SketVelocity:Destroy()
+                end
+                if sketAddedConnection then
+                    sketAddedConnection:Disconnect()
+                end
             end)
+        else
+            if hrp:FindFirstChild("SketVelocity") then
+                hrp.SketVelocity:Destroy()
+            end
         end
     end,
 })
-
 
 function NormalMode()
     local args = {"Normal"}
