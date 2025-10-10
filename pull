@@ -552,8 +552,7 @@ local CS = game:GetService("CollectionService")
 local lp = Players.LocalPlayer
 local teleporting = false
 
-local interval = 0.02
-local distThresh = 1
+local distThresh = 5
 
 for _, p in ipairs(workspace:GetDescendants()) do 
     if p:IsA("BasePart") and p.Name == "UpperTorso" then
@@ -585,8 +584,6 @@ function teleportLoop()
     local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
 
-    hrp.CFrame = CFrame.new(4857, 539, -1773)
-
     task.spawn(function()
         while teleporting and hrp do
             local t = nearestTorso(hrp, 150)
@@ -598,10 +595,11 @@ function teleportLoop()
                     hrp.AssemblyAngularVelocity = Vector3.zero
                 end
             end
-            task.wait(interval)
+            task.wait()
         end
     end)
 end
+
 
 local function smoothTeleportLoop(targetPos)
     teleporting = true
