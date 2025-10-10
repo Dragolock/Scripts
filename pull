@@ -552,6 +552,10 @@ local CS = game:GetService("CollectionService")
 local lp = Players.LocalPlayer
 local teleporting = false
 
+local interval = 0.0001
+local distThresh = 0.1
+local lerpAlpha = 0.4
+
 for _, p in ipairs(workspace:GetDescendants()) do 
     if p:IsA("BasePart") and p.Name == "UpperTorso" then
         CS:AddTag(p, "SkeletonTarget")
@@ -577,35 +581,17 @@ local function nearestTorso(hrp, radius)
     return best
 end
 
-function teleportLoop(state)
-    local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-
-    if state then
-        teleporting = true
-        task.spawn(function()
-            while teleporting and hrp do
-                local t = nearestTorso(hrp, 150)
-                if t then
-                    local targetPos = t.Position + Vector3.new(0, 7.8, 0)
-                    hrp.CFrame = CFrame.new(targetPos)
-                    hrp.AssemblyLinearVelocity = Vector3.zero
-                    hrp.AssemblyAngularVelocity = Vector3.zero
-                end
-                task.wait()
-            end
-        end)
-    else
-        teleporting = false
-        return
-    end
-end
-
-
 function teleportLoop()
     teleporting = true
     local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
+
+    local args = {"-234", false}
+    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("PortalC"):FireServer(unpack(args))
+
+    task.wait(0.2)
+
+    hrp.CFrame = CFrame.new(4857, 539, -1773)
 
     task.spawn(function()
         while teleporting and hrp do
@@ -613,16 +599,15 @@ function teleportLoop()
             if t then
                 local targetPos = t.Position + Vector3.new(0, 7.8, 0)
                 if (hrp.Position - targetPos).Magnitude > distThresh then
-                    hrp.CFrame = CFrame.new(targetPos)
+                    hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), lerpAlpha)
                     hrp.AssemblyLinearVelocity = Vector3.zero
                     hrp.AssemblyAngularVelocity = Vector3.zero
                 end
             end
-            task.wait()
+            task.wait(interval)
         end
     end)
 end
-
 
 local function smoothTeleportLoop(targetPos)
     teleporting = true
