@@ -470,7 +470,7 @@ eventTab:AddToggle({
                 while library.flags["GenerateSouls"] do
                     Remotes:WaitForChild("OnJoinDungeon"):FireServer("Normal")
                     local startTime = tick()
-                    while tick() - startTime < 0.1 do
+                    while tick() - startTime < 0.3 do
                         teleportToNearestSket()
                         Remotes:WaitForChild("OnDungeonClick"):FireServer()
                         task.wait()
