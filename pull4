@@ -816,7 +816,16 @@ halloweenTab:AddToggle({
     callback = function(state)
         local player = game.Players.LocalPlayer
         local character = player.Character or player.CharacterAdded:Wait()
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        local hrp = character:WaitForChild("HumanoidRootPart")
+
+        if state then
+            local eventsRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("FollowTheUpdate")
+            eventsRemote:FireServer()
+
+            local functionsRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Functions"):WaitForChild("OnCodeRequest")
+            local args = { "Pumpkin", "YT_Arawrd" }
+            functionsRemote:InvokeServer(unpack(args))
+        end
 
         task.spawn(function()
             while library.flags["CollectPumpkins"] and character.Parent do
@@ -827,7 +836,7 @@ halloweenTab:AddToggle({
                             break
                         end
                         if part:IsA("BasePart") then
-                            part.CFrame = character.HumanoidRootPart.CFrame + Vector3.new(0, 0, 0)
+                            part.CFrame = hrp.CFrame + Vector3.new(0, 3, 0)
                             task.wait(0.05)
                         end
                     end
@@ -837,7 +846,6 @@ halloweenTab:AddToggle({
         end)
     end,
 })
-
 
 --------------------------------------------------
 -- INIT WINDOWS
