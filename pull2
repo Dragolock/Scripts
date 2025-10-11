@@ -408,8 +408,8 @@ eventTab:AddToggle({
 })
 
 eventTab:AddToggle({
-    text = "InstantTP Heads",
-    flag = "InstantTPHeads",
+    text = "TP Raid Skellys",
+    flag = "TPRaidSkellys",
     callback = function(state)
         local player = game.Players.LocalPlayer
         local character = player.Character or player.CharacterAdded:Wait()
@@ -417,55 +417,81 @@ eventTab:AddToggle({
         local humanoid = character:FindFirstChildOfClass("Humanoid")
 
         if state then
-            if not hrp:FindFirstChild("HeadVelocity") then
-                local bodyVelocity = Instance.new("BodyVelocity")
-                bodyVelocity.Name = "HeadVelocity"
-                bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-                bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-                bodyVelocity.Parent = hrp
+            if not hrp:FindFirstChild("SkellyVelocity") then
+                local bv = Instance.new("BodyVelocity")
+                bv.Name = "SkellyVelocity"
+                bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+                bv.Velocity = Vector3.new(0, 0, 0)
+                bv.Parent = hrp
             end
         else
-            if hrp:FindFirstChild("HeadVelocity") then
-                hrp.HeadVelocity:Destroy()
+            if hrp:FindFirstChild("SkellyVelocity") then
+                hrp.SkellyVelocity:Destroy()
             end
             return
         end
 
-        task.spawn(function()
-            while library.flags["InstantTPHeads"] and character.Parent do
-                local nearestHead
-                local nearestDistance = 100
+        local torsos = {}
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("BasePart") and v.Name == "UpperTorso" then
+                local model = v:FindFirstAncestorOfClass("Model")
+                local playerFromModel = model and game.Players:GetPlayerFromCharacter(model)
+                if not playerFromModel then
+                    table.insert(torsos, v)
+                end
+            end
+        end
 
-                for _, v in pairs(workspace:GetDescendants()) do
-                    if v:IsA("BasePart") and v.Name == "Head" then
-                        local model = v:FindFirstAncestorOfClass("Model")
-                        local playerFromModel = model and game.Players:GetPlayerFromCharacter(model)
-                        if not playerFromModel then
-                            local distance = (hrp.Position - v.Position).Magnitude
-                            if distance < nearestDistance then
-                                nearestDistance = distance
-                                nearestHead = v
-                            end
+        local torsoAddedConnection
+        torsoAddedConnection = workspace.DescendantAdded:Connect(function(v)
+            if v:IsA("BasePart") and v.Name == "UpperTorso" then
+                local model = v:FindFirstAncestorOfClass("Model")
+                local playerFromModel = model and game.Players:GetPlayerFromCharacter(model)
+                if not playerFromModel then
+                    table.insert(torsos, v)
+                end
+            end
+        end)
+
+        task.spawn(function()
+            while library.flags["TPRaidSkellys"] and character.Parent do
+                local nearestTorso
+                local nearestDistance = 100
+                local hrpPos = hrp.Position
+
+                for i, torso in ipairs(torsos) do
+                    if torso and torso.Parent then
+                        local distance = (hrpPos - torso.Position).Magnitude
+                        if distance < nearestDistance then
+                            nearestDistance = distance
+                            nearestTorso = torso
                         end
+                    else
+                        torsos[i] = nil
                     end
                 end
 
-                if nearestHead then
+                if nearestTorso then
                     if humanoid and humanoid.Sit then
                         humanoid.Sit = false
                     end
-                    hrp.CFrame = CFrame.new(nearestHead.Position + Vector3.new(0, 5, 0))
+                    hrp.CFrame = CFrame.new(nearestTorso.Position + Vector3.new(0, 5, 0))
                 end
 
-                task.wait(0.1)
+                task.wait(0.15)
             end
 
-            if hrp:FindFirstChild("HeadVelocity") then
-                hrp.HeadVelocity:Destroy()
+            if torsoAddedConnection then
+                torsoAddedConnection:Disconnect()
+            end
+
+            if hrp:FindFirstChild("SkellyVelocity") then
+                hrp.SkellyVelocity:Destroy()
             end
         end)
     end,
 })
+
 
 eventTab:AddToggle({
     text = "Generate Souls",
@@ -554,6 +580,7 @@ eventTab:AddToggle({
         end
     end,
 })
+
 eventTab:AddToggle({
     text = "InstantTP Sketies",
     flag = "InstantTPSketies",
