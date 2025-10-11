@@ -493,37 +493,6 @@ eventTab:AddToggle({
         end
     end,
 })
-
-function NormalMode()
-    local args = {"Normal"}
-    game:GetService("ReplicatedStorage")
-        :WaitForChild("Remotes")
-        :WaitForChild("Events")
-        :WaitForChild("Dungeon")
-        :WaitForChild("OnJoinDungeon")
-        :FireServer(unpack(args))
-end
-
-function HardMode()
-    local args = {"Hard"}
-    game:GetService("ReplicatedStorage")
-        :WaitForChild("Remotes")
-        :WaitForChild("Events")
-        :WaitForChild("Dungeon")
-        :WaitForChild("OnJoinDungeon")
-        :FireServer(unpack(args))
-end
-
-function ChaosMode()
-    local args = {"Chaos"}
-    game:GetService("ReplicatedStorage")
-        :WaitForChild("Remotes")
-        :WaitForChild("Events")
-        :WaitForChild("Dungeon")
-        :WaitForChild("OnJoinDungeon")
-        :FireServer(unpack(args))
-end
-
 eventTab:AddToggle({
     text = "InstantTP Sketies",
     flag = "InstantTPSketies",
@@ -758,14 +727,6 @@ eventTab:AddList({
         end
     end,
 })
-
-eventTab:AddList({
-    text = "Select Gamemode",
-    values = {"Normal", "Hard", "Chaos"},
-    flag = "TeleportTarget",
-    value = "Normal",
-})
-
 eventTab:AddButton({
     text = "Set WalkSpeed to 65",
     callback = function()
