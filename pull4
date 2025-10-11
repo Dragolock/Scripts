@@ -827,20 +827,17 @@ halloweenTab:AddToggle({
                             break
                         end
                         if part:IsA("BasePart") then
-                            if humanoid and humanoid.SeatPart then
-                                humanoid.Sit = false
-                                task.wait(0.1)
-                            end
-                            character:MoveTo(part.Position + Vector3.new(0, 0, 0))
-                            task.wait(0.5)
+                            part.CFrame = character.HumanoidRootPart.CFrame + Vector3.new(0, 0, 0)
+                            task.wait(0.05)
                         end
                     end
                 end
-                task.wait()
+                task.wait(0.1)
             end
         end)
     end,
 })
+
 
 --------------------------------------------------
 -- INIT WINDOWS
