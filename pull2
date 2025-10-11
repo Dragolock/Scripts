@@ -446,10 +446,8 @@ eventTab:AddToggle({
             end
         end
 
-        -- Initial scan
         refreshTorsos()
 
-        -- Update torsos when new ones appear
         local torsoAddedConnection = workspace.DescendantAdded:Connect(function(v)
             if v:IsA("BasePart") and v.Name == "UpperTorso" then
                 local model = v:FindFirstAncestorOfClass("Model")
@@ -496,13 +494,12 @@ eventTab:AddToggle({
                     if humanoid and humanoid.Sit then
                         humanoid.Sit = false
                     end
-                    hrp.CFrame = CFrame.new(nearestTorso.Position + Vector3.new(0, 5, 0))
+                    hrp.CFrame = CFrame.new(nearestTorso.Position + Vector3.new(0, -2, 0))
                 end
 
                 task.wait(0.2)
             end
 
-            -- Cleanup
             if torsoAddedConnection then torsoAddedConnection:Disconnect() end
             if torsoRemovedConnection then torsoRemovedConnection:Disconnect() end
             if hrp:FindFirstChild("SkellyVelocity") then hrp.SkellyVelocity:Destroy() end
