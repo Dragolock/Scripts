@@ -432,18 +432,25 @@ eventTab:AddToggle({
         end
 
         local torsos = {}
-        for _, v in pairs(workspace:GetDescendants()) do
-            if v:IsA("BasePart") and v.Name == "UpperTorso" then
-                local model = v:FindFirstAncestorOfClass("Model")
-                local playerFromModel = model and game.Players:GetPlayerFromCharacter(model)
-                if not playerFromModel then
-                    table.insert(torsos, v)
+
+        local function refreshTorsos()
+            torsos = {}
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("BasePart") and v.Name == "UpperTorso" then
+                    local model = v:FindFirstAncestorOfClass("Model")
+                    local playerFromModel = model and game.Players:GetPlayerFromCharacter(model)
+                    if not playerFromModel then
+                        table.insert(torsos, v)
+                    end
                 end
             end
         end
 
-        local torsoAddedConnection
-        torsoAddedConnection = workspace.DescendantAdded:Connect(function(v)
+        -- Initial scan
+        refreshTorsos()
+
+        -- Update torsos when new ones appear
+        local torsoAddedConnection = workspace.DescendantAdded:Connect(function(v)
             if v:IsA("BasePart") and v.Name == "UpperTorso" then
                 local model = v:FindFirstAncestorOfClass("Model")
                 local playerFromModel = model and game.Players:GetPlayerFromCharacter(model)
@@ -453,8 +460,24 @@ eventTab:AddToggle({
             end
         end)
 
+        -- Remove invalid torsos automatically
+        local torsoRemovedConnection = workspace.DescendantRemoving:Connect(function(v)
+            if v:IsA("BasePart") and v.Name == "UpperTorso" then
+                for i, t in ipairs(torsos) do
+                    if t == v then
+                        table.remove(torsos, i)
+                        break
+                    end
+                end
+            end
+        end)
+
         task.spawn(function()
             while library.flags["TPRaidSkellys"] and character.Parent do
+                if #torsos == 0 then
+                    refreshTorsos()
+                end
+
                 local nearestTorso
                 local nearestDistance = 100
                 local hrpPos = hrp.Position
@@ -466,8 +489,6 @@ eventTab:AddToggle({
                             nearestDistance = distance
                             nearestTorso = torso
                         end
-                    else
-                        torsos[i] = nil
                     end
                 end
 
@@ -475,23 +496,19 @@ eventTab:AddToggle({
                     if humanoid and humanoid.Sit then
                         humanoid.Sit = false
                     end
-                    hrp.CFrame = CFrame.new(nearestTorso.Position + Vector3.new(0, -2, 0))
+                    hrp.CFrame = CFrame.new(nearestTorso.Position + Vector3.new(0, 5, 0))
                 end
 
-                task.wait(0.15)
+                task.wait(0.2)
             end
 
-            if torsoAddedConnection then
-                torsoAddedConnection:Disconnect()
-            end
-
-            if hrp:FindFirstChild("SkellyVelocity") then
-                hrp.SkellyVelocity:Destroy()
-            end
+            -- Cleanup
+            if torsoAddedConnection then torsoAddedConnection:Disconnect() end
+            if torsoRemovedConnection then torsoRemovedConnection:Disconnect() end
+            if hrp:FindFirstChild("SkellyVelocity") then hrp.SkellyVelocity:Destroy() end
         end)
     end,
 })
-
 
 eventTab:AddToggle({
     text = "Generate Souls",
