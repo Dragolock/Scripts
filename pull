@@ -15,6 +15,7 @@ mainTab:AddLabel({ text = "Creator = Not me", type = "label" })
 local heraldWindow = library:CreateWindow("Events")
 local eventTab = heraldWindow:AddFolder("Abyss Event")
 local fishingTab = heraldWindow:AddFolder("Fishing Event")
+local halloweenTab = heraldWindow:AddFolder("Halloween")
 --------------------------------------------------
 -- MAIN GAME
 --------------------------------------------------
@@ -407,6 +408,106 @@ eventTab:AddToggle({
 })
 
 eventTab:AddToggle({
+    text = "TP Raid Skellys",
+    flag = "TPRaidSkellys",
+    callback = function(state)
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local hrp = character:WaitForChild("HumanoidRootPart")
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+        if state then
+            if not hrp:FindFirstChild("SkellyVelocity") then
+                local bv = Instance.new("BodyVelocity")
+                bv.Name = "SkellyVelocity"
+                bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+                bv.Velocity = Vector3.new(0, 0, 0)
+                bv.Parent = hrp
+            end
+        else
+            if hrp:FindFirstChild("SkellyVelocity") then
+                hrp.SkellyVelocity:Destroy()
+            end
+            return
+        end
+
+        local torsos = {}
+
+        local function refreshTorsos()
+            torsos = {}
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("BasePart") and v.Name == "UpperTorso" then
+                    local model = v:FindFirstAncestorOfClass("Model")
+                    local playerFromModel = model and game.Players:GetPlayerFromCharacter(model)
+                    if not playerFromModel then
+                        table.insert(torsos, v)
+                    end
+                end
+            end
+        end
+
+        refreshTorsos()
+
+        local torsoAddedConnection = workspace.DescendantAdded:Connect(function(v)
+            if v:IsA("BasePart") and v.Name == "UpperTorso" then
+                local model = v:FindFirstAncestorOfClass("Model")
+                local playerFromModel = model and game.Players:GetPlayerFromCharacter(model)
+                if not playerFromModel then
+                    table.insert(torsos, v)
+                end
+            end
+        end)
+
+        -- Remove invalid torsos automatically
+        local torsoRemovedConnection = workspace.DescendantRemoving:Connect(function(v)
+            if v:IsA("BasePart") and v.Name == "UpperTorso" then
+                for i, t in ipairs(torsos) do
+                    if t == v then
+                        table.remove(torsos, i)
+                        break
+                    end
+                end
+            end
+        end)
+
+        task.spawn(function()
+            while library.flags["TPRaidSkellys"] and character.Parent do
+                if #torsos == 0 then
+                    refreshTorsos()
+                end
+
+                local nearestTorso
+                local nearestDistance = 100
+                local hrpPos = hrp.Position
+
+                for i, torso in ipairs(torsos) do
+                    if torso and torso.Parent then
+                        local distance = (hrpPos - torso.Position).Magnitude
+                        if distance < nearestDistance then
+                            nearestDistance = distance
+                            nearestTorso = torso
+                        end
+                    end
+                end
+
+                if nearestTorso then
+                    if humanoid and humanoid.Sit then
+                        humanoid.Sit = false
+                    end
+                    hrp.CFrame = CFrame.new(nearestTorso.Position + Vector3.new(0, -2, 0))
+                end
+
+                task.wait(0.2)
+            end
+
+            if torsoAddedConnection then torsoAddedConnection:Disconnect() end
+            if torsoRemovedConnection then torsoRemovedConnection:Disconnect() end
+            if hrp:FindFirstChild("SkellyVelocity") then hrp.SkellyVelocity:Destroy() end
+        end)
+    end,
+})
+
+eventTab:AddToggle({
     text = "Generate Souls",
     flag = "GenerateSouls",
     callback = function(state)
@@ -493,6 +594,7 @@ eventTab:AddToggle({
         end
     end,
 })
+
 eventTab:AddToggle({
     text = "InstantTP Sketies",
     flag = "InstantTPSketies",
@@ -745,6 +847,38 @@ fishingTab:AddToggle({
                 end
             end)
         end
+    end,
+})
+
+halloweenTab:AddToggle({
+    text = "Collect Pumpkins",
+    flag = "CollectPumpkins",
+    callback = function(state)
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+        task.spawn(function()
+            while library.flags["CollectPumpkins"] and character.Parent do
+                local folder = workspace:FindFirstChild("HappyPumpkins")
+                if folder then
+                    for _, part in pairs(folder:GetDescendants()) do
+                        if not library.flags["CollectPumpkins"] then
+                            break
+                        end
+                        if part:IsA("BasePart") then
+                            if humanoid and humanoid.SeatPart then
+                                humanoid.Sit = false
+                                task.wait(0.1)
+                            end
+                            character:MoveTo(part.Position + Vector3.new(0, 0, 0))
+                            task.wait(0.5)
+                        end
+                    end
+                end
+                task.wait()
+            end
+        end)
     end,
 })
 
