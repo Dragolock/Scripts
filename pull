@@ -776,6 +776,39 @@ eventTab:AddButton({
     end,
 })
 
+fishingTab:AddToggle({
+    text = "Auto Fish (Bad)",
+    flag = "AutoFishBad",
+    callback = function(state)
+        if state then
+            task.spawn(function()
+                local ReplicatedStorage = game:GetService("ReplicatedStorage")
+                local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+                local Fishing = Remotes:WaitForChild("Fishing")
+
+                while library.flags["AutoFishBad"] do
+                    Fishing:WaitForChild("CastRod"):InvokeServer()
+                    
+                    local startTime = tick()
+                    while library.flags["AutoFishBad"] and tick() - startTime < 18 do
+                        Fishing:WaitForChild("PlayerReaction"):FireServer()
+                        task.wait(0.05)
+                    end
+
+                    if not library.flags["AutoFishBad"] then break end
+
+                    local args = { 2.5 }
+                    Fishing:WaitForChild("ReelIn"):FireServer(unpack(args))
+                    
+                    task.wait(1)
+                    Fishing:WaitForChild("Stop"):FireServer()
+                    task.wait(1)
+                end
+            end)
+        end
+    end,
+})
+
 --------------------------------------------------
 -- INIT WINDOWS
 --------------------------------------------------
