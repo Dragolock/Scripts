@@ -470,7 +470,7 @@ eventTab:AddToggle({
                 while library.flags["GenerateSouls"] do
                     Remotes:WaitForChild("OnJoinDungeon"):FireServer("Normal")
                     local startTime = tick()
-                    while tick() - startTime < 1 do
+                    while tick() - startTime < 0.5 do
                         teleportToNearestSket()
                         Remotes:WaitForChild("OnDungeonClick"):FireServer()
                         task.wait()
@@ -493,37 +493,6 @@ eventTab:AddToggle({
         end
     end,
 })
-
-function NormalMode()
-    local args = {"Normal"}
-    game:GetService("ReplicatedStorage")
-        :WaitForChild("Remotes")
-        :WaitForChild("Events")
-        :WaitForChild("Dungeon")
-        :WaitForChild("OnJoinDungeon")
-        :FireServer(unpack(args))
-end
-
-function HardMode()
-    local args = {"Hard"}
-    game:GetService("ReplicatedStorage")
-        :WaitForChild("Remotes")
-        :WaitForChild("Events")
-        :WaitForChild("Dungeon")
-        :WaitForChild("OnJoinDungeon")
-        :FireServer(unpack(args))
-end
-
-function ChaosMode()
-    local args = {"Chaos"}
-    game:GetService("ReplicatedStorage")
-        :WaitForChild("Remotes")
-        :WaitForChild("Events")
-        :WaitForChild("Dungeon")
-        :WaitForChild("OnJoinDungeon")
-        :FireServer(unpack(args))
-end
-
 eventTab:AddToggle({
     text = "InstantTP Sketies",
     flag = "InstantTPSketies",
@@ -591,28 +560,6 @@ eventTab:AddToggle({
                 sketAddedConnection:Disconnect()
             end
         end)
-    end,
-})
-
-eventTab:AddToggle({
-    text = "Join Gamemode",
-    flag = "JoinGamemode",
-    callback = function(state)
-        if state then
-            task.spawn(function()
-                while library.flags["JoinGamemode"] do
-                    local target = library.flags["TeleportTarget"]
-                    if target == "Normal" then
-                        NormalMode()
-                    elseif target == "Hard" then
-                        HardMode()
-                    elseif target == "Chaos" then
-                        ChaosMode()
-                    end
-                    task.wait(0.2)
-                end
-            end)
-        end
     end,
 })
 
@@ -758,14 +705,6 @@ eventTab:AddList({
         end
     end,
 })
-
-eventTab:AddList({
-    text = "Select Gamemode",
-    values = {"Normal", "Hard", "Chaos"},
-    flag = "TeleportTarget",
-    value = "Normal",
-})
-
 eventTab:AddButton({
     text = "Set WalkSpeed to 65",
     callback = function()
