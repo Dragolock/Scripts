@@ -833,6 +833,8 @@ fishingTab:AddToggle({
 
                 while library.flags["AutoFishBad"] and character.Parent do
                     hrp.CFrame = CFrame.new(-890, 10, -246)
+                    task.wait(2)
+
                     hrp.Anchored = true
 
                     Fishing:WaitForChild("CastRod"):InvokeServer()
@@ -864,6 +866,7 @@ fishingTab:AddToggle({
         end
     end,
 })
+
 
 
 halloweenTab:AddToggle({
