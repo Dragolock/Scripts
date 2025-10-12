@@ -497,7 +497,7 @@ eventTab:AddToggle({
                     hrp.CFrame = CFrame.new(nearestTorso.Position + Vector3.new(0, -2, 0))
                 end
 
-                task.wait(0.2)
+                task.wait()
             end
 
             if torsoAddedConnection then torsoAddedConnection:Disconnect() end
