@@ -821,31 +821,48 @@ fishingTab:AddToggle({
     text = "Auto Fish (Bad)",
     flag = "AutoFishBad",
     callback = function(state)
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local hrp = character:WaitForChild("HumanoidRootPart")
+
         if state then
             task.spawn(function()
                 local ReplicatedStorage = game:GetService("ReplicatedStorage")
                 local Remotes = ReplicatedStorage:WaitForChild("Remotes")
                 local Fishing = Remotes:WaitForChild("Fishing")
 
-                while library.flags["AutoFishBad"] do
+                while library.flags["AutoFishBad"] and character.Parent do
+                    hrp.CFrame = CFrame.new(-890, 10, -246)
+                    task.wait(2)
+
+                    hrp.Anchored = true
+
                     Fishing:WaitForChild("CastRod"):InvokeServer()
-                    
+
                     local startTime = tick()
                     while library.flags["AutoFishBad"] and tick() - startTime < 18 do
                         Fishing:WaitForChild("PlayerReaction"):FireServer()
                         task.wait(0.05)
                     end
 
-                    if not library.flags["AutoFishBad"] then break end
+                    if not library.flags["AutoFishBad"] then
+                        break
+                    end
 
-                    local args = { 2.5 }
+                    local args = {2.5}
                     Fishing:WaitForChild("ReelIn"):FireServer(unpack(args))
-                    
                     task.wait(1)
                     Fishing:WaitForChild("Stop"):FireServer()
                     task.wait(1)
                 end
+
+                hrp.Anchored = false
             end)
+        else
+            local hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                hrp.Anchored = false
+            end
         end
     end,
 })
@@ -856,7 +873,16 @@ halloweenTab:AddToggle({
     callback = function(state)
         local player = game.Players.LocalPlayer
         local character = player.Character or player.CharacterAdded:Wait()
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        local hrp = character:WaitForChild("HumanoidRootPart")
+
+        if state then
+            local eventsRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("FollowTheUpdate")
+            eventsRemote:FireServer()
+
+            local functionsRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Functions"):WaitForChild("OnCodeRequest")
+            local args = { "Pumpkin", "YT_Arawrd" }
+            functionsRemote:InvokeServer(unpack(args))
+        end
 
         task.spawn(function()
             while library.flags["CollectPumpkins"] and character.Parent do
@@ -867,16 +893,12 @@ halloweenTab:AddToggle({
                             break
                         end
                         if part:IsA("BasePart") then
-                            if humanoid and humanoid.SeatPart then
-                                humanoid.Sit = false
-                                task.wait(0.1)
-                            end
-                            character:MoveTo(part.Position + Vector3.new(0, 0, 0))
-                            task.wait(0.5)
+                            part.CFrame = hrp.CFrame + Vector3.new(0, 0, 0)
+                            task.wait(0.05)
                         end
                     end
                 end
-                task.wait()
+                task.wait(0.1)
             end
         end)
     end,
