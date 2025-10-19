@@ -19,6 +19,7 @@ local Tabs = {
     AbyssDungeon = Window:CreateTab{Title = "Abyss Dungeon", Icon = "phosphor-sword-bold"},
     Fishing = Window:CreateTab{Title = "Fishing Event", Icon = "phosphor-sword-bold"},
     Halloween = Window:CreateTab{Title = "Halloween Event", Icon = "phosphor-sword-bold"},
+    PvP = Window:CreateTab{Title = "PvP", Icon = "phosphor-sword-bold"}
     Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
 }
 
@@ -106,6 +107,13 @@ Tabs.AbyssDungeon:CreateToggle("TPRaidSkellys", {Title = "TP Raid Skellys", Defa
             if hrp:FindFirstChild("SkellyVelocity") then hrp.SkellyVelocity:Destroy() end
         end)
     end)
+
+local noteAbyss = Tabs.AbyssDungeon:CreateParagraph("Note", {
+    Title = "Note",
+    Content = "To get more souls, enable Dungeon Fast Attack and Generate Souls at the exact same time.",
+    TitleAlignment = "Left",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
 
 Tabs.AbyssDungeon:CreateToggle("GenerateSouls", {
     Title = "Generate Souls",
@@ -438,6 +446,82 @@ Tabs.Halloween:CreateToggle("CollectPumpkins", {Title = "Collect Pumpkins", Defa
             end
         end)
     end)
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local function getPlayerNames()
+    local t = {}
+    for _, player in ipairs(Players:GetPlayers()) do
+        table.insert(t, player.Name)
+    end
+    return t
+end
+
+local playerNames = getPlayerNames()
+
+-- Buy Potions Toggle
+local buyPotionsToggle = Tabs.PvP:CreateToggle("BuyPotions", {
+    Title = "Buy Potions",
+    Default = false
+})
+
+buyPotionsToggle:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            while buyPotionsToggle.Value do
+                local remotes = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Events")
+                remotes.HalloweenShopEvent:FireServer("WinsPotions")
+                remotes.HalloweenShopEvent:FireServer("ShinyPotions")
+                task.wait()
+            end
+        end)
+    end
+end)
+
+local notefight = Tabs.PvP:CreateParagraph("Note", {
+    Title = "Note",
+    Content = "The Infinite Season Wins generator script only works when you can fight twice in a row. Let the game run for six hours, then come back and enable it.",
+    TitleAlignment = "Left",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
+
+local autoPvPToggle = Tabs.PvP:CreateToggle("AutoPvP", {
+    Title = "Auto PvP",
+    Default = false
+})
+
+local dropdownRef = Tabs.PvP:CreateDropdown("PvPTarget", {
+    Title = "Select PvP Target",
+    Values = playerNames,
+    Default = playerNames[1] or ""
+})
+
+autoPvPToggle:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            while autoPvPToggle.Value do
+                local r = ReplicatedStorage.Remotes.Events
+                local targetName = dropdownRef.Value
+                if targetName and targetName ~= "" then
+                    r.WinEvent_PVP:FireServer(targetName, true, true)
+                end
+                task.wait(0.7)
+            end
+        end)
+    end
+end)
+
+-- Refresh Players Button
+Tabs.PvP:CreateButton({
+    Title = "Refresh Players",
+    Callback = function()
+        playerNames = getPlayerNames()
+        dropdownRef:SetValues(playerNames)
+        dropdownRef:SetValue(playerNames[1] or "")
+    end
+})
+
 
 --------------------------------------------------
 -- CONFIGURATION / MANAGERS
