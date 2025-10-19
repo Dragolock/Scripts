@@ -3,7 +3,7 @@ local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/UI-I
 local Window = Rayfield:CreateWindow({
    Name = "PAS - HUB",
    LoadingTitle = "PAS - HUB Loader",
-   LoadingSubtitle = "Converted to Rayfield",
+   LoadingSubtitle = "hallo :3",
    ConfigurationSaving = {
       Enabled = true,
       FolderName = nil,
@@ -33,15 +33,15 @@ local mainTab = Window:CreateTab("Main Game", 4483362458)
 local bossesTab = Window:CreateTab("Bosses")
 local worldsTab = Window:CreateTab("Worlds/Secret Worlds")
 local pvpTab = Window:CreateTab("PvP Stuff")
-local eventsWindow = Window:CreateTab("Events")
+local eventsTab = Window:CreateTab("Events")
 
 local mainGameSection = mainTab:CreateSection("Main Game", false)
 local bossSection = bossesTab:CreateSection("Bosses", false)
 local worldSection = worldsTab:CreateSection("Worlds/Secret Worlds", false)
 local pvpSection = pvpTab:CreateSection("PvP Stuff", false)
-local abyssSection = eventsWindow:CreateSection("Abyss Event", false)
-local fishingSection = eventsWindow:CreateSection("Fishing Event", false)
-local halloweenSection = eventsWindow:CreateSection("Halloween", false)
+local abyssSection = eventsTab:CreateSection("Abyss Event", false)
+local fishingSection = eventsTab:CreateSection("Fishing Event", false)
+local halloweenSection = eventsTab:CreateSection("Halloween", false)
 
 mainTab:CreateLabel("Creator = Not me")
 
