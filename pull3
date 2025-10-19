@@ -301,6 +301,10 @@ Tabs.Abyss:CreateToggle("Teleport", {
     end
 end)
 
+local joinToggle = Tabs.Abyss:CreateToggle("Join Dungeon", {
+    Title = "Join Dungeon",
+    Default = false
+})
 
 Tabs.Abyss:CreateDropdown("TeleportTarget", {
     Title = "Select Target",
@@ -320,11 +324,6 @@ Tabs.Abyss:CreateDropdown("TeleportTarget", {
 end)
 
 local Remotes = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("Dungeon")
-
-local joinToggle = Tabs.Abyss:CreateToggle("Join Dungeon", {
-    Title = "Join Dungeon",
-    Default = false
-})
 
 local joinDropdown = Tabs.Abyss:CreateDropdown("Select Dungeon mode", {
     Title = "Join Dungeon mode",
