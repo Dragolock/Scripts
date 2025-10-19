@@ -97,7 +97,7 @@ Tabs.AbyssDungeon:CreateToggle("TPRaidSkellys", {Title = "TP Raid Skellys", Defa
                 end
                 if nearest then
                     if humanoid and humanoid.Sit then humanoid.Sit = false end
-                    hrp.CFrame = CFrame.new(nearest.Position + Vector3.new(0, -2, 0))
+                    hrp.CFrame = CFrame.new(nearest.Position + Vector3.new(0, 0, 0))
                 end
                 task.wait()
             end
@@ -194,6 +194,36 @@ Tabs.AbyssDungeon:CreateToggle("GenerateSouls", {
     end
 end)
 
+local joinToggle = Tabs.AbyssDungeon:CreateToggle("Join Dungeon", {
+    Title = "Join Dungeon",
+    Default = false
+})
+
+local Remotes = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("Dungeon")
+
+local joinDropdown = Tabs.AbyssDungeon:CreateDropdown("Select Dungeon", {
+    Title = "Join Dungeon mode",
+    Values = {"Normal", "Hard", "Chaos"},
+    Default = "Normal"
+})
+
+local function fireJoinDungeon(mode)
+    local args = {mode}
+    Remotes.OnJoinDungeon:FireServer(unpack(args))
+end
+
+joinToggle:OnChanged(function(state)
+    if state then
+        fireJoinDungeon(joinDropdown.Value)
+    end
+end)
+
+joinDropdown:OnChanged(function(mode)
+    if joinToggle.Value then
+        fireJoinDungeon(mode)
+    end
+end)
+
 local Players = game:GetService("Players")
 local CS = game:GetService("CollectionService")
 local lp = Players.LocalPlayer
@@ -278,6 +308,21 @@ local function teleportHollowKing700()
     smoothTeleportLoop(Vector3.new(-3765, 665, -1161))
 end
 
+Tabs.Abyss:CreateToggle("AttackAura", { 
+    Title = "Attack Aura", 
+    Default = false 
+}):OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            while Options.AttackAura.Value do
+                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("OnAttackMob"):FireServer()
+                task.wait()
+            end
+        end)
+    end
+end)
+
+
 -- Add toggle with Fluent Renewed:
 Tabs.Abyss:CreateToggle("Teleport", {
     Title = "Teleport",
@@ -301,11 +346,6 @@ Tabs.Abyss:CreateToggle("Teleport", {
     end
 end)
 
-local joinToggle = Tabs.Abyss:CreateToggle("Join Dungeon", {
-    Title = "Join Dungeon",
-    Default = false
-})
-
 Tabs.Abyss:CreateDropdown("TeleportTarget", {
     Title = "Select Target",
     Values = {"Skeletons", "Commander Skeleton", "Hollow King (700)"},
@@ -322,32 +362,6 @@ Tabs.Abyss:CreateDropdown("TeleportTarget", {
         end
     end
 end)
-
-local Remotes = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("Dungeon")
-
-local joinDropdown = Tabs.Abyss:CreateDropdown("Select Dungeon mode", {
-    Title = "Join Dungeon mode",
-    Values = {"Normal", "Hard", "Chaos"},
-    Default = "Normal"
-})
-
-local function fireJoinDungeon(mode)
-    local args = {mode}
-    Remotes.OnJoinDungeon:FireServer(unpack(args))
-end
-
-joinToggle:OnChanged(function(state)
-    if state then
-        fireJoinDungeon(joinDropdown.Value)
-    end
-end)
-
-joinDropdown:OnChanged(function(mode)
-    if joinToggle.Value then
-        fireJoinDungeon(mode)
-    end
-end)
-
 
 Tabs.Abyss:CreateButton{
     Title = "WalkSpeed 65",
@@ -405,7 +419,7 @@ Tabs.Halloween:CreateToggle("CollectPumpkins", {Title = "Collect Pumpkins", Defa
             local ev = game.ReplicatedStorage.Remotes.Events.FollowTheUpdate
             ev:FireServer()
             game.ReplicatedStorage.Remotes.Functions.OnCodeRequest:InvokeServer("Pumpkin","YT_Arawrd")
-            task.wait(3)
+            task.wait(5)
             game.ReplicatedStorage.Remotes.Functions.OnCodeRequest:InvokeServer("TRICKORTREAT","YT_Arawrd")
         end
 
