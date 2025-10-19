@@ -19,7 +19,7 @@ local Tabs = {
     AbyssDungeon = Window:CreateTab{Title = "Abyss Dungeon", Icon = "phosphor-sword-bold"},
     Fishing = Window:CreateTab{Title = "Fishing Event", Icon = "phosphor-sword-bold"},
     Halloween = Window:CreateTab{Title = "Halloween Event", Icon = "phosphor-sword-bold"},
-    PvP = Window:CreateTab{Title = "PvP", Icon = "phosphor-sword-bold"}
+    PvP = Window:CreateTab{Title = "PvP", Icon = "phosphor-sword-bold"},
     Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
 }
 
