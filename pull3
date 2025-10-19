@@ -405,6 +405,8 @@ Tabs.Halloween:CreateToggle("CollectPumpkins", {Title = "Collect Pumpkins", Defa
             local ev = game.ReplicatedStorage.Remotes.Events.FollowTheUpdate
             ev:FireServer()
             game.ReplicatedStorage.Remotes.Functions.OnCodeRequest:InvokeServer("Pumpkin","YT_Arawrd")
+            task.wait(3)
+            game.ReplicatedStorage.Remotes.Functions.OnCodeRequest:InvokeServer("TRICKORTREAT","YT_Arawrd")
         end
 
         task.spawn(function()
