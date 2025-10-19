@@ -111,7 +111,7 @@ Tabs.AbyssDungeon:CreateToggle("TPRaidSkellys", {Title = "TP Raid Skellys", Defa
 local noteAbyss = Tabs.AbyssDungeon:CreateParagraph("Note", {
     Title = "Note",
     Content = "To get more souls, enable Dungeon Fast Attack and Generate Souls at the exact same time.",
-    TitleAlignment = "Left",
+    TitleAlignment = "Middle",
     ContentAlignment = Enum.TextXAlignment.Left
 })
 
@@ -482,7 +482,7 @@ end)
 local notefight = Tabs.PvP:CreateParagraph("Note", {
     Title = "Note",
     Content = "The Infinite Season Wins generator script only works when you can fight twice in a row. Let the game run for six hours, then come back and enable it.",
-    TitleAlignment = "Left",
+    TitleAlignment = "Middle",
     ContentAlignment = Enum.TextXAlignment.Left
 })
 
