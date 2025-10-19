@@ -393,6 +393,7 @@ Tabs.Fishing:CreateToggle("AutoFishBad", {Title = "Auto Fish (Bad)", Default = f
                 local Fishing = game.ReplicatedStorage.Remotes.Fishing
                 while Options.AutoFishBad.Value and char.Parent do
                     hrp.CFrame = CFrame.new(-890, 10, -246)
+                    task.wait(2)
                     hrp.Anchored = true
                     Fishing.CastRod:InvokeServer()
                     local start = tick()
