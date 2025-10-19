@@ -3,16 +3,14 @@ local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOog
 local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
 local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
 
--- Create Window
-local Window = Library:CreateWindow{
-    Title = "PAS - HUB",
-    SubTitle = "Creator = Not me",
-    Size = UDim2.fromOffset(830, 525),
-    Resize = true,
-    MinSize = Vector2.new(470, 380),
-    Acrylic = true,
-    Theme = "Dark",
-    MinimizeKey = Enum.KeyCode.RightControl
+local Window = Library:Window{
+    Title = "Pull A Sword",
+    SubTitle = "By coco",
+    TabWidth = 160,
+    Size =  UDim2.fromOffset(580, 460),
+    Resize = false, 
+    Theme = "Darker",
+    MinimizeKey = Enum.KeyCode.LeftShift
 }
 
 -- Create Tabs
