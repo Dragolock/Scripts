@@ -161,16 +161,8 @@ Tabs.MainGame:CreateButton{
         end
     end
 }
-
-bossTab:CreateParagraph("BossInfo", {
-    Title = "Info",
-    Content = "TP Lab/Ocean = Crystals.",
-    TitleAlignment = "Left",
-    ContentAlignment = Enum.TextXAlignment.Left
-})
-
--- Generate Crystals
-local GenCrystals = bossTab:CreateToggle("GenCrystals", {Title = "Generate Crystals", Default = false})
+-- Generate Crystals Toggle
+local GenCrystals = Bosses:CreateToggle("GenCrystals", {Title = "Generate Crystals", Default = false})
 GenCrystals:OnChanged(function(state)
     local r = game.ReplicatedStorage.Remotes.Events
     if state then
@@ -188,8 +180,8 @@ GenCrystals:OnChanged(function(state)
     end
 end)
 
--- Spin Crystal Wheels
-local SpinWheel = bossTab:CreateToggle("SpinWheel", {Title = "Spin Crystal Wheels", Default = false})
+-- Spin Crystal Wheels Toggle
+local SpinWheel = Bosses:CreateToggle("SpinWheel", {Title = "Spin Crystal Wheels", Default = false})
 SpinWheel:OnChanged(function(state)
     if state then
         task.spawn(function()
@@ -204,17 +196,17 @@ SpinWheel:OnChanged(function(state)
     end
 end)
 
--- Kill Title Boss
-local KillBoss = bossTab:CreateToggle("KillBoss", {Title = "Kill Title Boss", Default = false})
+-- Kill Title Boss Toggle
+local KillBoss = Bosses:CreateToggle("KillBoss", {Title = "Kill Title Boss", Default = false})
 KillBoss:OnChanged(function(state)
     local r = game.ReplicatedStorage.Remotes.Events
     if state then
         r.RemoveC:FireServer(1)
         task.wait(0.1)
         local bossMap = {
-            ["The King"]="Boss1", ["Dravenar"]="Boss2", ["Glacius"]="Boss3", ["Anubis"]="Boss4",
-            ["Bossbot"]="Boss5", ["Lazyfish"]="Boss6", ["Yokai"]="Boss7", ["Vort3x"]="Boss8",
-            ["Underlord"]="Boss9", ["The Conquerer"]="Boss10",
+            ["The King"]="Boss1",["Dravenar"]="Boss2",["Glacius"]="Boss3",["Anubis"]="Boss4",
+            ["Bossbot"]="Boss5",["Lazyfish"]="Boss6",["Yokai"]="Boss7",["Vort3x"]="Boss8",
+            ["Underlord"]="Boss9",["The Conquerer"]="Boss10",
         }
         local chosen = bossMap[Options.BossTarget.Value] or "Boss1"
         task.spawn(function()
@@ -228,15 +220,12 @@ KillBoss:OnChanged(function(state)
     end
 end)
 
-local BossTarget = bossTab:CreateDropdown("BossTarget", {
+local BossTarget = Bosses:CreateDropdown("BossTarget", {
     Title = "Select Boss",
     Values = {"The King","Dravenar","Glacius","Anubis","Bossbot","Lazyfish","Yokai","Vort3x","Underlord","The Conquerer"},
     Multi = false,
     Default = 1
 })
-
 BossTarget:OnChanged(function(value)
-    if KillBoss.Value then
-    end
+    -- Automatically used in KillBoss logic via Options.BossTarget.Value
 end)
-
