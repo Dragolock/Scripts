@@ -225,11 +225,9 @@ joinDropdown:OnChanged(function(mode)
     end
 end)
 
-local noteAbyssDungeon = Tabs.AbyssDungeon:CreateParagraph("Note", {
-    Title = "Note",
-    Content = "To get more souls, enable Dungeon Fast Attack and Generate Souls at the exact same time.",
-    TitleAlignment = "Middle",
-    ContentAlignment = Enum.TextXAlignment.Left
+local Paragraph1 = Tabs.AbyssDungeon:CreateParagraph("Information", {
+    Title = "Paragraph",
+    Content = "To get more souls, enable Dungeon Fast Attack and Generate Souls at the exact same time."
 })
 
 local Players = game:GetService("Players")
@@ -515,11 +513,9 @@ Tabs.PvP:CreateButton({
     end
 })
 
-local notefight = Tabs.PvP:CreateParagraph("Note", {
-    Title = "Note",
-    Content = "The Infinite Season Wins script only works when you can fight twice in a row, and have the ,Skip Fight Timer Gamepass, Let the game run for six hours, then come back and enable it.",
-    TitleAlignment = "Middle",
-    ContentAlignment = Enum.TextXAlignment.Left
+local Paragraph2 = Tabs.PvP:CreateParagraph("PVP Info", {
+    Title = "Paragraph",
+    Content = "The Infinite Season Wins script only works when you can fight twice in a row, and have the ,Skip Fight Timer Gamepass, Let the game run for six hours, then come back and enable it."
 })
 
 --------------------------------------------------
