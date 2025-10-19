@@ -108,13 +108,6 @@ Tabs.AbyssDungeon:CreateToggle("TPRaidSkellys", {Title = "TP Raid Skellys", Defa
         end)
     end)
 
-local noteAbyss = Tabs.AbyssDungeon:CreateParagraph("Note", {
-    Title = "Note",
-    Content = "To get more souls, enable Dungeon Fast Attack and Generate Souls at the exact same time.",
-    TitleAlignment = "Middle",
-    ContentAlignment = Enum.TextXAlignment.Left
-})
-
 Tabs.AbyssDungeon:CreateToggle("GenerateSouls", {
     Title = "Generate Souls",
     Default = false
@@ -231,6 +224,13 @@ joinDropdown:OnChanged(function(mode)
         fireJoinDungeon(mode)
     end
 end)
+
+local noteAbyssDungeon = Tabs.AbyssDungeon:CreateParagraph("Note", {
+    Title = "Note",
+    Content = "To get more souls, enable Dungeon Fast Attack and Generate Souls at the exact same time.",
+    TitleAlignment = "Middle",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
 
 local Players = game:GetService("Players")
 local CS = game:GetService("CollectionService")
@@ -479,13 +479,6 @@ buyPotionsToggle:OnChanged(function(state)
     end
 end)
 
-local notefight = Tabs.PvP:CreateParagraph("Note", {
-    Title = "Note",
-    Content = "The Infinite Season Wins generator script only works when you can fight twice in a row. Let the game run for six hours, then come back and enable it.",
-    TitleAlignment = "Middle",
-    ContentAlignment = Enum.TextXAlignment.Left
-})
-
 local autoPvPToggle = Tabs.PvP:CreateToggle("AutoPvP", {
     Title = "Auto PvP",
     Default = false
@@ -522,6 +515,12 @@ Tabs.PvP:CreateButton({
     end
 })
 
+local notefight = Tabs.PvP:CreateParagraph("Note", {
+    Title = "Note",
+    Content = "The Infinite Season Wins script only works when you can fight twice in a row, and have the ,Skip Fight Timer Gamepass, Let the game run for six hours, then come back and enable it.",
+    TitleAlignment = "Middle",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
 
 --------------------------------------------------
 -- CONFIGURATION / MANAGERS
