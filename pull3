@@ -1,36 +1,43 @@
--- Load Fluent
+-- Load Fluent Library
 local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
 local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
 local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
 
-local Window = Library:Window{
-    Title = "Pull A Sword",
-    SubTitle = "By coco",
-    TabWidth = 160,
-    Size =  UDim2.fromOffset(580, 460),
-    Resize = false, 
-    Theme = "Darker",
-    MinimizeKey = Enum.KeyCode.LeftShift
+-- Create Window
+local Window = Library:CreateWindow{
+    Title = "PAS - HUB",
+    SubTitle = "Creator = Not me",
+    Size = UDim2.fromOffset(830, 525),
+    Resize = true,
+    MinSize = Vector2.new(470, 380),
+    Acrylic = true,
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.RightControl
 }
 
--- Tabs
+-- Create Tabs
 local Tabs = {
-    MainGame = Window:CreateTab{Title = "Main Game", Icon = "ph-users"},
+    MainGame = Window:CreateTab{Title = "Main Game", Icon = "phosphor-sword-bold"},
     Bosses = Window:CreateTab{Title = "Bosses", Icon = "ph-skull"},
-    Worlds = Window:CreateTab{Title = "Worlds/Secret Worlds", Icon = "ph-globe"},
-    PvP = Window:CreateTab{Title = "PvP Stuff", Icon = "ph-sword"},
-    Events = Window:CreateTab{Title = "Events", Icon = "ph-flame"},
-    Fishing = Window:CreateTab{Title = "Fishing Event", Icon = "ph-fish"},
-    Halloween = Window:CreateTab{Title = "Halloween", Icon = "ph-pumpkin"}
+    Worlds = Window:CreateTab{Title = "Worlds/Secret Worlds", Icon = "ph-map-pin-bold"},
+    PvP = Window:CreateTab{Title = "PvP Stuff", Icon = "ph-shield-check-bold"},
+    Events = Window:CreateTab{Title = "Events", Icon = "ph-lightning-bold"},
+    Fishing = Window:CreateTab{Title = "Fishing Event", Icon = "ph-fish-bold"},
+    Halloween = Window:CreateTab{Title = "Halloween", Icon = "ph-pumpkin-bold"}
 }
 
--- MAIN GAME
--- Auto Click
-local AutoClick = Tabs.MainGame:CreateToggle("AutoClick", {Title = "Auto Click", Default = false})
-AutoClick:OnChanged(function(state)
+local Options = Library.Options
+
+--------------------------
+-- MAIN GAME TAB
+--------------------------
+Tabs.MainGame:CreateToggle("AutoClick", {
+    Title = "Auto Click",
+    Default = false
+}):OnChanged(function(state)
     if state then
         task.spawn(function()
-            while AutoClick.Value do
+            while Options.AutoClick.Value do
                 game.ReplicatedStorage.Remotes.Events.ClickEvent:FireServer()
                 task.wait()
             end
@@ -38,18 +45,20 @@ AutoClick:OnChanged(function(state)
     end
 end)
 
--- Hatch Nearest
 local eggList = {
     "W1E1","W2E1","W3E1","W4E1","W5E1","W6E1","W7E1","W8E1","W9E1","W10E1",
     "W11E1","W12E1","W13E1","W14E1","W15E1","W16E1","W17E1","W18E1","W19E1","W20E1",
     "W21E1","W22E1","W23E1","W24E1","W25E1","W26E1","W27E1","W28E1","W29E1","W30E1",
     "W31E1","W32E1","W33E1","W34E1","W35E1","Common Egg"
 }
-local HatchNearest = Tabs.MainGame:CreateToggle("HatchNearest", {Title = "Hatch Nearest", Default = false})
-HatchNearest:OnChanged(function(state)
+
+Tabs.MainGame:CreateToggle("HatchNearest", {
+    Title = "Hatch Nearest",
+    Default = false
+}):OnChanged(function(state)
     if state then
         task.spawn(function()
-            while HatchNearest.Value do
+            while Options.HatchNearest.Value do
                 for _, egg in ipairs(eggList) do
                     game.ReplicatedStorage.GameClient.Events.RemoteFunction.BuyEgg:InvokeServer(egg,"Buy1")
                 end
@@ -59,20 +68,20 @@ HatchNearest:OnChanged(function(state)
     end
 end)
 
--- Auto Spin Wheel
-local AutoSpinWheel = Tabs.MainGame:CreateToggle("AutoSpinWheel", {Title = "Auto Spin Wheel", Default = false})
-AutoSpinWheel:OnChanged(function(state)
+Tabs.MainGame:CreateToggle("AutoSpinWheel", {
+    Title = "Auto Spin Wheel",
+    Default = false
+}):OnChanged(function(state)
     if state then
         task.spawn(function()
-            while AutoSpinWheel.Value do
-                game.ReplicatedStorage.GameClient.Events.RemoteEvent.SpaceEggEvent:FireServer()
+            while Options.AutoSpinWheel.Value do
+                game:GetService("ReplicatedStorage").GameClient.Events.RemoteEvent.SpaceEggEvent:FireServer()
                 task.wait(20)
             end
         end)
     end
 end)
 
--- Complete Quests
 Tabs.MainGame:CreateButton{
     Title = "Complete Quests",
     Callback = function()
@@ -124,11 +133,11 @@ Tabs.MainGame:CreateButton{
     end
 }
 
--- Anti AFK / Anti Lag
 Tabs.MainGame:CreateButton{
     Title = "Antiafk & Antilag",
     Callback = function()
-        game:GetService('Players').LocalPlayer.Idled:Connect(function()
+        local player = game:GetService('Players').LocalPlayer
+        player.Idled:Connect(function()
             game:GetService('VirtualUser'):CaptureController()
             game:GetService('VirtualUser'):ClickButton2(Vector2.new())
         end)
@@ -161,15 +170,26 @@ Tabs.MainGame:CreateButton{
         end
     end
 }
--- Generate Crystals Toggle
-local GenCrystals = Bosses:CreateToggle("GenCrystals", {Title = "Generate Crystals", Default = false})
-GenCrystals:OnChanged(function(state)
+
+--------------------------
+-- BOSSES TAB
+--------------------------
+local bossMap = {
+    ["The King"]="Boss1",["Dravenar"]="Boss2",["Glacius"]="Boss3",["Anubis"]="Boss4",
+    ["Bossbot"]="Boss5",["Lazyfish"]="Boss6",["Yokai"]="Boss7",["Vort3x"]="Boss8",
+    ["Underlord"]="Boss9",["The Conquerer"]="Boss10",
+}
+
+Tabs.Bosses:CreateLabel("InfoLabel", {Title = "TP Lab/Ocean = Crystals."})
+
+Tabs.Bosses:CreateToggle("GenCrystals", {Title = "Generate Crystals", Default = false})
+:OnChanged(function(state)
     local r = game.ReplicatedStorage.Remotes.Events
     if state then
         r.RemoveC:FireServer(1)
         task.spawn(function()
-            while GenCrystals.Value do
-                for i = 1, 20 do
+            while Options.GenCrystals.Value do
+                for i=1,20 do
                     r.WinMegaBossEvent:FireServer("Dragon6", "Chaos")
                 end
                 task.wait()
@@ -180,12 +200,11 @@ GenCrystals:OnChanged(function(state)
     end
 end)
 
--- Spin Crystal Wheels Toggle
-local SpinWheel = Bosses:CreateToggle("SpinWheel", {Title = "Spin Crystal Wheels", Default = false})
-SpinWheel:OnChanged(function(state)
+Tabs.Bosses:CreateToggle("SpinWheel", {Title = "Spin Crystal Wheels", Default = false})
+:OnChanged(function(state)
     if state then
         task.spawn(function()
-            while SpinWheel.Value do
+            while Options.SpinWheel.Value do
                 local r = game.ReplicatedStorage.Remotes.Events
                 r.WorldWheelEvent:FireServer("5")
                 r.SpinWheelSecret:FireServer("-8", "563")
@@ -196,21 +215,14 @@ SpinWheel:OnChanged(function(state)
     end
 end)
 
--- Kill Title Boss Toggle
-local KillBoss = Bosses:CreateToggle("KillBoss", {Title = "Kill Title Boss", Default = false})
-KillBoss:OnChanged(function(state)
+Tabs.Bosses:CreateToggle("KillBoss", {Title = "Kill Title Boss", Default = false})
+:OnChanged(function(state)
     local r = game.ReplicatedStorage.Remotes.Events
     if state then
         r.RemoveC:FireServer(1)
-        task.wait(0.1)
-        local bossMap = {
-            ["The King"]="Boss1",["Dravenar"]="Boss2",["Glacius"]="Boss3",["Anubis"]="Boss4",
-            ["Bossbot"]="Boss5",["Lazyfish"]="Boss6",["Yokai"]="Boss7",["Vort3x"]="Boss8",
-            ["Underlord"]="Boss9",["The Conquerer"]="Boss10",
-        }
         local chosen = bossMap[Options.BossTarget.Value] or "Boss1"
         task.spawn(function()
-            while KillBoss.Value do
+            while Options.KillBoss.Value do
                 r.WinBossEvent:FireServer(chosen)
                 task.wait(0.2)
             end
@@ -220,12 +232,10 @@ KillBoss:OnChanged(function(state)
     end
 end)
 
-local BossTarget = Bosses:CreateDropdown("BossTarget", {
+Tabs.Bosses:CreateDropdown("BossTarget", {
     Title = "Select Boss",
     Values = {"The King","Dravenar","Glacius","Anubis","Bossbot","Lazyfish","Yokai","Vort3x","Underlord","The Conquerer"},
-    Multi = false,
-    Default = 1
-})
-BossTarget:OnChanged(function(value)
-    -- Automatically used in KillBoss logic via Options.BossTarget.Value
+    Default = "The King"
+}):OnChanged(function(value)
+    -- Used automatically in KillBoss logic
 end)
