@@ -233,13 +233,6 @@ local function teleportLoop()
     local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
 
-    local args = {"-234", false}
-    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("PortalC"):FireServer(unpack(args))
-
-    task.wait(0.2)
-
-    hrp.CFrame = CFrame.new(4857, 539, -1773)
-
     task.spawn(function()
         while teleporting and hrp do
             local t = nearestTorso(hrp, 150)
@@ -308,6 +301,7 @@ Tabs.Abyss:CreateToggle("Teleport", {
     end
 end)
 
+
 Tabs.Abyss:CreateDropdown("TeleportTarget", {
     Title = "Select Target",
     Values = {"Skeletons", "Commander Skeleton", "Hollow King (700)"},
@@ -322,6 +316,36 @@ Tabs.Abyss:CreateDropdown("TeleportTarget", {
         elseif value == "Hollow King (700)" then
             teleportHollowKing700()
         end
+    end
+end)
+
+local Remotes = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("Dungeon")
+
+local joinToggle = Tabs.Abyss:CreateToggle("Join Dungeon", {
+    Title = "Join Dungeon",
+    Default = false
+})
+
+local joinDropdown = Tabs.Abyss:CreateDropdown("Select Dungeon mode", {
+    Title = "Join Dungeon mode",
+    Values = {"Normal", "Hard", "Chaos"},
+    Default = "Normal"
+})
+
+local function fireJoinDungeon(mode)
+    local args = {mode}
+    Remotes.OnJoinDungeon:FireServer(unpack(args))
+end
+
+joinToggle:OnChanged(function(state)
+    if state then
+        fireJoinDungeon(joinDropdown.Value)
+    end
+end)
+
+joinDropdown:OnChanged(function(mode)
+    if joinToggle.Value then
+        fireJoinDungeon(mode)
     end
 end)
 
