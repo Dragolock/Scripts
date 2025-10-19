@@ -163,3 +163,82 @@ Tabs.MainGame:CreateButton{
         end
     end
 }
+
+bossTab:CreateParagraph("BossInfo", {
+    Title = "Info",
+    Content = "TP Lab/Ocean = Crystals.",
+    TitleAlignment = "Left",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
+
+-- Generate Crystals
+local GenCrystals = bossTab:CreateToggle("GenCrystals", {Title = "Generate Crystals", Default = false})
+GenCrystals:OnChanged(function(state)
+    local r = game.ReplicatedStorage.Remotes.Events
+    if state then
+        r.RemoveC:FireServer(1)
+        task.spawn(function()
+            while GenCrystals.Value do
+                for i = 1, 20 do
+                    r.WinMegaBossEvent:FireServer("Dragon6", "Chaos")
+                end
+                task.wait()
+            end
+        end)
+    else
+        r.RemoveC:FireServer(0)
+    end
+end)
+
+-- Spin Crystal Wheels
+local SpinWheel = bossTab:CreateToggle("SpinWheel", {Title = "Spin Crystal Wheels", Default = false})
+SpinWheel:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            while SpinWheel.Value do
+                local r = game.ReplicatedStorage.Remotes.Events
+                r.WorldWheelEvent:FireServer("5")
+                r.SpinWheelSecret:FireServer("-8", "563")
+                r.WorldWheelEvent:FireServer("6")
+                task.wait(1)
+            end
+        end)
+    end
+end)
+
+-- Kill Title Boss
+local KillBoss = bossTab:CreateToggle("KillBoss", {Title = "Kill Title Boss", Default = false})
+KillBoss:OnChanged(function(state)
+    local r = game.ReplicatedStorage.Remotes.Events
+    if state then
+        r.RemoveC:FireServer(1)
+        task.wait(0.1)
+        local bossMap = {
+            ["The King"]="Boss1", ["Dravenar"]="Boss2", ["Glacius"]="Boss3", ["Anubis"]="Boss4",
+            ["Bossbot"]="Boss5", ["Lazyfish"]="Boss6", ["Yokai"]="Boss7", ["Vort3x"]="Boss8",
+            ["Underlord"]="Boss9", ["The Conquerer"]="Boss10",
+        }
+        local chosen = bossMap[Options.BossTarget.Value] or "Boss1"
+        task.spawn(function()
+            while KillBoss.Value do
+                r.WinBossEvent:FireServer(chosen)
+                task.wait(0.2)
+            end
+        end)
+    else
+        r.RemoveC:FireServer(0)
+    end
+end)
+
+local BossTarget = bossTab:CreateDropdown("BossTarget", {
+    Title = "Select Boss",
+    Values = {"The King","Dravenar","Glacius","Anubis","Bossbot","Lazyfish","Yokai","Vort3x","Underlord","The Conquerer"},
+    Multi = false,
+    Default = 1
+})
+
+BossTarget:OnChanged(function(value)
+    if KillBoss.Value then
+    end
+end)
+
