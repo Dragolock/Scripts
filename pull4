@@ -35,15 +35,13 @@ local worldsTab = Window:CreateTab("Worlds/Secret Worlds")
 local pvpTab = Window:CreateTab("PvP Stuff")
 local eventsTab = Window:CreateTab("Events")
 
-local mainGameSection = mainTab:CreateSection("Main Game", false)
-local bossSection = bossesTab:CreateSection("Bosses", false)
-local worldSection = worldsTab:CreateSection("Worlds/Secret Worlds", false)
-local pvpSection = pvpTab:CreateSection("PvP Stuff", false)
-local abyssSection = eventsTab:CreateSection("Abyss Event", false)
-local fishingSection = eventsTab:CreateSection("Fishing Event", false)
-local halloweenSection = eventsTab:CreateSection("Halloween", false)
+--// Sections
+mainTab:CreateSection("Main Game")
+bossesTab:CreateSection("Bosses")
+worldsTab:CreateSection("Worlds/Secret Worlds")
+pvpTab:CreateSection("PvP Stuff")
+eventsTab:CreateSection("Abyss Event")
 
-mainTab:CreateLabel("Creator = Not me")
 
 -- ===================================================================
 -- MAIN GAME: Auto Click, Hatch Nearest, Auto Spin Wheel, Quest Completer
@@ -517,7 +515,7 @@ pvpTab:CreateButton({
 -- ===================================================================
 
 -- Underworld Event (Dungeon fast attack)
-abyssSection:CreateToggle({
+eventsTab:CreateToggle({
     Name = "Dungeon Fast Attack",
     Info = "Fast Attack",
     CurrentValue = false,
@@ -540,7 +538,7 @@ abyssSection:CreateToggle({
 })
 
 -- TP Raid Skellys
-abyssSection:CreateToggle({
+eventsTab:CreateToggle({
     Name = "TP Raid Skellys",
     Info = "Teleport to the nearest skelly",
     CurrentValue = false,
@@ -643,7 +641,7 @@ abyssSection:CreateToggle({
 })
 
 -- Generate Souls (Dungeon farming)
-abyssSection:CreateToggle({
+eventsTab:CreateToggle({
     Name = "Generate Souls",
     Info = "Join/Leave dungeon to generate souls",
     CurrentValue = false,
@@ -734,7 +732,7 @@ abyssSection:CreateToggle({
     end
 })
 
-abyssSection:CreateToggle({
+eventsTab:CreateToggle({
     Name = "InstantTP Sketies",
     Info = "Teleport to the nearest Skelly",
     CurrentValue = false,
@@ -915,7 +913,7 @@ local function teleportHollowKing700()
 end
 
 -- Teleport toggle + list
-abyssSection:CreateToggle({
+eventsTab:CreateToggle({
     Name = "Teleport",
     Info = "Teleports to selected target (Skeletons, Commander, Hollow King)",
     CurrentValue = false,
@@ -944,7 +942,7 @@ abyssSection:CreateToggle({
     end
 })
 
-abyssSection:CreateDropdown({
+eventsTab:CreateDropdown({
     Name = "Select Target",
     Options = {"Skeletons", "Commander Skeleton", "Hollow King (700)"},
     CurrentOption = "Skeletons",
@@ -966,7 +964,7 @@ abyssSection:CreateDropdown({
 })
 flags["TeleportTarget"] = "Skeletons"
 
-abyssSection:CreateButton({
+eventsTab:CreateButton({
     Name = "Set WalkSpeed to 65",
     Info = "Increases your walkspeed",
     Callback = function()
@@ -981,7 +979,7 @@ abyssSection:CreateButton({
 -- FISHING Event
 -- ===================================================================
 
-fishingSection:CreateToggle({
+eventsTab:CreateToggle({
     Name = "Auto Fish (Bad)",
     Info = "Auto fish",
     CurrentValue = false,
@@ -1036,7 +1034,7 @@ fishingSection:CreateToggle({
 -- HALLOWEEN Event
 -- ===================================================================
 
-halloweenSection:CreateToggle({
+eventsTab:CreateToggle({
     Name = "Collect Pumpkins",
     Info = "Collects All the Pumpkins",
     CurrentValue = false,
