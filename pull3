@@ -16,6 +16,7 @@ local Window = Library:Window{
 -- Tabs
 local Tabs = {
     Abyss = Window:CreateTab{Title = "Abyss Event", Icon = "phosphor-sword-bold"},
+    AbyssDungeon = Window:CreateTab{Title = "Abyss Dungeon", Icon = "phosphor-sword-bold"},
     Fishing = Window:CreateTab{Title = "Fishing Event", Icon = "phosphor-sword-bold"},
     Halloween = Window:CreateTab{Title = "Halloween Event", Icon = "phosphor-sword-bold"},
     Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
@@ -27,7 +28,7 @@ local Options = Library.Options
 -- ABYSS EVENT TAB
 --------------------------------------------------
 
-Tabs.Abyss:CreateToggle("DungeonFastAttack", {Title = "Dungeon Fast Attack", Default = false})
+Tabs.AbyssDungeon:CreateToggle("DungeonFastAttack", {Title = "Dungeon Fast Attack", Default = false})
     :OnChanged(function(state)
         if state then
             task.spawn(function()
@@ -39,7 +40,7 @@ Tabs.Abyss:CreateToggle("DungeonFastAttack", {Title = "Dungeon Fast Attack", Def
         end
     end)
 
-Tabs.Abyss:CreateToggle("TPRaidSkellys", {Title = "TP Raid Skellys", Default = false})
+Tabs.AbyssDungeon:CreateToggle("TPRaidSkellys", {Title = "TP Raid Skellys", Default = false})
     :OnChanged(function(state)
         local player = game.Players.LocalPlayer
         local character = player.Character or player.CharacterAdded:Wait()
@@ -106,7 +107,7 @@ Tabs.Abyss:CreateToggle("TPRaidSkellys", {Title = "TP Raid Skellys", Default = f
         end)
     end)
 
-Tabs.Abyss:CreateToggle("GenerateSouls", {
+Tabs.AbyssDungeon:CreateToggle("GenerateSouls", {
     Title = "Generate Souls",
     Default = false
 }):OnChanged(function(state)
