@@ -1,78 +1,83 @@
--- Load library
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/liebertsx/Tora-Library/main/src/librarynew",true))()
---------------------------------------------------
--- MAIN WINDOW
---------------------------------------------------
-local mainTab = library:CreateWindow("PAS - HUB")
-local mainGame = mainTab:AddFolder("Main Game")
-local bossTab  = mainTab:AddFolder("Bosses")
-local worldTab = mainTab:AddFolder("Worlds/Secret Worlds")
-local pvpTab  = mainTab:AddFolder("PvP Stuff")
-mainTab:AddLabel({ text = "Creator = Not me", type = "label" })
---------------------------------------------------
--- ABYSS EVENT WINDOW (Old name was herald, too lazy to change)
---------------------------------------------------
-local heraldWindow = library:CreateWindow("Events")
-local eventTab = heraldWindow:AddFolder("Abyss Event")
-local fishingTab = heraldWindow:AddFolder("Fishing Event")
-local halloweenTab = heraldWindow:AddFolder("Halloween")
---------------------------------------------------
+-- Load Fluent
+local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
+local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
+local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
+
+-- Main Window
+local Window = Library:CreateWindow{
+    Title = "PAS - HUB",
+    SubTitle = "Creator = Not me",
+    Size = UDim2.fromOffset(830, 525),
+    Resize = true,
+    MinSize = Vector2.new(470, 380),
+    Acrylic = true,
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.RightControl
+}
+
+-- Tabs
+local Tabs = {
+    MainGame = Window:CreateTab{Title = "Main Game", Icon = "ph-users"},
+    Bosses = Window:CreateTab{Title = "Bosses", Icon = "ph-skull"},
+    Worlds = Window:CreateTab{Title = "Worlds/Secret Worlds", Icon = "ph-globe"},
+    PvP = Window:CreateTab{Title = "PvP Stuff", Icon = "ph-sword"},
+    Events = Window:CreateTab{Title = "Events", Icon = "ph-flame"},
+    Fishing = Window:CreateTab{Title = "Fishing Event", Icon = "ph-fish"},
+    Halloween = Window:CreateTab{Title = "Halloween", Icon = "ph-pumpkin"}
+}
+
 -- MAIN GAME
---------------------------------------------------
-mainGame:AddToggle({
-    text = "Auto Click",
-    flag = "AutoClick",
-    callback = function(state)
-        if state then
-            task.spawn(function()
-                while library.flags["AutoClick"] do
-                    game.ReplicatedStorage.Remotes.Events.ClickEvent:FireServer()
-                    task.wait()
-                end
-            end)
-        end
+-- Auto Click
+local AutoClick = Tabs.MainGame:CreateToggle("AutoClick", {Title = "Auto Click", Default = false})
+AutoClick:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            while AutoClick.Value do
+                game.ReplicatedStorage.Remotes.Events.ClickEvent:FireServer()
+                task.wait()
+            end
+        end)
     end
-})
+end)
+
+-- Hatch Nearest
 local eggList = {
     "W1E1","W2E1","W3E1","W4E1","W5E1","W6E1","W7E1","W8E1","W9E1","W10E1",
     "W11E1","W12E1","W13E1","W14E1","W15E1","W16E1","W17E1","W18E1","W19E1","W20E1",
     "W21E1","W22E1","W23E1","W24E1","W25E1","W26E1","W27E1","W28E1","W29E1","W30E1",
     "W31E1","W32E1","W33E1","W34E1","W35E1","Common Egg"
 }
-mainGame:AddToggle({
-    text = "Hatch Nearest",
-    flag = "HatchNearest",
-    callback = function(state)
-        if state then
-            task.spawn(function()
-                while library.flags["HatchNearest"] do
-                    for _, egg in ipairs(eggList) do
-                        game.ReplicatedStorage.GameClient.Events.RemoteFunction.BuyEgg:InvokeServer(egg,"Buy1")
-                    end
-                    task.wait(0.3)
+local HatchNearest = Tabs.MainGame:CreateToggle("HatchNearest", {Title = "Hatch Nearest", Default = false})
+HatchNearest:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            while HatchNearest.Value do
+                for _, egg in ipairs(eggList) do
+                    game.ReplicatedStorage.GameClient.Events.RemoteFunction.BuyEgg:InvokeServer(egg,"Buy1")
                 end
-            end)
-        end
+                task.wait(0.3)
+            end
+        end)
     end
-})
-mainGame:AddToggle({
-    text = "Auto Spin Wheel",
-    flag = "AutoSpinWheel",
-    callback = function(state)
-        if state then
-            task.spawn(function()
-                while library.flags["AutoSpinWheel"] do
-                    game:GetService("ReplicatedStorage").GameClient.Events.RemoteEvent.SpaceEggEvent:FireServer()
-                    task.wait(20)
-                end
-            end)
-        end
+end)
+
+-- Auto Spin Wheel
+local AutoSpinWheel = Tabs.MainGame:CreateToggle("AutoSpinWheel", {Title = "Auto Spin Wheel", Default = false})
+AutoSpinWheel:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            while AutoSpinWheel.Value do
+                game.ReplicatedStorage.GameClient.Events.RemoteEvent.SpaceEggEvent:FireServer()
+                task.wait(20)
+            end
+        end)
     end
-})
--- Quest Completer
-mainGame:AddButton({
-    text = "Complete Quests",
-    callback = function()
+end)
+
+-- Complete Quests
+Tabs.MainGame:CreateButton{
+    Title = "Complete Quests",
+    Callback = function()
         local remotes = game:GetService("ReplicatedStorage").Remotes.Events
         remotes.RemoveC:FireServer(1)
         task.wait()
@@ -119,11 +124,12 @@ mainGame:AddButton({
             task.wait(0.5)
         end
     end
-})
+}
+
 -- Anti AFK / Anti Lag
-mainGame:AddButton({
-    text = "Antiafk & Antilag",
-    callback = function()
+Tabs.MainGame:CreateButton{
+    Title = "Antiafk & Antilag",
+    Callback = function()
         game:GetService('Players').LocalPlayer.Idled:Connect(function()
             game:GetService('VirtualUser'):CaptureController()
             game:GetService('VirtualUser'):ClickButton2(Vector2.new())
@@ -156,752 +162,4 @@ mainGame:AddButton({
             end
         end
     end
-})
---------------------------------------------------
--- BOSSES
---------------------------------------------------
--- Info Label above Generate Crystals
-bossTab:AddLabel({
-    text = "TP Lab/Ocean = Crystals.",
-    type = "label"
-})
-bossTab:AddToggle({
-    text = "Generate Crystals",
-    flag = "GenCrystals",
-    callback = function(state)
-        local r = game.ReplicatedStorage.Remotes.Events
-        if state then
-            r.RemoveC:FireServer(1)
-            task.spawn(function()
-                while library.flags["GenCrystals"] do
-                    for i=1,20 do
-                        r.WinMegaBossEvent:FireServer("Dragon6", "Chaos")
-                    end
-                    task.wait()
-                end
-            end)
-        else
-            r.RemoveC:FireServer(0)
-        end
-    end
-})
-bossTab:AddToggle({
-    text = "Spin Crystal Wheels",
-    flag = "SpinWheel",
-    callback = function(state)
-        if state then
-            task.spawn(function()
-                while library.flags["SpinWheel"] do
-                    local r = game.ReplicatedStorage.Remotes.Events
-                    r.WorldWheelEvent:FireServer("5")
-                    r.SpinWheelSecret:FireServer("-8", "563")
-                    r.WorldWheelEvent:FireServer("6")
-                    task.wait(1)
-                end
-            end)
-        end
-    end
-})
-bossTab:AddToggle({
-    text = "Kill Title Boss",
-    flag = "KillBoss",
-    callback = function(state)
-        local r = game.ReplicatedStorage.Remotes.Events
-        if state then
-            r.RemoveC:FireServer(1)
-            task.wait(0.1)
-            local bossMap = {
-                ["The King"]="Boss1",["Dravenar"]="Boss2",["Glacius"]="Boss3",["Anubis"]="Boss4",
-                ["Bossbot"]="Boss5",["Lazyfish"]="Boss6",["Yokai"]="Boss7",["Vort3x"]="Boss8",
-                ["Underlord"]="Boss9",["The Conquerer"]="Boss10",
-            }
-            local chosen = bossMap[library.flags["BossTarget"]] or "Boss1"
-            task.spawn(function()
-                while library.flags["KillBoss"] do
-                    r.WinBossEvent:FireServer(chosen)
-                    task.wait(0.2)
-                end
-            end)
-        else
-            r.RemoveC:FireServer(0)
-        end
-    end
-})
-bossTab:AddList({
-    text = "Select Boss",
-    values = {"The King","Dravenar","Glacius","Anubis","Bossbot","Lazyfish","Yokai","Vort3x","Underlord","The Conquerer"},
-    flag = "BossTarget",
-    value = "The King"
-})
---------------------------------------------------
--- WORLDS / SECRET WORLDS
---------------------------------------------------
-local worldOptions = {
-    {name="Castle",args={"2",true}}, {name="Volcano Cave",args={"1",true}},
-    {name="Glacier Peaks",args={"3",true}}, {name="Desert Island",args={"5",true}},
-    {name="The Lab",args={"7",true}}, {name="Ocean",args={"9",true}},
-    {name="Temple",args={"11",true}}, {name="Arcade",args={"13",true}},
-    {name="Underworld",args={"15",true}}, {name="Darkstar",args={"17",true}},
-    {name="Nyxra Place",args={"-6",false}}, {name="Anubis",args={"-8",false}},
-    {name="Viridian",args={"-14",false}}, {name="Ultra Prime",args={"-10",false}},
 }
-worldTab:AddButton({
-    text = "TP to World",
-    callback = function()
-        local selected = library.flags["WorldTarget"]
-        for _, opt in ipairs(worldOptions) do
-            if opt.name == selected then
-                game.ReplicatedStorage.Remotes.Events.PortalC:FireServer(unpack(opt.args))
-                break
-            end
-        end
-    end
-})
-local secretBossOptions = {
-    {name="Nyxra",dragon="Dragon-3"},
-    {name="RaZar",dragon="Dragon-4"},
-    {name="Viridian",dragon="Dragon-5"},
-    {name="Ultra Prime",dragon="Dragon-8"},
-}
-local difficultyOptions = {"Normal","Hard","Chaos"}
-worldTab:AddToggle({
-    text = "Kill Secret Boss",
-    flag = "KillSecretBoss",
-    callback = function(state)
-        local remotes = game.ReplicatedStorage.Remotes.Events
-        if state then
-            local boss=nil
-            for _, b in ipairs(secretBossOptions) do
-                if library.flags["SecretBossTarget"]==b.name then boss=b.dragon break end
-            end
-            local difficulty = library.flags["SecretBossDifficulty"]
-            if boss and difficulty then
-                remotes.RemoveC:FireServer(1)
-                task.wait(0.2)
-                task.spawn(function()
-                    while library.flags["KillSecretBoss"] do
-                        remotes.WinMegaBossEvent:FireServer(boss,difficulty)
-                        task.wait(0.2)
-                    end
-                end)
-            end
-        else remotes.RemoveC:FireServer(0) end
-    end
-})
-worldTab:AddList({
-    text="Select World",
-    values=(function() local t={} for _,o in ipairs(worldOptions)do table.insert(t,o.name)end return t end)(),
-    flag="WorldTarget", value=worldOptions[1].name
-})
-worldTab:AddList({
-    text="Select Which Boss",
-    values=(function() local t={} for _,b in ipairs(secretBossOptions)do table.insert(t,b.name)end return t end)(),
-    flag="SecretBossTarget", value=secretBossOptions[1].name
-})
-worldTab:AddList({
-    text="Difficulty",
-    values=difficultyOptions,
-    flag="SecretBossDifficulty",
-    value=difficultyOptions[1]
-})
---------------------------------------------------
--- PVP stuff
---------------------------------------------------
-pvpTab:AddToggle({
-    text = "Buy Potions",
-    flag = "BuyPotions",
-    callback = function(state)
-        if state then
-            task.spawn(function()
-                while library.flags["BuyPotions"] do
-                    local remotes = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events")
-                    remotes.HalloweenShopEvent:FireServer("WinsPotions")
-                    remotes.HalloweenShopEvent:FireServer("ShinyPotions")
-                    task.wait() -- minimal yield, no manual delay
-                end
-            end)
-        end
-    end
-})
--- grab all player names
-local function getPlayerNames()
-    local t = {}
-    for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
-        table.insert(t, player.Name)
-    end
-    return t
-end
-local playerNames = getPlayerNames()
--- Auto PvP toggle
-pvpTab:AddToggle({
-    text = "Auto PvP",
-    flag = "AutoPvP",
-    callback = function(state)
-        if state then
-            task.spawn(function()
-                while library.flags["AutoPvP"] do
-                    local r = game.ReplicatedStorage.Remotes.Events
-                    local targetName = library.flags["PvPTarget"]
-                    if targetName and targetName ~= "" then
-                        r.WinEvent_PVP:FireServer(targetName, true, true)
-                    end
-                    task.wait(0.7)
-                end
-            end)
-        end
-    end
-})
--- PvP Test Button
-pvpTab:AddButton({
-    text = "PvP Test (x2 Instant)",
-    callback = function()
-        local r = game.ReplicatedStorage.Remotes.Events
-        local targetName = library.flags["PvPTarget"]
-        if targetName and targetName ~= "" then
-            for i = 1, 2 do
-                r.WinEvent_PVP:FireServer(targetName, true, true)
-            end
-        end
-    end
-})
--- Dropdown to pick player
-local dropdownRef
-dropdownRef = pvpTab:AddList({
-    text = "Select PvP Target",
-    values = playerNames,
-    flag = "PvPTarget",
-    value = playerNames[1] or ""
-})
--- Refresh Players Button
-pvpTab:AddButton({
-    text = "Refresh Players",
-    callback = function()
-        playerNames = getPlayerNames()
-        if dropdownRef then
-            dropdownRef.values = playerNames
-            dropdownRef:SetValue(playerNames[1] or "")
-        end
-    end
-})
---------------------------------------------------
--- UNDERWORLD EVENT
---------------------------------------------------
-
-eventTab:AddToggle({
-    text = "Dungeon Fast Attack",
-    flag = "DungeonFastAttack",
-    callback = function(state)
-        if state then
-            task.spawn(function()
-                while library.flags["DungeonFastAttack"] do
-                    game:GetService("ReplicatedStorage")
-                        :WaitForChild("Remotes")
-                        :WaitForChild("Events")
-                        :WaitForChild("Dungeon")
-                        :WaitForChild("OnDungeonClick")
-                        :FireServer()
-                    task.wait()
-                end
-            end)
-        end
-    end,
-})
-
-eventTab:AddToggle({
-    text = "TP Raid Skellys",
-    flag = "TPRaidSkellys",
-    callback = function(state)
-        local player = game.Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local hrp = character:WaitForChild("HumanoidRootPart")
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-
-        if state then
-            if not hrp:FindFirstChild("SkellyVelocity") then
-                local bv = Instance.new("BodyVelocity")
-                bv.Name = "SkellyVelocity"
-                bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-                bv.Velocity = Vector3.new(0, 0, 0)
-                bv.Parent = hrp
-            end
-        else
-            if hrp:FindFirstChild("SkellyVelocity") then
-                hrp.SkellyVelocity:Destroy()
-            end
-            return
-        end
-
-        local torsos = {}
-
-        local function refreshTorsos()
-            torsos = {}
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("BasePart") and v.Name == "UpperTorso" then
-                    local model = v:FindFirstAncestorOfClass("Model")
-                    local playerFromModel = model and game.Players:GetPlayerFromCharacter(model)
-                    if not playerFromModel then
-                        table.insert(torsos, v)
-                    end
-                end
-            end
-        end
-
-        refreshTorsos()
-
-        local torsoAddedConnection = workspace.DescendantAdded:Connect(function(v)
-            if v:IsA("BasePart") and v.Name == "UpperTorso" then
-                local model = v:FindFirstAncestorOfClass("Model")
-                local playerFromModel = model and game.Players:GetPlayerFromCharacter(model)
-                if not playerFromModel then
-                    table.insert(torsos, v)
-                end
-            end
-        end)
-
-        -- Remove invalid torsos automatically
-        local torsoRemovedConnection = workspace.DescendantRemoving:Connect(function(v)
-            if v:IsA("BasePart") and v.Name == "UpperTorso" then
-                for i, t in ipairs(torsos) do
-                    if t == v then
-                        table.remove(torsos, i)
-                        break
-                    end
-                end
-            end
-        end)
-
-        task.spawn(function()
-            while library.flags["TPRaidSkellys"] and character.Parent do
-                if #torsos == 0 then
-                    refreshTorsos()
-                end
-
-                local nearestTorso
-                local nearestDistance = 100
-                local hrpPos = hrp.Position
-
-                for i, torso in ipairs(torsos) do
-                    if torso and torso.Parent then
-                        local distance = (hrpPos - torso.Position).Magnitude
-                        if distance < nearestDistance then
-                            nearestDistance = distance
-                            nearestTorso = torso
-                        end
-                    end
-                end
-
-                if nearestTorso then
-                    if humanoid and humanoid.Sit then
-                        humanoid.Sit = false
-                    end
-                    hrp.CFrame = CFrame.new(nearestTorso.Position + Vector3.new(0, -2, 0))
-                end
-
-                task.wait()
-            end
-
-            if torsoAddedConnection then torsoAddedConnection:Disconnect() end
-            if torsoRemovedConnection then torsoRemovedConnection:Disconnect() end
-            if hrp:FindFirstChild("SkellyVelocity") then hrp.SkellyVelocity:Destroy() end
-        end)
-    end,
-})
-
-eventTab:AddToggle({
-    text = "Generate Souls",
-    flag = "GenerateSouls",
-    callback = function(state)
-        local ReplicatedStorage = game:GetService("ReplicatedStorage")
-        local Players = game:GetService("Players")
-        local Workspace = game:GetService("Workspace")
-
-        local player = Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local hrp = character:WaitForChild("HumanoidRootPart")
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-
-        if state then
-            task.spawn(function()
-                if not hrp:FindFirstChild("SketVelocity") then
-                    local bodyVelocity = Instance.new("BodyVelocity")
-                    bodyVelocity.Name = "SketVelocity"
-                    bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-                    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-                    bodyVelocity.Parent = hrp
-                end
-
-                local skets = {}
-                for _, v in pairs(Workspace:GetDescendants()) do
-                    if v:IsA("Model") and v.Name:lower() == "sket" then
-                        table.insert(skets, v)
-                    end
-                end
-
-                local sketAddedConnection
-                sketAddedConnection = Workspace.DescendantAdded:Connect(function(v)
-                    if v:IsA("Model") and v.Name:lower() == "sket" then
-                        table.insert(skets, v)
-                    end
-                end)
-
-                local function teleportToNearestSket()
-                    local nearestSket
-                    local nearestDistance = math.huge
-
-                    for _, sket in ipairs(skets) do
-                        if sket.PrimaryPart then
-                            local distance = (hrp.Position - sket.PrimaryPart.Position).Magnitude
-                            if distance < nearestDistance then
-                                nearestDistance = distance
-                                nearestSket = sket
-                            end
-                        end
-                    end
-
-                    if nearestSket and nearestSket.PrimaryPart then
-                        if humanoid and humanoid.Sit then
-                            humanoid.Sit = false
-                        end
-                        hrp.CFrame = CFrame.new(nearestSket.PrimaryPart.Position + Vector3.new(0, 8.7, 0))
-                    end
-                end
-
-                local Remotes = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("Dungeon")
-
-                while library.flags["GenerateSouls"] do
-                    Remotes:WaitForChild("OnJoinDungeon"):FireServer("Normal")
-                    local startTime = tick()
-                    while tick() - startTime < 0.5 do
-                        teleportToNearestSket()
-                        Remotes:WaitForChild("OnDungeonClick"):FireServer()
-                        task.wait()
-                    end
-                    Remotes:WaitForChild("OnLeaveDungeon"):FireServer(true)
-                    task.wait(0.1)
-                end
-
-                if hrp:FindFirstChild("SketVelocity") then
-                    hrp.SketVelocity:Destroy()
-                end
-                if sketAddedConnection then
-                    sketAddedConnection:Disconnect()
-                end
-            end)
-        else
-            if hrp:FindFirstChild("SketVelocity") then
-                hrp.SketVelocity:Destroy()
-            end
-        end
-    end,
-})
-
-eventTab:AddToggle({
-    text = "InstantTP Sketies",
-    flag = "InstantTPSketies",
-    callback = function(state)
-        local player = game.Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local hrp = character:WaitForChild("HumanoidRootPart")
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-
-        if state then
-            if not hrp:FindFirstChild("SketVelocity") then
-                local bodyVelocity = Instance.new("BodyVelocity")
-                bodyVelocity.Name = "SketVelocity"
-                bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-                bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-                bodyVelocity.Parent = hrp
-            end
-        else
-            if hrp:FindFirstChild("SketVelocity") then
-                hrp.SketVelocity:Destroy()
-            end
-            return
-        end
-
-        local skets = {}
-        for _, v in pairs(workspace:GetDescendants()) do
-            if v:IsA("Model") and v.Name:lower() == "sket" then
-                table.insert(skets, v)
-            end
-        end
-
-        local sketAddedConnection
-        sketAddedConnection = workspace.DescendantAdded:Connect(function(v)
-            if v:IsA("Model") and v.Name:lower() == "sket" then
-                table.insert(skets, v)
-            end
-        end)
-
-        task.spawn(function()
-            while library.flags["InstantTPSketies"] and character.Parent do
-                local nearestSket
-                local nearestDistance = math.huge
-
-                for _, sket in ipairs(skets) do
-                    if sket.PrimaryPart then
-                        local distance = (hrp.Position - sket.PrimaryPart.Position).Magnitude
-                        if distance < nearestDistance then
-                            nearestDistance = distance
-                            nearestSket = sket
-                        end
-                    end
-                end
-
-                if nearestSket and nearestSket.PrimaryPart then
-                    if humanoid and humanoid.Sit then
-                        humanoid.Sit = false
-                    end
-                    hrp.CFrame = CFrame.new(nearestSket.PrimaryPart.Position + Vector3.new(0, 8.7, 0))
-                end
-
-                task.wait()
-            end
-
-            if sketAddedConnection then
-                sketAddedConnection:Disconnect()
-            end
-        end)
-    end,
-})
-
-local Players = game:GetService("Players")
-local CS = game:GetService("CollectionService")
-local lp = Players.LocalPlayer
-local teleporting = false
-
-local interval = 0.0001
-local distThresh = 0.1
-local lerpAlpha = 0.4
-
-for _, p in ipairs(workspace:GetDescendants()) do 
-    if p:IsA("BasePart") and p.Name == "UpperTorso" then
-        CS:AddTag(p, "SkeletonTarget")
-    end 
-end
-
-workspace.DescendantAdded:Connect(function(p)
-    if p:IsA("BasePart") and p.Name == "UpperTorso" then
-        CS:AddTag(p, "SkeletonTarget")
-    end 
-end)
-
-local function nearestTorso(hrp, radius)
-    local best, d = nil, math.huge
-    for _, p in ipairs(CS:GetTagged("SkeletonTarget")) do
-        if p:IsDescendantOf(workspace) and not Players:GetPlayerFromCharacter(p.Parent) then
-            local m = (p.Position - hrp.Position).Magnitude
-            if m < d and m <= radius then
-                d, best = m, p
-            end
-        end
-    end
-    return best
-end
-
-function teleportLoop()
-    teleporting = true
-    local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-
-    local args = {"-234", false}
-    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("PortalC"):FireServer(unpack(args))
-
-    task.wait(0.2)
-
-    hrp.CFrame = CFrame.new(4857, 539, -1773)
-
-    task.spawn(function()
-        while teleporting and hrp do
-            local t = nearestTorso(hrp, 150)
-            if t then
-                local targetPos = t.Position + Vector3.new(0, 7.8, 0)
-                if (hrp.Position - targetPos).Magnitude > distThresh then
-                    hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), lerpAlpha)
-                    hrp.AssemblyLinearVelocity = Vector3.zero
-                    hrp.AssemblyAngularVelocity = Vector3.zero
-                end
-            end
-            task.wait(interval)
-        end
-    end)
-end
-
-local function smoothTeleportLoop(targetPos)
-    teleporting = true
-    local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-
-    task.spawn(function()
-        while teleporting and hrp do
-            if (hrp.Position - targetPos).Magnitude > distThresh then
-                hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), lerpAlpha)
-                hrp.AssemblyLinearVelocity = Vector3.zero
-                hrp.AssemblyAngularVelocity = Vector3.zero
-            end
-            task.wait(interval)
-        end
-    end)
-end
-
-function teleportCommander()
-    local args = { "-234", false }
-    game:GetService("ReplicatedStorage")
-        :WaitForChild("Remotes")
-        :WaitForChild("Events")
-        :WaitForChild("PortalC")
-        :FireServer(unpack(args))
-
-    smoothTeleportLoop(Vector3.new(4758, 538, -1768))
-end
-
-function teleportHollowKing700()
-    local args = { "-236", false }
-    game:GetService("ReplicatedStorage")
-        :WaitForChild("Remotes")
-        :WaitForChild("Events")
-        :WaitForChild("PortalC")
-        :FireServer(unpack(args))
-
-    smoothTeleportLoop(Vector3.new(-3765, 665, -1161))
-end
-
-eventTab:AddToggle({
-    text = "Teleport",
-    flag = "Teleport",
-    callback = function(state)
-        teleporting = false
-        if state then
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v.Name:lower() == "monster" then
-                    v:Destroy()
-                end
-            end
-            local target = library.flags["TeleportTarget"]
-            if target == "Skeletons" then
-                teleportLoop()
-            elseif target == "Commander Skeleton" then
-                teleportCommander()
-            elseif target == "Hollow King (700)" then
-                teleportHollowKing700()
-            end
-        end
-    end,
-})
-
-eventTab:AddList({
-    text = "Select Target",
-    values = {"Skeletons", "Commander Skeleton", "Hollow King (700)"},
-    flag = "TeleportTarget",
-    value = "Skeletons",
-    callback = function(value)
-        teleporting = false
-        if library.flags["EnableTeleport"] then
-            if value == "Skeletons" then
-                teleportLoop()
-            elseif value == "Commander Skeleton" then
-                teleportCommander()
-            elseif value == "Hollow King (700)" then
-                teleportHollowKing700()
-            end
-        end
-    end,
-})
-eventTab:AddButton({
-    text = "Set WalkSpeed to 65",
-    callback = function()
-        local plr = game.Players.LocalPlayer
-        local char = plr.Character or plr.CharacterAdded:Wait()
-        local humanoid = char:WaitForChild("Humanoid")
-        humanoid.WalkSpeed = 65
-    end,
-})
-
-fishingTab:AddToggle({
-    text = "Auto Fish (Bad)",
-    flag = "AutoFishBad",
-    callback = function(state)
-        local player = game.Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local hrp = character:WaitForChild("HumanoidRootPart")
-
-        if state then
-            task.spawn(function()
-                local ReplicatedStorage = game:GetService("ReplicatedStorage")
-                local Remotes = ReplicatedStorage:WaitForChild("Remotes")
-                local Fishing = Remotes:WaitForChild("Fishing")
-
-                while library.flags["AutoFishBad"] and character.Parent do
-                    hrp.CFrame = CFrame.new(-890, 10, -246)
-                    task.wait(2)
-
-                    hrp.Anchored = true
-
-                    Fishing:WaitForChild("CastRod"):InvokeServer()
-
-                    local startTime = tick()
-                    while library.flags["AutoFishBad"] and tick() - startTime < 18 do
-                        Fishing:WaitForChild("PlayerReaction"):FireServer()
-                        task.wait(0.05)
-                    end
-
-                    if not library.flags["AutoFishBad"] then
-                        break
-                    end
-
-                    local args = {2.5}
-                    Fishing:WaitForChild("ReelIn"):FireServer(unpack(args))
-                    task.wait(1)
-                    Fishing:WaitForChild("Stop"):FireServer()
-                    task.wait(1)
-                end
-
-                hrp.Anchored = false
-            end)
-        else
-            local hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                hrp.Anchored = false
-            end
-        end
-    end,
-})
-
-
-
-halloweenTab:AddToggle({
-    text = "Collect Pumpkins",
-    flag = "CollectPumpkins",
-    callback = function(state)
-        local player = game.Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local humanoid = character:FindFirstChildOfClass("Humanoid")
-
-        task.spawn(function()
-            while library.flags["CollectPumpkins"] and character.Parent do
-                local folder = workspace:FindFirstChild("HappyPumpkins")
-                if folder then
-                    for _, part in pairs(folder:GetDescendants()) do
-                        if not library.flags["CollectPumpkins"] then
-                            break
-                        end
-                        if part:IsA("BasePart") then
-                            if humanoid and humanoid.SeatPart then
-                                humanoid.Sit = false
-                                task.wait(0.1)
-                            end
-                            character:MoveTo(part.Position + Vector3.new(0, 0, 0))
-                            task.wait(0.5)
-                        end
-                    end
-                end
-                task.wait()
-            end
-        end)
-    end,
-})
-
---------------------------------------------------
--- INIT WINDOWS
---------------------------------------------------
-library:Init()
