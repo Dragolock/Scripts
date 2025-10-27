@@ -370,6 +370,18 @@ Tabs.Abyss:CreateDropdown("TeleportTarget", {
 end)
 
 Tabs.Abyss:CreateButton{
+    Title = "Use Abyss Portal",
+    Description = "Teleports to Abyss World.",
+    Callback = function()
+        local args = {
+            "-234",
+            false
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("PortalC"):FireServer(unpack(args))
+    end
+}
+
+Tabs.Abyss:CreateButton{
     Title = "WalkSpeed 65",
     Description = "Set your speed to 65",
     Callback = function()
