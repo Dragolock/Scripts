@@ -497,30 +497,6 @@ Tabs.Halloween:CreateToggle("InfCandyPharaoh", {Title = "Inf Candy (Pharaoh)", D
         end
     end)
 
-Tabs.Halloween:CreateToggle("CycleBosses", {Title = "Cycle Bosses", Default = false})
-    :OnChanged(function(state)
-        if state then
-            task.spawn(function()
-                local removeC = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC")
-                local winBossEvent = game:GetService("ReplicatedStorage"):WaitForChild("EventFolder"):WaitForChild("WinBossEvent")
-                
-                removeC:FireServer({1})
-                task.wait(0.1)
-
-                local sequence = {"1", "2", "3"}
-                local index = 1
-
-                while Options.CycleBosses.Value do
-                    winBossEvent:FireServer({sequence[index]})
-                    task.wait(0.01)
-                    index = index + 1
-                    if index > #sequence then
-                        index = 1
-                    end
-                end
-            end)
-        end
-    end)
 
 Tabs.Halloween:CreateToggle("CollectPumpkins", {Title = "Collect Pumpkins", Default = false})
     :OnChanged(function(state)
