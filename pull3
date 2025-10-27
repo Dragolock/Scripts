@@ -528,6 +528,18 @@ Tabs.Halloween:CreateToggle("CollectPumpkins", {Title = "Collect Pumpkins", Defa
         end)
     end)
 
+Tabs.Halloween:CreateButton{
+    Title = "TTP Halloween",
+    Description = "Teleports to Halloween World.",
+    Callback = function()
+        local args = {
+            "-50",
+            false
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("PortalC"):FireServer(unpack(args))
+    end
+}
+
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
