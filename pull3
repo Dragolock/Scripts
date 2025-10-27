@@ -416,7 +416,7 @@ Tabs.Fishing:CreateToggle("AutoFishBad", {Title = "Auto Fish (Bad)", Default = f
 -- HALLOWEEN EVENT TAB
 --------------------------------------------------
 
-Tabs.AbyssDungeon:CreateToggle("AutoClick", {Title = "Auto Click", Default = false})
+Tabs.Halloween:CreateToggle("AutoClick", {Title = "Auto Click", Default = false})
     :OnChanged(function(state)
         if state then
             task.spawn(function()
@@ -461,7 +461,7 @@ Tabs.Halloween:CreateToggle("InfCandyDracula", {Title = "Inf Candy (Dracula)", D
                 task.wait(0.1)
 
                 local event = game:GetService("ReplicatedStorage"):WaitForChild("EventFolder"):WaitForChild("WinBossEvent")
-                local args = {"3"}
+                local args = {"2"}
 
                 while Options.InfCandyDracula.Value do
                     event:FireServer(unpack(args))
@@ -501,19 +501,18 @@ Tabs.Halloween:CreateToggle("CycleBosses", {Title = "Cycle Bosses", Default = fa
     :OnChanged(function(state)
         if state then
             task.spawn(function()
-                local event = game:GetService("ReplicatedStorage"):WaitForChild("EventFolder"):WaitForChild("WinBossEvent")
                 local removeC = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC")
-                local index = 1
+                local winBossEvent = game:GetService("ReplicatedStorage"):WaitForChild("EventFolder"):WaitForChild("WinBossEvent")
+                
+                removeC:FireServer({1})
+                task.wait(0.1)
+
                 local sequence = {"1", "2", "3"}
+                local index = 1
 
                 while Options.CycleBosses.Value do
-                    removeC:FireServer({1})
+                    winBossEvent:FireServer({sequence[index]})
                     task.wait(0.01)
-                    event:FireServer({sequence[index]})
-                    task.wait(0.01)
-                    removeC:FireServer({0})
-                    task.wait(0.01)
-
                     index = index + 1
                     if index > #sequence then
                         index = 1
