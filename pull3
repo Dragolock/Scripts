@@ -529,7 +529,7 @@ Tabs.Halloween:CreateToggle("CollectPumpkins", {Title = "Collect Pumpkins", Defa
     end)
 
 Tabs.Halloween:CreateButton{
-    Title = "TTP Halloween",
+    Title = "Use Halloween Portal",
     Description = "Teleports to Halloween World.",
     Callback = function()
         local args = {
