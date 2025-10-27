@@ -446,6 +446,72 @@ Tabs.Halloween:CreateToggle("CollectPumpkins", {Title = "Collect Pumpkins", Defa
         end)
     end)
 
+Tabs.Halloween:CreateToggle("InfCandy (FrankenShock)", {
+    Title = "Inf Candy (FrankenShock)",
+    Default = false
+}):OnChanged(function(state)
+    Options.InfCandyFrankenShock.Value = state
+    if state then
+        task.spawn(function()
+            local startArgs = { 1 }
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC"):FireServer(unpack(startArgs))
+            task.wait(0.1)
+            while Options.InfCandyFrankenShock.Value do
+                local bossArgs = { "1" }
+                game:GetService("ReplicatedStorage"):WaitForChild("EventFolder"):WaitForChild("WinBossEvent"):FireServer(unpack(bossArgs))
+                task.wait(0.01)
+            end
+        end)
+    else
+        local finishArgs = { 0 }
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC"):FireServer(unpack(finishArgs))
+    end
+end)
+
+Tabs.Halloween:CreateToggle("InfCandy (Dracula)", {
+    Title = "Inf Candy (FrankenShock)",
+    Default = false
+}):OnChanged(function(state)
+    Options.InfCandyFrankenShock.Value = state
+    if state then
+        task.spawn(function()
+            local startArgs = { 1 }
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC"):FireServer(unpack(startArgs))
+            task.wait(0.1)
+            while Options.InfCandyFrankenShock.Value do
+                local bossArgs = { "2" }
+                game:GetService("ReplicatedStorage"):WaitForChild("EventFolder"):WaitForChild("WinBossEvent"):FireServer(unpack(bossArgs))
+                task.wait(0.01)
+            end
+        end)
+    else
+        local finishArgs = { 0 }
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC"):FireServer(unpack(finishArgs))
+    end
+end)
+
+Tabs.Halloween:CreateToggle("InfCandy (CursedPharaoh)", {
+    Title = "Inf Candy (FrankenShock)",
+    Default = false
+}):OnChanged(function(state)
+    Options.InfCandyFrankenShock.Value = state
+    if state then
+        task.spawn(function()
+            local startArgs = { 1 }
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC"):FireServer(unpack(startArgs))
+            task.wait(0.1)
+            while Options.InfCandyFrankenShock.Value do
+                local bossArgs = { "3" }
+                game:GetService("ReplicatedStorage"):WaitForChild("EventFolder"):WaitForChild("WinBossEvent"):FireServer(unpack(bossArgs))
+                task.wait(0.01)
+            end
+        end)
+    else
+        local finishArgs = { 0 }
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC"):FireServer(unpack(finishArgs))
+    end
+end)
+
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
