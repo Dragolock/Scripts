@@ -316,27 +316,6 @@ local function teleportHollowKing700()
     smoothTeleportLoop(Vector3.new(-3765, 665, -1161))
 end
 
-Tabs.Abyss:CreateToggle("GenCrystals", {
-    Title = "Generate Crystals",
-    Default = false
-}):OnChanged(function(state)
-    local r = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events")
-
-    if state then
-        r.RemoveC:FireServer(1)
-        task.spawn(function()
-            while Options.GenCrystals.Value do
-                for i = 1, 20 do
-                    r.WinMegaBossEvent:FireServer("Dragon6", "Chaos")
-                end
-                task.wait()
-            end
-        end)
-    else
-        r.RemoveC:FireServer(0)
-    end
-end)
-
 Tabs.Abyss:CreateToggle("Teleport", {
     Title = "Teleport",
     Default = false
@@ -376,26 +355,26 @@ Tabs.Abyss:CreateDropdown("TeleportTarget", {
     end
 end)
 
-Tabs.Abyss:CreateToggle({
-    text = "Generate Crystals",
-    flag = "GenCrystals",
-    callback = function(state)
-        local r = game.ReplicatedStorage.Remotes.Events
-        if state then
-            r.RemoveC:FireServer(1)
-            task.spawn(function()
-                while library.flags["GenCrystals"] do
-                    for i = 1, 20 do
-                        r.WinMegaBossEvent:FireServer("Dragon6", "Chaos")
-                    end
-                    task.wait()
+Tabs.Abyss:CreateToggle("GenCrystals", {
+    Title = "Generate Crystals",
+    Default = false
+}):OnChanged(function(state)
+    local r = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events")
+
+    if state then
+        r.RemoveC:FireServer(1)
+        task.spawn(function()
+            while Options.GenCrystals.Value do
+                for i = 1, 20 do
+                    r.WinMegaBossEvent:FireServer("Dragon6", "Chaos")
                 end
-            end)
-        else
-            r.RemoveC:FireServer(0)
-        end
+                task.wait()
+            end
+        end)
+    else
+        r.RemoveC:FireServer(0)
     end
-})
+end)
 
 Tabs.Abyss:CreateButton{
     Title = "Use Abyss Portal",
