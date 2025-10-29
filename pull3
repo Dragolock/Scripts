@@ -316,17 +316,24 @@ local function teleportHollowKing700()
     smoothTeleportLoop(Vector3.new(-3765, 665, -1161))
 end
 
-Tabs.Abyss:CreateToggle("AttackAura", { 
-    Title = "Attack Aura", 
-    Default = false 
+Tabs.Abyss:CreateToggle("GenCrystals", {
+    Title = "Generate Crystals",
+    Default = false
 }):OnChanged(function(state)
+    local r = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events")
+
     if state then
+        r.RemoveC:FireServer(1)
         task.spawn(function()
-            while Options.AttackAura.Value do
-                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("OnAttackMob"):FireServer()
+            while Options.GenCrystals.Value do
+                for i = 1, 20 do
+                    r.WinMegaBossEvent:FireServer("Dragon6", "Chaos")
+                end
                 task.wait()
             end
         end)
+    else
+        r.RemoveC:FireServer(0)
     end
 end)
 
@@ -369,7 +376,7 @@ Tabs.Abyss:CreateDropdown("TeleportTarget", {
     end
 end)
 
-Tabs.Abyss:AddToggle({
+Tabs.Abyss:CreateToggle({
     text = "Generate Crystals",
     flag = "GenCrystals",
     callback = function(state)
