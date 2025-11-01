@@ -446,97 +446,92 @@ Tabs.Halloween:CreateToggle("AutoClick", {Title = "Auto Click", Default = false}
         end
     end)
 
-Tabs.Halloween:CreateToggle("InfCandyFrankenShock", {Title = "Inf Candy (FrankenShock)", Default = false})
+local candyDropdown = Tabs.Halloween:CreateDropdown("CandyBossSelect", {
+    Title = "Select Candy Boss",
+    Values = {"FrankenShock", "Dracula", "Cursed Pharaoh", "Witch"},
+    Default = "FrankenShock"
+})
+
+Tabs.Halloween:CreateToggle("GenerateCandyKeys", {Title = "Generate Candy/Keys", Default = false})
     :OnChanged(function(state)
         if state then
             task.spawn(function()
-                local removeArgs = {1}
-                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC"):FireServer(unpack(removeArgs))
+                local bossSelection = candyDropdown.Value
+                local event = game:GetService("ReplicatedStorage"):WaitForChild("EventFolder"):WaitForChild("WinBossEvent")
+                local removeEvent = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC")
 
+                -- Enable remove event
+                removeEvent:FireServer(1)
                 task.wait(0.1)
 
-                local event = game:GetService("ReplicatedStorage"):WaitForChild("EventFolder"):WaitForChild("WinBossEvent")
-                local args = {"1"}
+                if bossSelection == "FrankenShock" then
+                    while Options.GenerateCandyKeys.Value and candyDropdown.Value == "FrankenShock" do
+                        event:FireServer("1")
+                        task.wait(0.01)
+                    end
 
-                while Options.InfCandyFrankenShock.Value do
-                    event:FireServer(unpack(args))
-                    task.wait(0.01)
+                elseif bossSelection == "Dracula" then
+                    while Options.GenerateCandyKeys.Value and candyDropdown.Value == "Dracula" do
+                        event:FireServer("2")
+                        task.wait(0.01)
+                    end
+
+                elseif bossSelection == "Cursed Pharaoh" then
+                    while Options.GenerateCandyKeys.Value and candyDropdown.Value == "Cursed Pharaoh" do
+                        event:FireServer("3")
+                        task.wait(0.01)
+                    end
+
+                elseif bossSelection == "Witch" then
+                    while Options.GenerateCandyKeys.Value and candyDropdown.Value == "Witch" do
+                        event:FireServer("4")
+                        task.wait(0.01)
+                    end
                 end
             end)
         else
+            -- Disable remove event
             local removeArgs = {0}
             game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC"):FireServer(unpack(removeArgs))
         end
     end)
 
-Tabs.Halloween:CreateToggle("InfCandyDracula", {Title = "Inf Candy (Dracula)", Default = false})
+Tabs.Halloween:CreateToggle("AutoWitchTower", {Title = "Auto Witch Tower", Default = false})
     :OnChanged(function(state)
         if state then
             task.spawn(function()
-                local removeArgs = {1}
-                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC"):FireServer(unpack(removeArgs))
-
-                task.wait(0.1)
-
-                local event = game:GetService("ReplicatedStorage"):WaitForChild("EventFolder"):WaitForChild("WinBossEvent")
-                local args = {"2"}
-
-                while Options.InfCandyDracula.Value do
-                    event:FireServer(unpack(args))
+                local towerEvent = game:GetService("ReplicatedStorage"):WaitForChild("TowerEventRemotes"):WaitForChild("TowerRewardsEvent")
+                local lastFalse = tick()
+                while Options.AutoWitchTower.Value do
+                    towerEvent:FireServer("-21", true)
+                    if tick() - lastFalse >= 1 then
+                        towerEvent:FireServer("-21", false)
+                        lastFalse = tick()
+                    end
                     task.wait(0.01)
                 end
             end)
-        else
-            local removeArgs = {0}
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC"):FireServer(unpack(removeArgs))
         end
     end)
 
-Tabs.Halloween:CreateToggle("InfCandyPharaoh", {Title = "Inf Candy (Pharaoh)", Default = false})
+Tabs.Halloween:CreateToggle("AutoDraculaTower", {Title = "Auto Dracula Tower", Default = false})
     :OnChanged(function(state)
         if state then
             task.spawn(function()
-                local removeArgs = {1}
-                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC"):FireServer(unpack(removeArgs))
-
-                task.wait(0.1)
-
-                local event = game:GetService("ReplicatedStorage"):WaitForChild("EventFolder"):WaitForChild("WinBossEvent")
-                local args = {"3"}
-
-                while Options.InfCandyPharaoh.Value do
-                    event:FireServer(unpack(args))
+                local towerEvent = game:GetService("ReplicatedStorage"):WaitForChild("TowerEventRemotes"):WaitForChild("TowerRewardsEvent")
+                local lastFalse = tick()
+                while Options.AutoDraculaTower.Value do
+                    towerEvent:FireServer("-20", true)
+                    if tick() - lastFalse >= 1 then
+                        towerEvent:FireServer("-20", false)
+                        lastFalse = tick()
+                    end
                     task.wait(0.01)
                 end
             end)
-        else
-            local removeArgs = {0}
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC"):FireServer(unpack(removeArgs))
         end
     end)
 
-Tabs.Halloween:CreateToggle("InfCandyWitch", {Title = "Inf Candy (Witch)", Default = false})
-    :OnChanged(function(state)
-        if state then
-            task.spawn(function()
-                local removeArgs = {1}
-                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC"):FireServer(unpack(removeArgs))
-
-                task.wait(0.1)
-
-                local event = game:GetService("ReplicatedStorage"):WaitForChild("EventFolder"):WaitForChild("WinBossEvent")
-                local args = {"4"}
-
-                while Options.InfCandyWitch.Value do
-                    event:FireServer(unpack(args))
-                    task.wait(0.01)
-                end
-            end)
-        else
-            local removeArgs = {0}
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC"):FireServer(unpack(removeArgs))
-        end
-    end)
 
 Tabs.Halloween:CreateToggle("CollectPumpkins", {Title = "Collect Pumpkins", Default = false})
     :OnChanged(function(state)
