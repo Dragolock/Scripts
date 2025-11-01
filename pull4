@@ -1,780 +1,150 @@
-local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/UI-Interface/CustomFIeld/main/RayField.lua'))()
+local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
+local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
+local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
 
-local Window = Rayfield:CreateWindow({
-   Name = "PAS - HUB",
-   LoadingTitle = "PAS - HUB Loader",
-   LoadingSubtitle = "hallo :3",
-   ConfigurationSaving = {
-      Enabled = true,
-      FolderName = nil,
-      FileName = "PAS-HUB-Config"
-   },
-   Discord = {
-      Enabled = false,
-      Invite = "sirius",
-      RememberJoins = true
-   },
-   KeySystem = false,
-})
+local Window = Library:Window{
+    Title = "Pull A Sword Events",
+    SubTitle = "By coco",
+    TabWidth = 130,
+    Size =  UDim2.fromOffset(500, 430),
+    Resize = false, 
+    Theme = "Darker",
+    MinimizeKey = Enum.KeyCode.LeftShift
+}
 
-local flags = {}
+-- Tabs
+local Tabs = {
+    Abyss = Window:CreateTab{Title = "Abyss Event", Icon = "phosphor-sword-bold"},
+    AbyssDungeon = Window:CreateTab{Title = "Abyss Dungeon", Icon = "phosphor-sword-bold"},
+    Fishing = Window:CreateTab{Title = "Fishing Event", Icon = "phosphor-sword-bold"},
+    Halloween = Window:CreateTab{Title = "Halloween Event", Icon = "phosphor-sword-bold"},
+    PvP = Window:CreateTab{Title = "PvP", Icon = "phosphor-sword-bold"},
+    Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
+}
 
-local function spawnFlagLoop(flagName, fn)
-    task.spawn(function()
-        task.wait()
-        while flags[flagName] do
-            pcall(fn)
-            task.wait()
+local Options = Library.Options
+
+--------------------------------------------------
+-- ABYSS EVENT TAB
+--------------------------------------------------
+
+Tabs.AbyssDungeon:CreateToggle("DungeonFastAttack", {Title = "Dungeon Fast Attack", Default = false})
+    :OnChanged(function(state)
+        if state then
+            task.spawn(function()
+                while Options.DungeonFastAttack.Value do
+                    game:GetService("ReplicatedStorage").Remotes.Events.Dungeon.OnDungeonClick:FireServer()
+                    task.wait()
+                end
+            end)
         end
     end)
-end
 
-local mainTab = Window:CreateTab("Main Game", 4483362458)
-local bossesTab = Window:CreateTab("Bosses")
-local worldsTab = Window:CreateTab("Worlds/Secret Worlds")
-local pvpTab = Window:CreateTab("PvP Stuff")
-local eventsTab = Window:CreateTab("Events")
+Tabs.AbyssDungeon:CreateToggle("TPRaidSkellys", {Title = "TP Raid Skellys", Default = false})
+    :OnChanged(function(state)
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local hrp = character:WaitForChild("HumanoidRootPart")
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
 
---// Sections
-mainTab:CreateSection("Main Game")
-bossesTab:CreateSection("Bosses")
-worldsTab:CreateSection("Worlds/Secret Worlds")
-pvpTab:CreateSection("PvP Stuff")
-eventsTab:CreateSection("Abyss Event")
-
-
--- ===================================================================
--- MAIN GAME: Auto Click, Hatch Nearest, Auto Spin Wheel, Quest Completer
--- ===================================================================
-
--- Auto Click
-local AutoClickToggle = mainTab:CreateToggle({
-    Name = "Auto Click",
-    Info = "Fire ClickEvent repeatedly",
-    CurrentValue = false,
-    Flag = "AutoClick",
-    Callback = function(Value)
-        flags["AutoClick"] = Value
-        if Value then
-            spawnFlagLoop("AutoClick", function()
-                pcall(function()
-                    local rep = game:GetService("ReplicatedStorage")
-                    if rep and rep.Remotes and rep.Remotes.Events and rep.Remotes.Events.ClickEvent then
-                        rep.Remotes.Events.ClickEvent:FireServer()
-                    else
-                        game:GetService("ReplicatedStorage").Remotes.Events.ClickEvent:FireServer()
-                    end
-                end)
-            end)
-        end
-    end,
-})
-
--- Hatch Nearest (hatch all eggs in list in loop)
-local eggList = {
-    "W1E1","W2E1","W3E1","W4E1","W5E1","W6E1","W7E1","W8E1","W9E1","W10E1",
-    "W11E1","W12E1","W13E1","W14E1","W15E1","W16E1","W17E1","W18E1","W19E1","W20E1",
-    "W21E1","W22E1","W23E1","W24E1","W25E1","W26E1","W27E1","W28E1","W29E1","W30E1",
-    "W31E1","W32E1","W33E1","W34E1","W35E1","Common Egg"
-}
-local HatchToggle = mainTab:CreateToggle({
-    Name = "Hatch Nearest",
-    Info = "Buys eggs",
-    CurrentValue = false,
-    Flag = "HatchNearest",
-    Callback = function(Value)
-        flags["HatchNearest"] = Value
-        if Value then
-            spawnFlagLoop("HatchNearest", function()
-                pcall(function()
-                    local rf = game:GetService("ReplicatedStorage").GameClient.Events.RemoteFunction
-                    for _, egg in ipairs(eggList) do
-                        rf:InvokeServer(egg, "Buy1")
-                    end
-                end)
-                task.wait(0.3)
-            end)
-        end
-    end,
-})
-
--- Auto Spin Wheel
-local SpinWheelToggle = mainTab:CreateToggle({
-    Name = "Auto Spin Wheel",
-    Info = "Auto Spins the normal Wheel",
-    CurrentValue = false,
-    Flag = "AutoSpinWheel",
-    Callback = function(Value)
-        flags["AutoSpinWheel"] = Value
-        if Value then
-            spawnFlagLoop("AutoSpinWheel", function()
-                pcall(function()
-                    local rep = game:GetService("ReplicatedStorage")
-                    rep.GameClient.Events.RemoteEvent.SpaceEggEvent:FireServer()
-                end)
-                task.wait(20)
-            end)
-        end
-    end,
-})
-
--- Quest Completer Button
-mainTab:CreateButton({
-    Name = "Complete Quests",
-    Info = "Automatically completes Quests",
-    Callback = function()
-        task.spawn(function()
-            local remotes = game:GetService("ReplicatedStorage").Remotes.Events
-            pcall(function()
-                remotes.RemoveC:FireServer(1)
-                task.wait()
-                remotes.WorldWheelEvent:FireServer("5")
-                remotes.OnStandartShopRequest:FireServer("Buy", 2, 3)
-                remotes.OnStandartShopRequest:FireServer("Buy", 2, 1)
-                task.wait()
-                remotes.PortalC:FireServer("1", true)
-                task.wait(1)
-                remotes.PortalC:FireServer("2", true)
-                task.wait(1)
-                remotes.PortalC:FireServer("1", true)
-                task.wait(1)
-                remotes.PortalC:FireServer("2", true)
-                task.wait(1)
-                remotes.PortalC:FireServer("1", true)
-                task.wait(1)
-                remotes.PortalC:FireServer("2", true)
-                task.wait(2)
-                for i = 1, 10 do
-                    remotes.WinEvent:FireServer("5")
-                    task.wait(2)
-                end
-                task.wait(2)
-                for i = 1, 25 do
-                    remotes.WinBossEvent:FireServer("Boss1")
-                    task.wait(0.1)
-                end
-                remotes.RemoveC:FireServer(0)
-                task.wait(120)
-                local dailyArgs = {
-                    {"Daily", "UseOnSideSystem"},
-                    {"Daily", "Defeat10Enemies"},
-                    {"Daily", "Pull10Swords"},
-                    {"Daily", "Click1000Times"},
-                    {"Daily", "Win20MillionPower"},
-                    {"Daily", "GoTo5Worlds"},
-                    {"Daily", "PlayFor60Minutes"},
-                    {"Daily", "BuyItemsAtStore"},
-                    {"Daily", "Complete10Quests"},
-                }
-                for _, args in ipairs(dailyArgs) do
-                    remotes.ClaimQuest:FireServer(unpack(args))
-                    task.wait(0.5)
-                end
-            end)
-        end)
-    end
-})
-
--- Anti AFK & Anti Lag
-mainTab:CreateButton({
-    Name = "Antiafk & Antilag",
-    Info = "Increases performance",
-    Callback = function()
-        task.spawn(function()
-            -- Anti AFK:
-            local plr = game:GetService('Players').LocalPlayer
-            plr.Idled:Connect(function()
-                pcall(function()
-                    local vu = game:GetService('VirtualUser')
-                    vu:CaptureController()
-                    vu:ClickButton2(Vector2.new())
-                end)
-            end)
-
-            -- Anti Lag:
-            local g = game
-            local w = g.Workspace
-            local l = g.Lighting
-            local t = w.Terrain
-            pcall(function()
-                t.WaterWaveSize, t.WaterWaveSpeed, t.WaterReflectance, t.WaterTransparency = 0,0,0,0
-                l.GlobalShadows, l.FogEnd, l.Brightness = false, 9e9, 0
-                settings().Rendering.QualityLevel = "Level01"
-                for i, v in pairs(g:GetDescendants()) do
-                    if v:IsA("Part") or v:IsA("Union") or v:IsA("CornerWedgePart") or v:IsA("TrussPart") then
-                        v.Material, v.Reflectance = "Plastic", 0
-                    elseif v:IsA("Decal") or v:IsA("Texture") then
-                        v.Transparency = 1
-                    elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
-                        v.Lifetime = NumberRange.new(0)
-                    elseif v:IsA("Explosion") then
-                        v.BlastPressure, v.BlastRadius = 1,1
-                    elseif v:IsA("Fire") or v:IsA("SpotLight") or v:IsA("Smoke") then
-                        v.Enabled = false
-                    elseif v:IsA("MeshPart") then
-                        v.Material, v.Reflectance, v.TextureID = "Plastic", 0, ""
-                    end
-                end
-                for i, e in pairs(l:GetChildren()) do
-                    if e:IsA("BlurEffect") or e:IsA("SunRaysEffect") or e:IsA("ColorCorrectionEffect") or e:IsA("BloomEffect") or e:IsA("DepthOfFieldEffect") then
-                        e.Enabled = false
-                    end
-                end
-            end)
-        end)
-    end
-})
-
--- ===================================================================
--- BOSSES Tab
--- ===================================================================
-
-bossesTab:CreateLabel("TP Lab/Ocean = Crystals.")
-
--- Generate Crystals toggle
-local GenCrystalsToggle = bossesTab:CreateToggle({
-    Name = "Generate Crystals",
-    Info = "Generate Crystals for Ocean/Lab Wheel",
-    CurrentValue = false,
-    Flag = "GenCrystals",
-    Callback = function(Value)
-        flags["GenCrystals"] = Value
-        local r = game.ReplicatedStorage.Remotes.Events
-        if Value then
-            pcall(function() r.RemoveC:FireServer(1) end)
-            spawnFlagLoop("GenCrystals", function()
-                for i=1,20 do
-                    pcall(function()
-                        r.WinMegaBossEvent:FireServer("Dragon6", "Chaos")
-                    end)
-                end
-                task.wait()
-            end)
+        if state then
+            local bv = hrp:FindFirstChild("SkellyVelocity") or Instance.new("BodyVelocity")
+            bv.Name = "SkellyVelocity"
+            bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+            bv.Velocity = Vector3.zero
+            bv.Parent = hrp
         else
-            pcall(function() r.RemoveC:FireServer(0) end)
+            if hrp:FindFirstChild("SkellyVelocity") then hrp.SkellyVelocity:Destroy() end
+            return
         end
-    end
-})
 
--- Spin Crystal Wheels
-local SpinCrystalToggle = bossesTab:CreateToggle({
-    Name = "Spin Crystal Wheels",
-    Info = "Spin Ocean/Lab Wheel",
-    CurrentValue = false,
-    Flag = "SpinWheel",
-    Callback = function(Value)
-        flags["SpinWheel"] = Value
-        if Value then
-            spawnFlagLoop("SpinWheel", function()
-                local r = game.ReplicatedStorage.Remotes.Events
-                pcall(function()
-                    r.WorldWheelEvent:FireServer("5")
-                    r.SpinWheelSecret:FireServer("-8", "563")
-                    r.WorldWheelEvent:FireServer("6")
-                end)
-                task.wait(1)
-            end)
-        end
-    end
-})
+        local torsos = {}
 
--- Kill Title Boss toggle and boss selection
-local KillBossToggle = bossesTab:CreateToggle({
-    Name = "Kill Title Boss",
-    Info = "Automatically Kill Title Boss",
-    CurrentValue = false,
-    Flag = "KillBoss",
-    Callback = function(Value)
-        flags["KillBoss"] = Value
-        local r = game.ReplicatedStorage.Remotes.Events
-        if Value then
-            pcall(function() r.RemoveC:FireServer(1) end)
-            task.wait(0.1)
-            spawnFlagLoop("KillBoss", function()
-                local bossMap = {
-                    ["The King"]="Boss1",["Dravenar"]="Boss2",["Glacius"]="Boss3",["Anubis"]="Boss4",
-                    ["Bossbot"]="Boss5",["Lazyfish"]="Boss6",["Yokai"]="Boss7",["Vort3x"]="Boss8",
-                    ["Underlord"]="Boss9",["The Conquerer"]="Boss10",
-                }
-                local chosen = bossMap[ flags["BossTarget"] ] or "Boss1"
-                pcall(function()
-                    r.WinBossEvent:FireServer(chosen)
-                end)
-                task.wait(0.2)
-            end)
-        else
-            pcall(function() r.RemoveC:FireServer(0) end)
-        end
-    end
-})
-
-local bossOptions = {"The King","Dravenar","Glacius","Anubis","Bossbot","Lazyfish","Yokai","Vort3x","Underlord","The Conquerer"}
-local BossTargetDropdown = bossesTab:CreateDropdown({
-    Name = "Select Boss",
-    Options = bossOptions,
-    CurrentOption = "The King",
-    MultiSelection = false,
-    Flag = "BossTarget",
-    Callback = function(Option)
-        flags["BossTarget"] = Option
-    end
-})
-flags["BossTarget"] = "The King"
-
--- ===================================================================
--- WORLDS / SECRET WORLDS Tab
--- ===================================================================
-
-local worldOptions = {
-    {name="Castle",args={"2",true}}, {name="Volcano Cave",args={"1",true}},
-    {name="Glacier Peaks",args={"3",true}}, {name="Desert Island",args={"5",true}},
-    {name="The Lab",args={"7",true}}, {name="Ocean",args={"9",true}},
-    {name="Temple",args={"11",true}}, {name="Arcade",args={"13",true}},
-    {name="Underworld",args={"15",true}}, {name="Darkstar",args={"17",true}},
-    {name="Nyxra Place",args={"-6",false}}, {name="Anubis",args={"-8",false}},
-    {name="Viridian",args={"-14",false}}, {name="Ultra Prime",args={"-10",false}},
-}
-
-local worldNames = {}
-for _,o in ipairs(worldOptions) do table.insert(worldNames, o.name) end
-
-local WorldTargetDropdown = worldsTab:CreateDropdown({
-    Name = "Select World",
-    Options = worldNames,
-    CurrentOption = worldNames[1],
-    MultiSelection = false,
-    Flag = "WorldTarget",
-    Callback = function(opt) flags["WorldTarget"] = opt end
-})
-flags["WorldTarget"] = worldNames[1]
-
--- TP to World button
-worldsTab:CreateButton({
-    Name = "TP to World",
-    Info = "Teleport to selected world",
-    Callback = function()
-        local selected = flags["WorldTarget"]
-        for _, opt in ipairs(worldOptions) do
-            if opt.name == selected then
-                pcall(function()
-                    game.ReplicatedStorage.Remotes.Events.PortalC:FireServer(unpack(opt.args))
-                end)
-                break
-            end
-        end
-    end
-})
-
--- secret boss options
-local secretBossOptions = {
-    {name="Nyxra",dragon="Dragon-3"},
-    {name="RaZar",dragon="Dragon-4"},
-    {name="Viridian",dragon="Dragon-5"},
-    {name="Ultra Prime",dragon="Dragon-8"},
-}
-local secretNames = {}
-for _,b in ipairs(secretBossOptions) do table.insert(secretNames, b.name) end
-local difficultyOptions = {"Normal","Hard","Chaos"}
-
-local SecretBossDropdown = worldsTab:CreateDropdown({
-    Name = "Select Which Boss",
-    Options = secretNames,
-    CurrentOption = secretNames[1],
-    MultiSelection = false,
-    Flag = "SecretBossTarget",
-    Callback = function(opt) flags["SecretBossTarget"] = opt end
-})
-flags["SecretBossTarget"] = secretNames[1]
-
-local SecretDifficultyDropdown = worldsTab:CreateDropdown({
-    Name = "Difficulty",
-    Options = difficultyOptions,
-    CurrentOption = difficultyOptions[1],
-    MultiSelection = false,
-    Flag = "SecretBossDifficulty",
-    Callback = function(opt) flags["SecretBossDifficulty"] = opt end
-})
-flags["SecretBossDifficulty"] = difficultyOptions[1]
-
--- Kill Secret Boss toggle
-local KillSecretBossToggle = worldsTab:CreateToggle({
-    Name = "Kill Secret Boss",
-    Info = "Automatically kill selected Secret Boss",
-    CurrentValue = false,
-    Flag = "KillSecretBoss",
-    Callback = function(Value)
-        flags["KillSecretBoss"] = Value
-        local remotes = game.ReplicatedStorage.Remotes.Events
-        if Value then
-            local boss=nil
-            for _, b in ipairs(secretBossOptions) do
-                if flags["SecretBossTarget"]==b.name then boss=b.dragon break end
-            end
-            local difficulty = flags["SecretBossDifficulty"]
-            if boss and difficulty then
-                pcall(function() remotes.RemoveC:FireServer(1) end)
-                task.wait(0.2)
-                spawnFlagLoop("KillSecretBoss", function()
-                    pcall(function()
-                        remotes.WinMegaBossEvent:FireServer(boss,difficulty)
-                    end)
-                    task.wait(0.2)
-                end)
-            end
-        else
-            pcall(function() remotes.RemoveC:FireServer(0) end)
-        end
-    end
-})
-
--- ===================================================================
--- PVP Tab
--- ===================================================================
-
--- Buy Potions
-local BuyPotionsToggle = pvpTab:CreateToggle({
-    Name = "Buy Potions",
-    Info = "Buys PvP potions",
-    CurrentValue = false,
-    Flag = "BuyPotions",
-    Callback = function(Value)
-        flags["BuyPotions"] = Value
-        if Value then
-            spawnFlagLoop("BuyPotions", function()
-                local remotes = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events")
-                pcall(function()
-                    remotes.HalloweenShopEvent:FireServer("WinsPotions")
-                    remotes.HalloweenShopEvent:FireServer("ShinyPotions")
-                end)
-            end)
-        end
-    end
-})
-
-local function getPlayerNames()
-    local t = {}
-    for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
-        table.insert(t, player.Name)
-    end
-    return t
-end
-local playerNames = getPlayerNames()
-
--- PvP Target dropdown (capture reference so we can update)
-local PvPTargetDropdown = pvpTab:CreateDropdown({
-    Name = "Select PvP Target",
-    Options = playerNames,
-    CurrentOption = playerNames[1] or "",
-    MultiSelection = false,
-    Flag = "PvPTarget",
-    Callback = function(opt)
-        flags["PvPTarget"] = opt
-    end
-})
-flags["PvPTarget"] = playerNames[1] or ""
-
--- Auto PvP toggle
-local AutoPvPToggle = pvpTab:CreateToggle({
-    Name = "Auto PvP",
-    Info = "Generate wins (Only works if u can pvp twice)",
-    CurrentValue = false,
-    Flag = "AutoPvP",
-    Callback = function(Value)
-        flags["AutoPvP"] = Value
-        if Value then
-            spawnFlagLoop("AutoPvP", function()
-                local r = game.ReplicatedStorage.Remotes.Events
-                local targetName = flags["PvPTarget"]
-                if targetName and targetName ~= "" then
-                    pcall(function() r.WinEvent_PVP:FireServer(targetName, true, true) end)
-                end
-                task.wait(0.7)
-            end)
-        end
-    end
-})
-
--- Refresh Players button
-pvpTab:CreateButton({
-    Name = "Refresh Players",
-    Info = "Updates dropdown list of player names",
-    Callback = function()
-        playerNames = getPlayerNames()
-        pcall(function()
-            PvPTargetDropdown:Clear() -- some implementations support Clear(); if not, this will error and be caught
-        end)
-        pcall(function()
-            PvPTargetDropdown:Set(playerNames[1] or "")
-        end)
-        flags["PvPTarget"] = playerNames[1] or ""
-    end
-})
-
--- ===================================================================
--- EVENTS: Abyss, Dungeon, Fishing, Halloween
--- ===================================================================
-
--- Underworld Event (Dungeon fast attack)
-eventsTab:CreateToggle({
-    Name = "Dungeon Fast Attack",
-    Info = "Fast Attack",
-    CurrentValue = false,
-    Flag = "DungeonFastAttack",
-    Callback = function(Value)
-        flags["DungeonFastAttack"] = Value
-        if Value then
-            spawnFlagLoop("DungeonFastAttack", function()
-                pcall(function()
-                    game:GetService("ReplicatedStorage")
-                        :WaitForChild("Remotes")
-                        :WaitForChild("Events")
-                        :WaitForChild("Dungeon")
-                        :WaitForChild("OnDungeonClick")
-                        :FireServer()
-                end)
-            end)
-        end
-    end
-})
-
--- TP Raid Skellys
-eventsTab:CreateToggle({
-    Name = "TP Raid Skellys",
-    Info = "Teleport to the nearest skelly",
-    CurrentValue = false,
-    Flag = "TPRaidSkellys",
-    Callback = function(Value)
-        flags["TPRaidSkellys"] = Value
-        task.spawn(function()
-            local player = game.Players.LocalPlayer
-            local character = player.Character or player.CharacterAdded:Wait()
-            local hrp = character:WaitForChild("HumanoidRootPart")
-            local humanoid = character:FindFirstChildOfClass("Humanoid")
-
-            if Value then
-                if not hrp:FindFirstChild("SkellyVelocity") then
-                    local bv = Instance.new("BodyVelocity")
-                    bv.Name = "SkellyVelocity"
-                    bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-                    bv.Velocity = Vector3.new(0, 0, 0)
-                    bv.Parent = hrp
-                end
-            else
-                if hrp:FindFirstChild("SkellyVelocity") then
-                    hrp.SkellyVelocity:Destroy()
-                end
-                return
-            end
-
-            local torsos = {}
-
-            local function refreshTorsos()
-                torsos = {}
-                for _, v in pairs(workspace:GetDescendants()) do
-                    if v:IsA("BasePart") and v.Name == "UpperTorso" then
-                        local model = v:FindFirstAncestorOfClass("Model")
-                        local playerFromModel = model and game.Players:GetPlayerFromCharacter(model)
-                        if not playerFromModel then
-                            table.insert(torsos, v)
-                        end
-                    end
-                end
-            end
-
-            refreshTorsos()
-
-            local torsoAddedConnection = workspace.DescendantAdded:Connect(function(v)
+        local function refreshTorsos()
+            torsos = {}
+            for _, v in pairs(workspace:GetDescendants()) do
                 if v:IsA("BasePart") and v.Name == "UpperTorso" then
                     local model = v:FindFirstAncestorOfClass("Model")
-                    local playerFromModel = model and game.Players:GetPlayerFromCharacter(model)
-                    if not playerFromModel then
+                    if not game.Players:GetPlayerFromCharacter(model) then
                         table.insert(torsos, v)
                     end
                 end
-            end)
+            end
+        end
+        refreshTorsos()
 
-            local torsoRemovedConnection = workspace.DescendantRemoving:Connect(function(v)
-                if v:IsA("BasePart") and v.Name == "UpperTorso" then
-                    for i, t in ipairs(torsos) do
-                        if t == v then
-                            table.remove(torsos, i)
-                            break
-                        end
-                    end
+        local torsoAdded = workspace.DescendantAdded:Connect(function(v)
+            if v:IsA("BasePart") and v.Name == "UpperTorso" and not game.Players:GetPlayerFromCharacter(v.Parent) then
+                table.insert(torsos, v)
+            end
+        end)
+
+        local torsoRemoved = workspace.DescendantRemoving:Connect(function(v)
+            if v:IsA("BasePart") and v.Name == "UpperTorso" then
+                for i, t in ipairs(torsos) do
+                    if t == v then table.remove(torsos, i) break end
                 end
-            end)
+            end
+        end)
 
-            while flags["TPRaidSkellys"] and character.Parent do
-                if #torsos == 0 then
-                    refreshTorsos()
+        task.spawn(function()
+            while Options.TPRaidSkellys.Value and character.Parent do
+                if #torsos == 0 then refreshTorsos() end
+                local nearest, nearestDist = nil, 100
+                for _, t in ipairs(torsos) do
+                    local d = (hrp.Position - t.Position).Magnitude
+                    if d < nearestDist then nearestDist, nearest = d, t end
                 end
-
-                local nearestTorso
-                local nearestDistance = 100
-                local hrpPos = hrp.Position
-
-                for i, torso in ipairs(torsos) do
-                    if torso and torso.Parent then
-                        local distance = (hrpPos - torso.Position).Magnitude
-                        if distance < nearestDistance then
-                            nearestDistance = distance
-                            nearestTorso = torso
-                        end
-                    end
+                if nearest then
+                    if humanoid and humanoid.Sit then humanoid.Sit = false end
+                    hrp.CFrame = CFrame.new(nearest.Position + Vector3.new(0, 0, 0))
                 end
-
-                if nearestTorso then
-                    if humanoid and humanoid.Sit then
-                        humanoid.Sit = false
-                    end
-                    hrp.CFrame = CFrame.new(nearestTorso.Position + Vector3.new(0, -2, 0))
-                end
-
                 task.wait()
             end
-
-            if torsoAddedConnection then torsoAddedConnection:Disconnect() end
-            if torsoRemovedConnection then torsoRemovedConnection:Disconnect() end
+            torsoAdded:Disconnect()
+            torsoRemoved:Disconnect()
             if hrp:FindFirstChild("SkellyVelocity") then hrp.SkellyVelocity:Destroy() end
         end)
-    end
-})
+    end)
 
--- Generate Souls (Dungeon farming)
-eventsTab:CreateToggle({
-    Name = "Generate Souls",
-    Info = "Join/Leave dungeon to generate souls",
-    CurrentValue = false,
-    Flag = "GenerateSouls",
-    Callback = function(Value)
-        flags["GenerateSouls"] = Value
+Tabs.AbyssDungeon:CreateToggle("GenerateSouls", {
+    Title = "Generate Souls",
+    Default = false
+}):OnChanged(function(state)
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local Players = game:GetService("Players")
+    local Workspace = game:GetService("Workspace")
+
+    local player = Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local hrp = character:WaitForChild("HumanoidRootPart")
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+    if state then
         task.spawn(function()
-            local ReplicatedStorage = game:GetService("ReplicatedStorage")
-            local Players = game:GetService("Players")
-            local Workspace = game:GetService("Workspace")
-
-            local player = Players.LocalPlayer
-            local character = player.Character or player.CharacterAdded:Wait()
-            local hrp = character:WaitForChild("HumanoidRootPart")
-            local humanoid = character:FindFirstChildOfClass("Humanoid")
-
-            if Value then
-                if not hrp:FindFirstChild("SketVelocity") then
-                    local bodyVelocity = Instance.new("BodyVelocity")
-                    bodyVelocity.Name = "SketVelocity"
-                    bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-                    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-                    bodyVelocity.Parent = hrp
-                end
-
-                local skets = {}
-                for _, v in pairs(Workspace:GetDescendants()) do
-                    if v:IsA("Model") and v.Name:lower() == "sket" then
-                        table.insert(skets, v)
-                    end
-                end
-
-                local sketAddedConnection
-                sketAddedConnection = Workspace.DescendantAdded:Connect(function(v)
-                    if v:IsA("Model") and v.Name:lower() == "sket" then
-                        table.insert(skets, v)
-                    end
-                end)
-
-                local function teleportToNearestSket()
-                    local nearestSket
-                    local nearestDistance = math.huge
-
-                    for _, sket in ipairs(skets) do
-                        if sket.PrimaryPart then
-                            local distance = (hrp.Position - sket.PrimaryPart.Position).Magnitude
-                            if distance < nearestDistance then
-                                nearestDistance = distance
-                                nearestSket = sket
-                            end
-                        end
-                    end
-
-                    if nearestSket and nearestSket.PrimaryPart then
-                        if humanoid and humanoid.Sit then
-                            humanoid.Sit = false
-                        end
-                        hrp.CFrame = CFrame.new(nearestSket.PrimaryPart.Position + Vector3.new(0, 8.7, 0))
-                    end
-                end
-
-                local Remotes = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("Dungeon")
-
-                while flags["GenerateSouls"] do
-                    pcall(function() Remotes:WaitForChild("OnJoinDungeon"):FireServer("Normal") end)
-                    local startTime = tick()
-                    while tick() - startTime < 0.5 do
-                        teleportToNearestSket()
-                        pcall(function() Remotes:WaitForChild("OnDungeonClick"):FireServer() end)
-                        task.wait()
-                    end
-                    pcall(function() Remotes:WaitForChild("OnLeaveDungeon"):FireServer(true) end)
-                    task.wait(0.1)
-                end
-
-                if hrp:FindFirstChild("SketVelocity") then
-                    hrp.SketVelocity:Destroy()
-                end
-                if sketAddedConnection then
-                    sketAddedConnection:Disconnect()
-                end
-            else
-                if hrp:FindFirstChild("SketVelocity") then
-                    hrp.SketVelocity:Destroy()
-                end
-            end
-        end)
-    end
-})
-
-eventsTab:CreateToggle({
-    Name = "InstantTP Sketies",
-    Info = "Teleport to the nearest Skelly",
-    CurrentValue = false,
-    Flag = "InstantTPSketies",
-    Callback = function(Value)
-        flags["InstantTPSketies"] = Value
-        task.spawn(function()
-            local player = game.Players.LocalPlayer
-            local character = player.Character or player.CharacterAdded:Wait()
-            local hrp = character:WaitForChild("HumanoidRootPart")
-            local humanoid = character:FindFirstChildOfClass("Humanoid")
-
-            if Value then
-                if not hrp:FindFirstChild("SketVelocity") then
-                    local bodyVelocity = Instance.new("BodyVelocity")
-                    bodyVelocity.Name = "SketVelocity"
-                    bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-                    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-                    bodyVelocity.Parent = hrp
-                end
-            else
-                if hrp:FindFirstChild("SketVelocity") then
-                    hrp.SketVelocity:Destroy()
-                end
-                return
+            if not hrp:FindFirstChild("SketVelocity") then
+                local bodyVelocity = Instance.new("BodyVelocity")
+                bodyVelocity.Name = "SketVelocity"
+                bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+                bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+                bodyVelocity.Parent = hrp
             end
 
             local skets = {}
-            for _, v in pairs(workspace:GetDescendants()) do
+            for _, v in pairs(Workspace:GetDescendants()) do
                 if v:IsA("Model") and v.Name:lower() == "sket" then
                     table.insert(skets, v)
                 end
             end
 
             local sketAddedConnection
-            sketAddedConnection = workspace.DescendantAdded:Connect(function(v)
+            sketAddedConnection = Workspace.DescendantAdded:Connect(function(v)
                 if v:IsA("Model") and v.Name:lower() == "sket" then
                     table.insert(skets, v)
                 end
             end)
 
-            while flags["InstantTPSketies"] and character.Parent do
+            local function teleportToNearestSket()
                 local nearestSket
                 local nearestDistance = math.huge
 
@@ -794,42 +164,98 @@ eventsTab:CreateToggle({
                     end
                     hrp.CFrame = CFrame.new(nearestSket.PrimaryPart.Position + Vector3.new(0, 8.7, 0))
                 end
-
-                task.wait()
             end
 
+            local Remotes = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("Dungeon")
+
+            while Options.GenerateSouls.Value do
+                Remotes:WaitForChild("OnJoinDungeon"):FireServer("Normal")
+                local startTime = tick()
+                while tick() - startTime < 0.5 do
+                    teleportToNearestSket()
+                    Remotes:WaitForChild("OnDungeonClick"):FireServer()
+                    task.wait()
+                end
+                Remotes:WaitForChild("OnLeaveDungeon"):FireServer(true)
+                task.wait(0.1)
+            end
+
+            if hrp:FindFirstChild("SketVelocity") then
+                hrp.SketVelocity:Destroy()
+            end
             if sketAddedConnection then
                 sketAddedConnection:Disconnect()
             end
         end)
+    else
+        if hrp:FindFirstChild("SketVelocity") then
+            hrp.SketVelocity:Destroy()
+        end
     end
+end)
+
+local joinToggle = Tabs.AbyssDungeon:CreateToggle("Join Dungeon", {
+    Title = "Join Dungeon",
+    Default = false
 })
 
-local PlayersService = game:GetService("Players")
-local CollectionService = game:GetService("CollectionService")
-local lp = PlayersService.LocalPlayer
+local Remotes = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("Dungeon")
+
+local joinDropdown = Tabs.AbyssDungeon:CreateDropdown("Select Dungeon", {
+    Title = "Join Dungeon mode",
+    Values = {"Normal", "Hard", "Chaos"},
+    Default = "Normal"
+})
+
+local function fireJoinDungeon(mode)
+    local args = {mode}
+    Remotes.OnJoinDungeon:FireServer(unpack(args))
+end
+
+joinToggle:OnChanged(function(state)
+    if state then
+        fireJoinDungeon(joinDropdown.Value)
+    end
+end)
+
+joinDropdown:OnChanged(function(mode)
+    if joinToggle.Value then
+        fireJoinDungeon(mode)
+    end
+end)
+
+local noteabyss = Tabs.AbyssDungeon:Paragraph("Note", {
+    Title = "Note",
+    Content = "To get more souls, enable Dungeon Fast Attack and Generate Souls at the exact same time.",
+    TitleAlignment = "Middle",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
+
+local Players = game:GetService("Players")
+local CS = game:GetService("CollectionService")
+local lp = Players.LocalPlayer
 local teleporting = false
 
 local interval = 0.0001
 local distThresh = 0.1
 local lerpAlpha = 0.4
 
-for _, p in ipairs(workspace:GetDescendants()) do 
+for _, p in ipairs(workspace:GetDescendants()) do
     if p:IsA("BasePart") and p.Name == "UpperTorso" then
-        pcall(function() CollectionService:AddTag(p, "SkeletonTarget") end)
-    end 
+        CS:AddTag(p, "SkeletonTarget")
+    end
 end
 
 workspace.DescendantAdded:Connect(function(p)
     if p:IsA("BasePart") and p.Name == "UpperTorso" then
-        pcall(function() CollectionService:AddTag(p, "SkeletonTarget") end)
-    end 
+        CS:AddTag(p, "SkeletonTarget")
+    end
 end)
 
 local function nearestTorso(hrp, radius)
     local best, d = nil, math.huge
-    for _, p in ipairs(CollectionService:GetTagged("SkeletonTarget")) do
-        if p:IsDescendantOf(workspace) and not PlayersService:GetPlayerFromCharacter(p.Parent) then
+    for _, p in ipairs(CS:GetTagged("SkeletonTarget")) do
+        if p:IsDescendantOf(workspace) and not Players:GetPlayerFromCharacter(p.Parent) then
             local m = (p.Position - hrp.Position).Magnitude
             if m < d and m <= radius then
                 d, best = m, p
@@ -843,17 +269,6 @@ local function teleportLoop()
     teleporting = true
     local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
-
-    local args = {"-234", false}
-    pcall(function()
-        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("PortalC"):FireServer(unpack(args))
-    end)
-
-    task.wait(0.2)
-
-    pcall(function()
-        hrp.CFrame = CFrame.new(4857, 539, -1773)
-    end)
 
     task.spawn(function()
         while teleporting and hrp do
@@ -889,179 +304,220 @@ local function smoothTeleportLoop(targetPos)
 end
 
 local function teleportCommander()
-    local args = { "-234", false }
-    pcall(function()
-        game:GetService("ReplicatedStorage")
-            :WaitForChild("Remotes")
-            :WaitForChild("Events")
-            :WaitForChild("PortalC")
-            :FireServer(unpack(args))
-    end)
+    local args = {"-234", false}
+    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("PortalC"):FireServer(unpack(args))
     smoothTeleportLoop(Vector3.new(4758, 538, -1768))
 end
 
 local function teleportHollowKing700()
-    local args = { "-236", false }
-    pcall(function()
-        game:GetService("ReplicatedStorage")
-            :WaitForChild("Remotes")
-            :WaitForChild("Events")
-            :WaitForChild("PortalC")
-            :FireServer(unpack(args))
-    end)
+    local args = {"-236", false}
+    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("PortalC"):FireServer(unpack(args))
     smoothTeleportLoop(Vector3.new(-3765, 665, -1161))
 end
 
--- Teleport toggle + list
-eventsTab:CreateToggle({
-    Name = "Teleport",
-    Info = "Teleports to selected target (Skeletons, Commander, Hollow King)",
-    CurrentValue = false,
-    Flag = "Teleport",
-    Callback = function(Value)
-        teleporting = false
-        flags["Teleport"] = Value
-        if Value then
-            -- destroy any monsters in workspace to reduce spam
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v.Name:lower() == "monster" then
-                    pcall(function() v:Destroy() end)
-                end
-            end
-            local target = flags["TeleportTarget"]
-            if target == "Skeletons" then
-                teleportLoop()
-            elseif target == "Commander Skeleton" then
-                teleportCommander()
-            elseif target == "Hollow King (700)" then
-                teleportHollowKing700()
-            end
-        else
-            teleporting = false
-        end
-    end
-})
-
-eventsTab:CreateDropdown({
-    Name = "Select Target",
-    Options = {"Skeletons", "Commander Skeleton", "Hollow King (700)"},
-    CurrentOption = "Skeletons",
-    MultiSelection = false,
-    Flag = "TeleportTarget",
-    Callback = function(value)
-        flags["TeleportTarget"] = value
-        teleporting = false
-        if flags["Teleport"] then
-            if value == "Skeletons" then
-                teleportLoop()
-            elseif value == "Commander Skeleton" then
-                teleportCommander()
-            elseif value == "Hollow King (700)" then
-                teleportHollowKing700()
+Tabs.Abyss:CreateToggle("Teleport", {
+    Title = "Teleport",
+    Default = false
+}):OnChanged(function(state)
+    teleporting = false
+    if state then
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v.Name:lower() == "monster" then
+                v:Destroy()
             end
         end
+        local target = Options.TeleportTarget.Value
+        if target == "Skeletons" then
+            teleportLoop()
+        elseif target == "Commander Skeleton" then
+            teleportCommander()
+        elseif target == "Hollow King (700)" then
+            teleportHollowKing700()
+        end
     end
-})
-flags["TeleportTarget"] = "Skeletons"
+end)
 
-eventsTab:CreateButton({
-    Name = "Set WalkSpeed to 65",
-    Info = "Increases your walkspeed",
-    Callback = function()
-        local plr = game.Players.LocalPlayer
-        local char = plr.Character or plr.CharacterAdded:Wait()
-        local humanoid = char:WaitForChild("Humanoid")
-        humanoid.WalkSpeed = 65
+Tabs.Abyss:CreateDropdown("TeleportTarget", {
+    Title = "Select Target",
+    Values = {"Skeletons", "Commander Skeleton", "Hollow King (700)"},
+    Default = "Skeletons"
+}):OnChanged(function(value)
+    teleporting = false
+    if Options.Teleport.Value then
+        if value == "Skeletons" then
+            teleportLoop()
+        elseif value == "Commander Skeleton" then
+            teleportCommander()
+        elseif value == "Hollow King (700)" then
+            teleportHollowKing700()
+        end
     end
-})
+end)
 
--- ===================================================================
--- FISHING Event
--- ===================================================================
+Tabs.Abyss:CreateToggle("GenCrystals", {
+    Title = "Generate Crystals",
+    Default = false
+}):OnChanged(function(state)
+    local r = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events")
 
-eventsTab:CreateToggle({
-    Name = "Auto Fish (Bad)",
-    Info = "Auto fish",
-    CurrentValue = false,
-    Flag = "AutoFishBad",
-    Callback = function(Value)
-        flags["AutoFishBad"] = Value
+    if state then
+        r.RemoveC:FireServer(1)
         task.spawn(function()
-            local player = game.Players.LocalPlayer
-            local character = player.Character or player.CharacterAdded:Wait()
-            local hrp = character:WaitForChild("HumanoidRootPart")
-
-            if Value then
-                local ReplicatedStorage = game:GetService("ReplicatedStorage")
-                local Remotes = ReplicatedStorage:WaitForChild("Remotes")
-                local Fishing = Remotes:WaitForChild("Fishing")
-
-                while flags["AutoFishBad"] and character.Parent do
-                    pcall(function()
-                        hrp.CFrame = CFrame.new(-890, 10, -246)
-                    end)
-                    task.wait(2)
-
-                    hrp.Anchored = true
-
-                    pcall(function() Fishing:WaitForChild("CastRod"):InvokeServer() end)
-
-                    local startTime = tick()
-                    while flags["AutoFishBad"] and tick() - startTime < 18 do
-                        pcall(function() Fishing:WaitForChild("PlayerReaction"):FireServer() end)
-                        task.wait(0.05)
-                    end
-
-                    if not flags["AutoFishBad"] then break end
-
-                    local args = {2.5}
-                    pcall(function() Fishing:WaitForChild("ReelIn"):FireServer(unpack(args)) end)
-                    task.wait(1)
-                    pcall(function() Fishing:WaitForChild("Stop"):FireServer() end)
-                    task.wait(1)
+            while Options.GenCrystals.Value do
+                for i = 1, 20 do
+                    r.WinMegaBossEvent:FireServer("Dragon6", "Chaos")
                 end
-
-                hrp.Anchored = false
-            else
-                local hrp2 = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                if hrp2 then hrp2.Anchored = false end
+                task.wait()
             end
         end)
+    else
+        r.RemoveC:FireServer(0)
     end
+end)
+
+Tabs.Abyss:CreateButton{
+    Title = "Use Abyss Portal",
+    Description = "Teleports to Abyss World.",
+    Callback = function()
+        local args = {
+            "-234",
+            false
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("PortalC"):FireServer(unpack(args))
+    end
+}
+
+Tabs.Abyss:CreateButton{
+    Title = "WalkSpeed 65",
+    Description = "Set your speed to 65",
+    Callback = function()
+        local hum = game.Players.LocalPlayer.Character:WaitForChild("Humanoid")
+        hum.WalkSpeed = 65
+    end
+}
+
+--------------------------------------------------
+-- FISHING EVENT TAB
+--------------------------------------------------
+
+Tabs.Fishing:CreateToggle("AutoFishBad", {Title = "Auto Fish (Bad)", Default = false})
+    :OnChanged(function(state)
+        local plr = game.Players.LocalPlayer
+        local char = plr.Character or plr.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+
+        if state then
+            task.spawn(function()
+                local Fishing = game.ReplicatedStorage.Remotes.Fishing
+                while Options.AutoFishBad.Value and char.Parent do
+                    hrp.CFrame = CFrame.new(-890, 10, -246)
+                    task.wait(2)
+                    hrp.Anchored = true
+                    Fishing.CastRod:InvokeServer()
+                    local start = tick()
+                    while tick() - start < 18 do
+                        Fishing.PlayerReaction:FireServer()
+                        task.wait(0.05)
+                    end
+                    Fishing.ReelIn:FireServer(2.5)
+                    Fishing.Stop:FireServer()
+                    task.wait(1)
+                end
+                hrp.Anchored = false
+            end)
+        else
+            hrp.Anchored = false
+        end
+    end)
+
+--------------------------------------------------
+-- HALLOWEEN EVENT TAB
+--------------------------------------------------
+
+Tabs.Halloween:CreateToggle("AutoClick", {Title = "Auto Click", Default = false})
+    :OnChanged(function(state)
+        if state then
+            task.spawn(function()
+                while Options.AutoClick.Value do
+                    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("ClickEvent"):FireServer()
+                    task.wait()
+                end
+            end)
+        end
+    end)
+
+local candyDropdown = Tabs.Halloween:CreateDropdown("CandyBossSelect", {
+    Title = "Select Candy Boss",
+    Values = {"FrankenShock", "Dracula", "Cursed Pharaoh", "Witch"},
+    Default = "FrankenShock"
 })
 
--- ===================================================================
--- HALLOWEEN Event
--- ===================================================================
+Tabs.Halloween:CreateToggle("GenerateCandyKeys", {Title = "Generate Candy/Keys", Default = false})
+    :OnChanged(function(state)
+        if state then
+            task.spawn(function()
+                local bossSelection = candyDropdown.Value
+                local event = game:GetService("ReplicatedStorage"):WaitForChild("EventFolder"):WaitForChild("WinBossEvent")
+                local removeEvent = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC")
 
-eventsTab:CreateToggle({
-    Name = "Collect Pumpkins",
-    Info = "Collects All the Pumpkins",
-    CurrentValue = false,
-    Flag = "CollectPumpkins",
-    Callback = function(Value)
-        flags["CollectPumpkins"] = Value
+                -- Enable remove event
+                removeEvent:FireServer(1)
+                task.wait(0.1)
+
+                if bossSelection == "FrankenShock" then
+                    while Options.GenerateCandyKeys.Value and candyDropdown.Value == "FrankenShock" do
+                        event:FireServer("1")
+                        task.wait(0.01)
+                    end
+
+                elseif bossSelection == "Dracula" then
+                    while Options.GenerateCandyKeys.Value and candyDropdown.Value == "Dracula" do
+                        event:FireServer("2")
+                        task.wait(0.01)
+                    end
+
+                elseif bossSelection == "Cursed Pharaoh" then
+                    while Options.GenerateCandyKeys.Value and candyDropdown.Value == "Cursed Pharaoh" do
+                        event:FireServer("3")
+                        task.wait(0.01)
+                    end
+
+                elseif bossSelection == "Witch" then
+                    while Options.GenerateCandyKeys.Value and candyDropdown.Value == "Witch" do
+                        event:FireServer("4")
+                        task.wait(0.01)
+                    end
+                end
+            end)
+        else
+            -- Disable remove event
+            local removeArgs = {0}
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC"):FireServer(unpack(removeArgs))
+        end
+    end)
+
+
+Tabs.Halloween:CreateToggle("CollectPumpkins", {Title = "Collect Pumpkins", Default = false})
+    :OnChanged(function(state)
+        local player = game.Players.LocalPlayer
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+
+        if state then
+            local ev = game.ReplicatedStorage.Remotes.Events.FollowTheUpdate
+            ev:FireServer()
+            game.ReplicatedStorage.Remotes.Functions.OnCodeRequest:InvokeServer("Pumpkin","YT_Arawrd")
+            task.wait(5)
+            game.ReplicatedStorage.Remotes.Functions.OnCodeRequest:InvokeServer("TRICKORTREAT","YT_Arawrd")
+        end
+
         task.spawn(function()
-            local player = game.Players.LocalPlayer
-            local character = player.Character or player.CharacterAdded:Wait()
-            local hrp = character:WaitForChild("HumanoidRootPart")
-
-            if Value then
-                local eventsRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("FollowTheUpdate")
-                pcall(function() eventsRemote:FireServer() end)
-
-                local functionsRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Functions"):WaitForChild("OnCodeRequest")
-                local args = { "Pumpkin", "YT_Arawrd" }
-                pcall(function() functionsRemote:InvokeServer(unpack(args)) end)
-            end
-
-            while flags["CollectPumpkins"] and character.Parent do
+            while Options.CollectPumpkins.Value and char.Parent do
                 local folder = workspace:FindFirstChild("HappyPumpkins")
                 if folder then
                     for _, part in pairs(folder:GetDescendants()) do
-                        if not flags["CollectPumpkins"] then break end
                         if part:IsA("BasePart") then
-                            pcall(function() part.CFrame = hrp.CFrame + Vector3.new(0, 0, 0) end)
+                            part.CFrame = hrp.CFrame
                             task.wait(0.05)
                         end
                     end
@@ -1069,23 +525,111 @@ eventsTab:CreateToggle({
                 task.wait(0.1)
             end
         end)
+    end)
+
+Tabs.Halloween:CreateButton{
+    Title = "Use Halloween Portal",
+    Description = "Teleports to Halloween World.",
+    Callback = function()
+        local args = {
+            "-50",
+            false
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("PortalC"):FireServer(unpack(args))
+    end
+}
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local function getPlayerNames()
+    local t = {}
+    for _, player in ipairs(Players:GetPlayers()) do
+        table.insert(t, player.Name)
+    end
+    return t
+end
+
+local playerNames = getPlayerNames()
+
+-- Buy Potions Toggle
+local buyPotionsToggle = Tabs.PvP:CreateToggle("BuyPotions", {
+    Title = "Buy Potions",
+    Default = false
+})
+
+buyPotionsToggle:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            while buyPotionsToggle.Value do
+                local remotes = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Events")
+                remotes.HalloweenShopEvent:FireServer("WinsPotions")
+                remotes.HalloweenShopEvent:FireServer("ShinyPotions")
+                task.wait()
+            end
+        end)
+    end
+end)
+
+local autoPvPToggle = Tabs.PvP:CreateToggle("AutoPvP", {
+    Title = "Auto PvP",
+    Default = false
+})
+
+local dropdownRef = Tabs.PvP:CreateDropdown("PvPTarget", {
+    Title = "Select PvP Target",
+    Values = playerNames,
+    Default = playerNames[1] or ""
+})
+
+autoPvPToggle:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            while autoPvPToggle.Value do
+                local r = ReplicatedStorage.Remotes.Events
+                local targetName = dropdownRef.Value
+                if targetName and targetName ~= "" then
+                    r.WinEvent_PVP:FireServer(targetName, true, true)
+                end
+                task.wait(0.7)
+            end
+        end)
+    end
+end)
+
+-- Refresh Players Button
+Tabs.PvP:CreateButton({
+    Title = "Refresh Players",
+    Callback = function()
+        playerNames = getPlayerNames()
+        dropdownRef:SetValues(playerNames)
+        dropdownRef:SetValue(playerNames[1] or "")
     end
 })
 
--- ===================================================================
--- FINISH / INIT
--- ===================================================================
-
-local defaultFlags = {
-    "AutoClick","HatchNearest","AutoSpinWheel","GenCrystals","SpinWheel","KillBoss",
-    "KillSecretBoss","BuyPotions","AutoPvP","DungeonFastAttack","TPRaidSkellys","GenerateSouls",
-    "InstantTPSketies","Teleport","AutoFishBad","CollectPumpkins"
-}
-for _,f in ipairs(defaultFlags) do flags[f] = false end
-
-Window:CreateNotification({
-    Title = "PAS - HUB",
-    Content = "hello!.",
-    Duration = 6.5
+local notepvp = Tabs.PvP:Paragraph("Note", {
+    Title = "Note",
+    Content = "The Infinite Season Wins script only works if you have the Skip Fight Timer gamepass and can fight twice in a row. Let the game run for six hours, then come back and enable it.",
+    TitleAlignment = "Middle",
+    ContentAlignment = Enum.TextXAlignment.Left
 })
 
+--------------------------------------------------
+-- CONFIGURATION / MANAGERS
+--------------------------------------------------
+
+SaveManager:SetLibrary(Library)
+InterfaceManager:SetLibrary(Library)
+
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+
+InterfaceManager:SetFolder("FluentEventsHub")
+SaveManager:SetFolder("FluentEventsHub/SpecificGame")
+
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+
+Window:SelectTab(1)
+Library:Notify{Title = "Fluent", Content = "Script loaded successfully!", Duration = 8}
+SaveManager:LoadAutoloadConfig()
