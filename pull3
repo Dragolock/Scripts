@@ -515,29 +515,6 @@ Tabs.Halloween:CreateToggle("InfCandyPharaoh", {Title = "Inf Candy (Pharaoh)", D
         end
     end)
 
-Tabs.Halloween:CreateToggle("InfCandyPharaoh", {Title = "Inf Candy (Pharaoh)", Default = false})
-    :OnChanged(function(state)
-        if state then
-            task.spawn(function()
-                local removeArgs = {1}
-                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC"):FireServer(unpack(removeArgs))
-
-                task.wait(0.1)
-
-                local event = game:GetService("ReplicatedStorage"):WaitForChild("EventFolder"):WaitForChild("WinBossEvent")
-                local args = {"3"}
-
-                while Options.InfCandyPharaoh.Value do
-                    event:FireServer(unpack(args))
-                    task.wait(0.01)
-                end
-            end)
-        else
-            local removeArgs = {0}
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC"):FireServer(unpack(removeArgs))
-        end
-    end)
-
 Tabs.Halloween:CreateToggle("InfCandyWitch", {Title = "Inf Candy (Witch)", Default = false})
     :OnChanged(function(state)
         if state then
