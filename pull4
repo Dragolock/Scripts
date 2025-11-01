@@ -501,13 +501,15 @@ Tabs.Halloween:CreateToggle("AutoWitchTower", {Title = "Auto Witch Tower", Defau
         if state then
             task.spawn(function()
                 local towerEvent = game:GetService("ReplicatedStorage"):WaitForChild("TowerEventRemotes"):WaitForChild("TowerRewardsEvent")
-                local args1 = {"-21", false}
-                towerEvent:FireServer(unpack(args1))
-                task.wait(0.1)
-                local args2 = {"-21", true}
-                for i = 1, 10 do
-                    towerEvent:FireServer(unpack(args2))
-                    task.wait(1)
+                while Options.AutoWitchTower.Value do
+                    local args1 = {"-21", false}
+                    towerEvent:FireServer(unpack(args1))
+                    task.wait(0.1)
+                    local args2 = {"-21", true}
+                    for i = 1, 10 do
+                        towerEvent:FireServer(unpack(args2))
+                        task.wait(0.3)
+                    end
                 end
             end)
         end
@@ -518,13 +520,15 @@ Tabs.Halloween:CreateToggle("AutoDraculaTower", {Title = "Auto Dracula Tower", D
         if state then
             task.spawn(function()
                 local towerEvent = game:GetService("ReplicatedStorage"):WaitForChild("TowerEventRemotes"):WaitForChild("TowerRewardsEvent")
-                local args1 = {"-20", false}
-                towerEvent:FireServer(unpack(args1))
-                task.wait(0.1)
-                local args2 = {"-20", true}
-                for i = 1, 10 do
-                    towerEvent:FireServer(unpack(args2))
-                    task.wait(1)
+                while Options.AutoDraculaTower.Value do
+                    local args1 = {"-20", false}
+                    towerEvent:FireServer(unpack(args1))
+                    task.wait(0.1)
+                    local args2 = {"-20", true}
+                    for i = 1, 10 do
+                        towerEvent:FireServer(unpack(args2))
+                        task.wait(0.3)
+                    end
                 end
             end)
         end
