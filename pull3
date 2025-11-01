@@ -504,7 +504,7 @@ Tabs.Halloween:CreateToggle("AutoWitchTower", {Title = "Auto Witch Tower", Defau
                 local lastFalse = tick()
                 while Options.AutoWitchTower.Value do
                     towerEvent:FireServer("-21", true)
-                    if tick() - lastFalse >= 1 then
+                    if tick() - lastFalse >= 2 then
                         towerEvent:FireServer("-21", false)
                         lastFalse = tick()
                     end
@@ -522,7 +522,7 @@ Tabs.Halloween:CreateToggle("AutoDraculaTower", {Title = "Auto Dracula Tower", D
                 local lastFalse = tick()
                 while Options.AutoDraculaTower.Value do
                     towerEvent:FireServer("-20", true)
-                    if tick() - lastFalse >= 1 then
+                    if tick() - lastFalse >= 2 then
                         towerEvent:FireServer("-20", false)
                         lastFalse = tick()
                     end
