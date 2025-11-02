@@ -452,6 +452,12 @@ local candyDropdown = Tabs.Halloween:CreateDropdown("CandyBossSelect", {
     Default = "FrankenShock"
 })
 
+local towerDropdown = Tabs.Halloween:CreateDropdown("SelectTower", {
+    Title = "Select Tower",
+    Values = {"Dracula Tower", "Witch Tower"},
+    Default = "Dracula Tower"
+})
+
 Tabs.Halloween:CreateToggle("GenerateCandyKeys", {Title = "Generate Candy/Keys", Default = false})
     :OnChanged(function(state)
         if state then
@@ -496,42 +502,37 @@ Tabs.Halloween:CreateToggle("GenerateCandyKeys", {Title = "Generate Candy/Keys",
         end
     end)
 
-Tabs.Halloween:CreateToggle("AutoWitchTower", {Title = "Auto Witch Tower", Default = false})
+Tabs.Halloween:CreateToggle("AutoTower", {Title = "Auto Tower", Default = false})
     :OnChanged(function(state)
         if state then
             task.spawn(function()
                 local towerEvent = game:GetService("ReplicatedStorage"):WaitForChild("TowerEventRemotes"):WaitForChild("TowerRewardsEvent")
                 local lastFalse = tick()
-                while Options.AutoWitchTower.Value do
-                    towerEvent:FireServer("-21", true)
-                    if tick() - lastFalse >= 1 then
-                        towerEvent:FireServer("-21", false)
-                        lastFalse = tick()
+                local selectedTower = towerDropdown.Value
+
+                if selectedTower == "Dracula Tower" then
+                    while Options.AutoTower.Value and towerDropdown.Value == "Dracula Tower" do
+                        towerEvent:FireServer("-20", true)
+                        if tick() - lastFalse >= 1.5 then
+                            towerEvent:FireServer("-20", false)
+                            lastFalse = tick()
+                        end
+                        task.wait(0.01)
                     end
-                    task.wait(0.01)
+
+                elseif selectedTower == "Witch Tower" then
+                    while Options.AutoTower.Value and towerDropdown.Value == "Witch Tower" do
+                        towerEvent:FireServer("-21", true)
+                        if tick() - lastFalse >= 1.5 then
+                            towerEvent:FireServer("-21", false)
+                            lastFalse = tick()
+                        end
+                        task.wait(0.01)
+                    end
                 end
             end)
         end
     end)
-
-Tabs.Halloween:CreateToggle("AutoDraculaTower", {Title = "Auto Dracula Tower", Default = false})
-    :OnChanged(function(state)
-        if state then
-            task.spawn(function()
-                local towerEvent = game:GetService("ReplicatedStorage"):WaitForChild("TowerEventRemotes"):WaitForChild("TowerRewardsEvent")
-                local lastFalse = tick()
-                while Options.AutoDraculaTower.Value do
-                    towerEvent:FireServer("-20", true)
-                    if tick() - lastFalse >= 1 then
-                        towerEvent:FireServer("-20", false)
-                        lastFalse = tick()
-                    end
-                    task.wait(0.01)
-                end
-            end)
-        end
-    end)
-
 
 Tabs.Halloween:CreateToggle("CollectPumpkins", {Title = "Collect Pumpkins", Default = false})
     :OnChanged(function(state)
