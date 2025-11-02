@@ -576,6 +576,26 @@ Tabs.Halloween:CreateButton{
     end
 }
 
+Tabs.Halloween:CreateButton{
+    Title = "Redeem Halloween Codes",
+    Description = "Automatically redeems all Halloween event codes.",
+    Callback = function()
+        task.spawn(function()
+            local onCodeRequest = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Functions"):WaitForChild("OnCodeRequest")
+            
+            onCodeRequest:InvokeServer("TRICKORTREAT", "YT_Arawrd")
+            task.wait(5)
+            onCodeRequest:InvokeServer("HAPPYHALLOWEEN", "YT_Arawrd")
+            task.wait(5)
+            onCodeRequest:InvokeServer("HALLOWEEN", "YT_Arawrd")
+            task.wait(5)
+            onCodeRequest:InvokeServer("PUMPKIN", "YT_Arawrd")
+            task.wait(5)
+            onCodeRequest:InvokeServer("HALLOWEENPARTY", "YT_Arawrd")
+        end)
+    end
+}
+
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
