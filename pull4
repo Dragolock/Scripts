@@ -25,88 +25,30 @@ Tabs.Stuff1:CreateToggle("AutoWin", {Title = "Auto Winn", Default = false})
         if state then
             task.spawn(function()
                 local Players = game:GetService("Players")
+                local TweenService = game:GetService("TweenService")
                 local player = Players.LocalPlayer
                 local char = player.Character or player.CharacterAdded:Wait()
                 local hrp = char:WaitForChild("HumanoidRootPart")
 
-                local function moveToPosition(rootPart, targetPosition, speed)
-                    -- Remove previous attachments/LinearVelocity if any
-                    for _, v in ipairs(rootPart:GetChildren()) do
-                        if v:IsA("LinearVelocity") or (v:IsA("Attachment") and v.Name == "MoveAttachment") then
-                            v:Destroy()
-                        end
-                    end
-                    -- Setup attachment
-                    local attachment = Instance.new("Attachment")
-                    attachment.Name = "MoveAttachment"
-                    attachment.Parent = rootPart
-
-                    -- Setup LinearVelocity
-                    local lv = Instance.new("LinearVelocity")
-                    lv.Attachment0 = attachment
-                    lv.MaxForce = math.huge
-                    lv.RelativeTo = Enum.ActuatorRelativeTo.World
-                    lv.Parent = rootPart
-
-                    -- Calculate direction and set velocity
-                    local direction = (targetPosition - rootPart.Position).Unit
-                    lv.VectorVelocity = direction * speed
-
-                    -- Wait until near target, then stop
-                    while Options.AutoWin.Value and (rootPart.Position - targetPosition).Magnitude > 2 do
-                        task.wait()
-                    end
-
-                    lv:Destroy()
-                    attachment:Destroy()
-                end
-
-                local target1 = Vector3.new(3, 32, -171)
-                local target2 = Vector3.new(2, -2043, -5464)
-                local speed = 100 -- Adjust as needed
+                local targetPosition1 = Vector3.new(3, 32, -171)
+                local targetPosition2 = Vector3.new(2, -2043, -5464)
 
                 while Options.AutoWin.Value do
-                    -- Add float effect (optional, as before)
-                    if not hrp:FindFirstChild("FloatVelocity") then
-                        local bv = Instance.new("BodyVelocity")
-                        bv.Name = "FloatVelocity"
-                        bv.Velocity = Vector3.new(0,0,0)
-                        bv.MaxForce = Vector3.new(0, math.huge, 0)
-                        bv.Parent = hrp
-                    end
+                    hrp.CFrame = CFrame.new(targetPosition1)
 
-                    -- Move to first point smoothly
-                    moveToPosition(hrp, target1, speed)
-                    task.wait(1) -- Pause at first waypoint
+                    local distance = (hrp.Position - targetPosition2).Magnitude
+                    local speed = 100
+                    local tweenTime = distance / speed
 
-                    -- Move to second point smoothly
-                    moveToPosition(hrp, target2, speed)
-                    task.wait(4) -- Wait at destination
-                end
+                    local tweenInfo = TweenInfo.new(tweenTime, Enum.EasingStyle.Linear)
+                    local tween = TweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(targetPosition2)})
+                    tween:Play()
+                    tween.Completed:Wait()
 
-                -- Cleanup float when toggle is off
-                local bv = hrp:FindFirstChild("FloatVelocity")
-                if bv then bv:Destroy() end
-                -- Cleanup LinearVelocity/Attachment
-                for _, v in ipairs(hrp:GetChildren()) do
-                    if v:IsA("LinearVelocity") or (v:IsA("Attachment") and v.Name == "MoveAttachment") then
-                        v:Destroy()
-                    end
+                    task.wait(4)
                 end
             end)
         else
-            -- Cleanup all movers immediately
-            local Players = game:GetService("Players")
-            local player = Players.LocalPlayer
-            local char = player.Character or player.CharacterAdded:Wait()
-            local hrp = char:WaitForChild("HumanoidRootPart")
-            local bv = hrp:FindFirstChild("FloatVelocity")
-            if bv then bv:Destroy() end
-            for _, v in ipairs(hrp:GetChildren()) do
-                if v:IsA("LinearVelocity") or (v:IsA("Attachment") and v.Name == "MoveAttachment") then
-                    v:Destroy()
-                end
-            end
         end
     end)
 
