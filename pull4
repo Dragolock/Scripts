@@ -20,8 +20,9 @@ local Tabs = {
 
 local Options = Library.Options
 
-Tabs.Stuff1:CreateToggle("AutoWin", {Title = "Auto Win", Default = false})
-:OnChanged(function(state)
+local autoWinToggle = Tabs.Stuff1:CreateToggle("AutoWin", {Title = "Auto Win", Default = false})
+
+autoWinToggle:OnChanged(function(state)
     local Players = game:GetService("Players")
     local RunService = game:GetService("RunService")
     local player = Players.LocalPlayer
@@ -35,7 +36,7 @@ Tabs.Stuff1:CreateToggle("AutoWin", {Title = "Auto Win", Default = false})
 
     if state then
         task.spawn(function()
-            while Options.AutoWin.Value do
+            while autoWinToggle.Value do
                 local elapsed = 0
                 local initialPos = hrp.Position
                 while elapsed < lerpTime do
