@@ -20,7 +20,7 @@ local Tabs = {
 
 local Options = Library.Options
 
-Tabs.Stuff1:CreateToggle("AutoWin", {Title = "Auto Win", Default = false})
+Tabs.Stuff1:CreateToggle("AutoWin", {Title = "Auto Winn", Default = false})
 :OnChanged(function(state)
     local Players = game:GetService("Players")
     local TweenService = game:GetService("TweenService")
