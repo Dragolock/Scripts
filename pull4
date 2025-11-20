@@ -24,7 +24,7 @@ local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
-Tabs.Stuff1:CreateToggle("AutoWinTest", {Title = "Auto Winn", Default = false})
+Tabs.Stuff1:CreateToggle("AutoWinTest", {Title = "Auto Win", Default = false})
     :OnChanged(function(state)
         if state then
             task.spawn(function()
@@ -32,7 +32,7 @@ Tabs.Stuff1:CreateToggle("AutoWinTest", {Title = "Auto Winn", Default = false})
                 local hrp = char:WaitForChild("HumanoidRootPart")
                 local targetPosition1 = Vector3.new(3, 32, -171)
                 local targetPosition2 = Vector3.new(2, -2043, -5464)
-                local lerpSpeed = 5 --smaller slower, higher faster
+                local lerpSpeed = 0.1 --smaller slower, higher faster
                 local reachingThreshold = 1 -- distance when the target is considered reached
 
                 local function moveToPosition(targetPos)
