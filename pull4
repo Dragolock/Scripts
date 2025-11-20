@@ -52,6 +52,43 @@ Tabs.Stuff1:CreateToggle("AutoWin", {Title = "Auto Win", Default = false})
         end
     end)
 
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+Tabs.Stuff1:CreateToggle("AutoWinTest", {Title = "Auto Winn", Default = false})
+    :OnChanged(function(state)
+        if state then
+            task.spawn(function()
+                local char = player.Character or player.CharacterAdded:Wait()
+                local hrp = char:WaitForChild("HumanoidRootPart")
+                local tweenSpeed = 10
+                local targetPosition1 = Vector3.new(3, 32, -171)
+                local targetPosition2 = Vector3.new(2, -2043, -5464)
+
+                local function tweenToPosition(targetPos)
+                    local humanoid = char:FindFirstChildOfClass("Humanoid")
+                    if humanoid and humanoid.SeatPart then
+                        humanoid.Sit = false
+                        task.wait(0.1)
+                    end
+                    local tweenInfo = TweenInfo.new(tweenSpeed, Enum.EasingStyle.Linear)
+                    local tween = TweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(targetPos)})
+                    tween:Play()
+                    tween.Completed:Wait()
+                end
+
+                while Options.AutoWinTest.Value do
+                    hrp.CFrame = CFrame.new(targetPosition1)
+                    tweenToPosition(targetPosition2)
+                    task.wait(4) -- wait at destination before repeating
+                end
+            end)
+        else
+            -- No specific cleanup needed for TweenService here
+        end
+    end)
+
 
 --------------------------------------------------
 -- CONFIGURATION / MANAGERS
