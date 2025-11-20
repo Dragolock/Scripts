@@ -14,13 +14,15 @@ local Window = Library:Window{
 
 -- Tabs
 local Tabs = {
-    Stuff1 = Window:CreateTab{Title = "Main Game", Icon = "phosphor-sword-bold"},
+    Stuff1 = Window:CreateTab{Title = "Main Game", Icon = "phosphor-sword-bold"}
+    Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"},
 }
 
 local Options = Library.Options
 
-Tabs.Stuff1:CreateToggle("AutoWin", {Title = "Auto Win", Default = false})
-:OnChanged(function(state)
+local autoWinToggle = Tabs.Stuff1:CreateToggle("AutoWin", {Title = "Auto Win", Default = false})
+
+autoWinToggle:OnChanged(function(state)
     local Players = game:GetService("Players")
     local TweenService = game:GetService("TweenService")
     local player = Players.LocalPlayer
@@ -30,7 +32,7 @@ Tabs.Stuff1:CreateToggle("AutoWin", {Title = "Auto Win", Default = false})
 
     if state then
         task.spawn(function()
-            while Tabs.Stuff1.Options.AutoWin.Value do
+            while autoWinToggle.Value do
                 -- Add float if not already present
                 if not hrp:FindFirstChild("FloatVelocity") then
                     local bv = Instance.new("BodyVelocity")
@@ -49,7 +51,7 @@ Tabs.Stuff1:CreateToggle("AutoWin", {Title = "Auto Win", Default = false})
                 tween.Completed:Wait()
 
                 -- Wait 2 seconds at target
-                task.wait(5)
+                task.wait(4)
             end
 
             -- Cleanup: remove float if toggle turned off
@@ -62,7 +64,6 @@ Tabs.Stuff1:CreateToggle("AutoWin", {Title = "Auto Win", Default = false})
         if bv then bv:Destroy() end
     end
 end)
-
 
 --------------------------------------------------
 -- CONFIGURATION / MANAGERS
