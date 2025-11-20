@@ -472,26 +472,34 @@ Tabs.Halloween:CreateToggle("GenerateCandyKeys", {Title = "Generate Candy/Keys",
 
                 if bossSelection == "FrankenShock" then
                     while Options.GenerateCandyKeys.Value and candyDropdown.Value == "FrankenShock" do
-                        event:FireServer("1")
-                        task.wait(0.01)
+                        for i = 1, 10 do
+                            event:FireServer("1")
+                        end
+                        task.wait()
                     end
 
                 elseif bossSelection == "Dracula" then
                     while Options.GenerateCandyKeys.Value and candyDropdown.Value == "Dracula" do
-                        event:FireServer("2")
-                        task.wait(0.01)
+                        for i = 1, 10 do
+                            event:FireServer("2")
+                        end
+                        task.wait()
                     end
 
                 elseif bossSelection == "Cursed Pharaoh" then
                     while Options.GenerateCandyKeys.Value and candyDropdown.Value == "Cursed Pharaoh" do
-                        event:FireServer("3")
-                        task.wait(0.01)
+                        for i = 1, 10 do
+                            event:FireServer("3")
+                        end
+                        task.wait()
                     end
 
                 elseif bossSelection == "Witch" then
                     while Options.GenerateCandyKeys.Value and candyDropdown.Value == "Witch" do
-                        event:FireServer("4")
-                        task.wait(0.01)
+                        for i = 1, 10 do
+                            event:FireServer("4")
+                        end
+                        task.wait()
                     end
                 end
             end)
@@ -501,6 +509,7 @@ Tabs.Halloween:CreateToggle("GenerateCandyKeys", {Title = "Generate Candy/Keys",
             game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC"):FireServer(unpack(removeArgs))
         end
     end)
+
 
 Tabs.Halloween:CreateToggle("AutoTower", {Title = "Auto Tower", Default = false})
     :OnChanged(function(state)
