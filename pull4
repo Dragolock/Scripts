@@ -20,90 +20,35 @@ local Tabs = {
 
 local Options = Library.Options
 
-local RunService = game:GetService("RunService")
-local player = game:GetService("Players").LocalPlayer
-
-Tabs.Stuff1:CreateToggle("AutoWinTest", {Title = "Auto Win", Default = false}):OnChanged(function(state)
+Tabs.Stuff1:CreateToggle("AutoWin", {Title = "Auto Win", Default = false})
+:OnChanged(function(state)
+    local Players = game:GetService("Players")
+    local TweenService = game:GetService("TweenService")
+    local player = Players.LocalPlayer
     local char = player.Character or player.CharacterAdded:Wait()
     local hrp = char:WaitForChild("HumanoidRootPart")
 
-    local function setFloat(enabled)
-        local bv = hrp:FindFirstChild("WRDBodyVelocity")
-        if enabled and not bv then
-            bv = Instance.new("BodyVelocity", hrp)
-            bv.Name = "WRDBodyVelocity"
-            bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-            bv.Velocity = Vector3.new()
-        elseif not enabled and bv then
-            bv:Destroy()
-        end
-    end
-
     if state then
-        setFloat(true)
-
         task.spawn(function()
-            local targets = { Vector3.new(3, 32, -171), Vector3.new(2, -2043, -5464) }
-            local travelTime = 0.2 -- seconds to get to each point
+            while Options.AutoWin.Value do
+                local firstPos = Vector3.new(3, 32, -171)
+                local secondPos = Vector3.new(2, -2043, -5464)
 
-            while Options.AutoWinTest.Value do
-                for _, pos in ipairs(targets) do
-                    local startTime = tick()
-                    local startCFrame = hrp.CFrame
-                    local endCFrame = CFrame.new(pos)
+                local tween = TweenService:Create(
+                    hrp,
+                    TweenInfo.new((hrp.Position - firstPos).Magnitude / 10, Enum.EasingStyle.Linear),
+                    {CFrame = CFrame.new(firstPos)}
+                )
+                tween:Play()
+                tween.Completed:Wait()
 
-                    while tick() - startTime < travelTime and Options.AutoWinTest.Value do
-                        local alpha = (tick() - startTime) / travelTime
-                        hrp.CFrame = startCFrame:Lerp(endCFrame, alpha)
-                        RunService.RenderStepped:Wait()
-                    end
+                task.wait(0.8)
 
-                    hrp.CFrame = endCFrame
-                    task.wait(0.1) -- short pause before next loop
-                end
-                task.wait(4) -- extra wait after completing full cycle
+                hrp.CFrame = CFrame.new(secondPos)
+
+                task.wait(4)
             end
         end)
-    else
-        setFloat(false)
-        Options.AutoWinTest.Value = false
-    end
-end)
-
-local RunService = game:GetService("RunService")
-local player = game.Players.LocalPlayer
-
-local loopTask
-
-Tabs.Stuff1:CreateToggle("AutoWinTest2", {Title = "Auto Win", Default = false}):OnChanged(function(state)
-    local char = player.Character or player.CharacterAdded:Wait()
-    local hrp = char:WaitForChild("HumanoidRootPart")
-
-    local function smoothTeleport(targetPos, duration)
-        local startTime = tick()
-        local startCFrame = hrp.CFrame
-        local endCFrame = CFrame.new(targetPos)
-        while tick() - startTime < duration do
-            local alpha = (tick() - startTime) / duration
-            hrp.CFrame = startCFrame:Lerp(endCFrame, alpha)
-            RunService.RenderStepped:Wait()
-        end
-        hrp.CFrame = endCFrame
-    end
-
-    if state then
-        if loopTask and loopTask.Connected then return end
-        loopTask = RunService.RenderStepped:Connect(function()
-            smoothTeleport(Vector3.new(3, 32, -171), 1)
-            task.wait(0.3)
-            hrp.CFrame = CFrame.new(2, -2043, -5464)
-            task.wait(4)
-        end)
-    else
-        if loopTask then
-            loopTask:Disconnect()
-            loopTask = nil
-        end
     end
 end)
 
