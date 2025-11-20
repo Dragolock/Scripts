@@ -20,50 +20,56 @@ local Tabs = {
 
 local Options = Library.Options
 
-local autoWinToggle = Tabs.Stuff1:CreateToggle("AutoWin", {Title = "Auto Win", Default = false})
+Tabs.Stuff1:CreateToggle("AutoWin", {Title = "Auto Win", Default = false})
+    :OnChanged(function(state)
+        if state then
+            task.spawn(function()
+                local Players = game:GetService("Players")
+                local TweenService = game:GetService("TweenService")
+                local player = Players.LocalPlayer
+                local char = player.Character or player.CharacterAdded:Wait()
+                local hrp = char:WaitForChild("HumanoidRootPart")
+                local targetPosition = Vector3.new(2, -2043, -5464)
 
-autoWinToggle:OnChanged(function(state)
-    local Players = game:GetService("Players")
-    local TweenService = game:GetService("TweenService")
-    local player = Players.LocalPlayer
-    local char = player.Character or player.CharacterAdded:Wait()
-    local hrp = char:WaitForChild("HumanoidRootPart")
-    local target = workspace:WaitForChild("FinishSegment"):WaitForChild("DetectorPart")
+                while Options.AutoWin.Value do
+                    -- Add float if not already present
+                    if not hrp:FindFirstChild("FloatVelocity") then
+                        local bv = Instance.new("BodyVelocity")
+                        bv.Name = "FloatVelocity"
+                        bv.Velocity = Vector3.new(0,0,0)
+                        bv.MaxForce = Vector3.new(0, math.huge, 0)
+                        bv.Parent = hrp
+                    end
 
-    if state then
-        task.spawn(function()
-            while autoWinToggle.Value do
-                -- Add float if not already present
-                if not hrp:FindFirstChild("FloatVelocity") then
-                    local bv = Instance.new("BodyVelocity")
-                    bv.Name = "FloatVelocity"
-                    bv.Velocity = Vector3.new(0,0,0)
-                    bv.MaxForce = Vector3.new(0, math.huge, 0)
-                    bv.Parent = hrp
+                    -- Teleport to start
+                    hrp.CFrame = CFrame.new(3,32,-171)
+
+                    -- Tween to win location
+                    local tween = TweenService:Create(
+                        hrp,
+                        TweenInfo.new((hrp.Position - targetPosition).Magnitude / 10, Enum.EasingStyle.Linear),
+                        {CFrame = CFrame.new(targetPosition)}
+                    )
+                    tween:Play()
+                    tween.Completed:Wait()
+                    task.wait(4)
                 end
 
-                -- Teleport to start
-                hrp.CFrame = CFrame.new(3,32,-171)
-
-                -- Tween to target
-                local tween = TweenService:Create(hrp, TweenInfo.new((hrp.Position - target.Position).Magnitude / 10, Enum.EasingStyle.Linear), {CFrame = target.CFrame})
-                tween:Play()
-                tween.Completed:Wait()
-
-                -- Wait 2 seconds at target
-                task.wait(4)
-            end
-
-            -- Cleanup: remove float if toggle turned off
+                -- On turning toggle OFF, cleanup
+                local bv = hrp:FindFirstChild("FloatVelocity")
+                if bv then bv:Destroy() end
+            end)
+        else
+            -- Remove float immediately if toggle turned off
+            local Players = game:GetService("Players")
+            local player = Players.LocalPlayer
+            local char = player.Character or player.CharacterAdded:Wait()
+            local hrp = char:WaitForChild("HumanoidRootPart")
             local bv = hrp:FindFirstChild("FloatVelocity")
             if bv then bv:Destroy() end
-        end)
-    else
-        -- Remove float if toggle turned off manually
-        local bv = hrp:FindFirstChild("FloatVelocity")
-        if bv then bv:Destroy() end
-    end
-end)
+        end
+    end)
+
 
 --------------------------------------------------
 -- CONFIGURATION / MANAGERS
