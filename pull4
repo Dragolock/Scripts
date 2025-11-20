@@ -36,7 +36,7 @@ Tabs.Stuff1:CreateToggle("AutoWin", {Title = "Auto Win", Default = false})
 
                 local tween = TweenService:Create(
                     hrp,
-                    TweenInfo.new((hrp.Position - firstPos).Magnitude / 10, Enum.EasingStyle.Linear),
+                    TweenInfo.new((hrp.Position - firstPos).Magnitude / 4, Enum.EasingStyle.Linear),
                     {CFrame = CFrame.new(firstPos)}
                 )
                 tween:Play()
