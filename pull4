@@ -44,7 +44,7 @@ Tabs.Stuff1:CreateToggle("AutoWinTest", {Title = "Auto Win", Default = false}):O
 
         task.spawn(function()
             local targets = { Vector3.new(3, 32, -171), Vector3.new(2, -2043, -5464) }
-            local travelTime = 5 -- seconds to get to each point
+            local travelTime = 0.2 -- seconds to get to each point
 
             while Options.AutoWinTest.Value do
                 for _, pos in ipairs(targets) do
@@ -70,7 +70,12 @@ Tabs.Stuff1:CreateToggle("AutoWinTest", {Title = "Auto Win", Default = false}):O
     end
 end)
 
-Tabs.Stuff1:CreateToggle("AutoWinTest2", {Title = "Auto Win test", Default = false}):OnChanged(function(state)
+local RunService = game:GetService("RunService")
+local player = game.Players.LocalPlayer
+
+local loopTask
+
+Tabs.Stuff1:CreateToggle("AutoWinTest2", {Title = "Auto Win", Default = false}):OnChanged(function(state)
     local char = player.Character or player.CharacterAdded:Wait()
     local hrp = char:WaitForChild("HumanoidRootPart")
 
@@ -87,14 +92,18 @@ Tabs.Stuff1:CreateToggle("AutoWinTest2", {Title = "Auto Win test", Default = fal
     end
 
     if state then
-        task.spawn(function()
-            while Options.AutoWinTest2.Value do
-                smoothTeleport(Vector3.new(3, 32, -171), 1)
-                task.wait(1)
-                hrp.CFrame = CFrame.new(2, -2043, -5464)
-                task.wait(4)
-            end
+        if loopTask and loopTask.Connected then return end
+        loopTask = RunService.RenderStepped:Connect(function()
+            smoothTeleport(Vector3.new(3, 32, -171), 1)
+            task.wait(0.3)
+            hrp.CFrame = CFrame.new(2, -2043, -5464)
+            task.wait(4)
         end)
+    else
+        if loopTask then
+            loopTask:Disconnect()
+            loopTask = nil
+        end
     end
 end)
 
