@@ -454,7 +454,7 @@ local candyDropdown = Tabs.Halloween:CreateDropdown("CandyBossSelect", {
 
 local towerDropdown = Tabs.Halloween:CreateDropdown("SelectTower", {
     Title = "Select Tower",
-    Values = {"Dracula Tower", "Witch Tower"},
+    Values = {"Dracula Tower", "Witch Tower", "Skeleton Tower"},
     Default = "Dracula Tower"
 })
 
@@ -519,6 +519,7 @@ Tabs.Halloween:CreateToggle("AutoTower", {Title = "Auto Tower", Default = false}
                 local lastFalse = tick()
                 local selectedTower = towerDropdown.Value
 
+                -- Dracula Tower
                 if selectedTower == "Dracula Tower" then
                     while Options.AutoTower.Value and towerDropdown.Value == "Dracula Tower" do
                         towerEvent:FireServer("-20", true)
@@ -529,6 +530,7 @@ Tabs.Halloween:CreateToggle("AutoTower", {Title = "Auto Tower", Default = false}
                         task.wait(0.01)
                     end
 
+                -- Witch Tower
                 elseif selectedTower == "Witch Tower" then
                     while Options.AutoTower.Value and towerDropdown.Value == "Witch Tower" do
                         towerEvent:FireServer("-21", true)
@@ -538,10 +540,23 @@ Tabs.Halloween:CreateToggle("AutoTower", {Title = "Auto Tower", Default = false}
                         end
                         task.wait(0.01)
                     end
+
+                -- Skeleton Tower
+                elseif selectedTower == "Skeleton Tower" then
+                    while Options.AutoTower.Value and towerDropdown.Value == "Skeleton Tower" do
+                        towerEvent:FireServer("-22", true)
+                        if tick() - lastFalse >= 1.5 then
+                            towerEvent:FireServer("-22", false)
+                            lastFalse = tick()
+                        end
+                        task.wait(0.01)
+                    end
                 end
+
             end)
         end
     end)
+
 
 Tabs.Halloween:CreateToggle("CollectPumpkins", {Title = "Collect Pumpkins", Default = false})
     :OnChanged(function(state)
