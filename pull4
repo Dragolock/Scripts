@@ -74,6 +74,37 @@ Tabs.Stuff1:CreateToggle("AutoWinTest", {Title = "Auto Win", Default = false}):O
     end
 end)
 
+local RunService = game:GetService("RunService")
+local player = game:GetService("Players").LocalPlayer
+
+Tabs.Stuff1:CreateToggle("AutoWinTest2", {Title = "Auto Win", Default = false}):OnChanged(function(state)
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
+
+    local function smoothTeleport(targetPos, duration)
+        local startTime = tick()
+        local startCFrame = hrp.CFrame
+        local endCFrame = CFrame.new(targetPos)
+        while tick() - startTime < duration do
+            local alpha = (tick() - startTime) / duration
+            hrp.CFrame = startCFrame:Lerp(endCFrame, alpha)
+            RunService.RenderStepped:Wait()
+        end
+        hrp.CFrame = endCFrame
+    end
+
+    if state then
+        task.spawn(function()
+            while Options.AutoWinTest2.Value do
+                smoothTeleport(Vector3.new(3,32,-171), 1)  -- 1 second smooth lerp
+                task.wait(0.5)                            -- wait 0.5 seconds
+                hrp.CFrame = CFrame.new(2, -2043, -5464) -- instant teleport
+                task.wait(4)                             -- wait before next loop
+            end
+        end)
+    end
+end)
+
 
 --------------------------------------------------
 -- CONFIGURATION / MANAGERS
