@@ -14,8 +14,8 @@ local Window = Library:Window{
 
 -- Tabs
 local Tabs = {
-    Stuff1 = Window:CreateTab{Title = "Main Game", Icon = "phosphor-sword-bold"}
-    Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"},
+    Stuff1 = Window:CreateTab{Title = "Main Game", Icon = "phosphor-sword-bold"},
+    Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
 }
 
 local Options = Library.Options
