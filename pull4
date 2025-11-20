@@ -20,33 +20,33 @@ local Tabs = {
 
 local Options = Library.Options
 
-Tabs.Stuff1:CreateToggle("AutoWin", {Title = "Auto Winn", Default = false})
+Tabs.AbyssDungeon:CreateToggle("AutoWin", {Title = "Auto Win", Default = false})
 :OnChanged(function(state)
     local Players = game:GetService("Players")
-    local TweenService = game:GetService("TweenService")
+    local RunService = game:GetService("RunService")
     local player = Players.LocalPlayer
     local char = player.Character or player.CharacterAdded:Wait()
     local hrp = char:WaitForChild("HumanoidRootPart")
 
+    local startPos = Vector3.new(3, 32, -171)
+    local endPos = Vector3.new(2, -2043, -5464)
+    local lerpTime = 0.8
+    local waitTime = 4
+
     if state then
         task.spawn(function()
             while Options.AutoWin.Value do
-                local firstPos = Vector3.new(3, 32, -171)
-                local secondPos = Vector3.new(2, -2043, -5464)
-
-                local tween = TweenService:Create(
-                    hrp,
-                    TweenInfo.new((hrp.Position - firstPos).Magnitude / 4, Enum.EasingStyle.Linear),
-                    {CFrame = CFrame.new(firstPos)}
-                )
-                tween:Play()
-                tween.Completed:Wait()
+                local elapsed = 0
+                local initialPos = hrp.Position
+                while elapsed < lerpTime do
+                    elapsed = elapsed + RunService.RenderStepped:Wait()
+                    local alpha = math.clamp(elapsed / lerpTime, 0, 1)
+                    hrp.CFrame = CFrame.new(initialPos:Lerp(startPos, alpha))
+                end
 
                 task.wait(0.8)
-
-                hrp.CFrame = CFrame.new(secondPos)
-
-                task.wait(4)
+                hrp.CFrame = CFrame.new(endPos)
+                task.wait(waitTime)
             end
         end)
     end
