@@ -24,33 +24,55 @@ local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
-Tabs.Stuff1:CreateToggle("AutoWinTest", {Title = "Auto Win", Default = false})
-    :OnChanged(function(state)
-        if state then
-            task.spawn(function()
-                local char = player.Character or player.CharacterAdded:Wait()
-                local hrp = char:WaitForChild("HumanoidRootPart")
-                local targetPosition1 = Vector3.new(3, 32, -171)
-                local targetPosition2 = Vector3.new(2, -2043, -5464)
-                local lerpSpeed = 0.1 --smaller slower, higher faster
-                local reachingThreshold = 1 -- distance when the target is considered reached
+local RunService = game:GetService("RunService")
+local player = game:GetService("Players").LocalPlayer
+local Options = { AutoWinTest = { Value = false } } -- Assuming Options table exists
 
-                local function moveToPosition(targetPos)
-                    while (hrp.Position - targetPos).Magnitude > reachingThreshold and Options.AutoWinTest.Value do
-                        hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(targetPos), lerpSpeed)
-                        RunService.RenderStepped:Wait()
-                    end
-                    hrp.CFrame = CFrame.new(targetPos) -- Snap exactly when done
-                end
+Tabs.Stuff1:CreateToggle("AutoWinTest", {Title = "Auto Win", Default = false}):OnChanged(function(state)
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
 
-                while Options.AutoWinTest.Value do
-                    moveToPosition(targetPosition1)
-                    moveToPosition(targetPosition2)
-                    task.wait(4) -- wait at destination
-                end
-            end)
+    local function setFloat(enabled)
+        local bv = hrp:FindFirstChild("WRDBodyVelocity")
+        if enabled and not bv then
+            bv = Instance.new("BodyVelocity", hrp)
+            bv.Name = "WRDBodyVelocity"
+            bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            bv.Velocity = Vector3.new()
+        elseif not enabled and bv then
+            bv:Destroy()
         end
-    end)
+    end
+
+    if state then
+        Options.AutoWinTest.Value = true
+        setFloat(true)
+
+        task.spawn(function()
+            local targets = { Vector3.new(3,32,-171), Vector3.new(2,-2043,-5464) }
+            local lerpSpeed = 0.1
+            local threshold = 1
+
+            local function moveTo(pos)
+                while (hrp.Position - pos).Magnitude > threshold and Options.AutoWinTest.Value do
+                    hrp.CFrame = hrp.CFrame:Lerp(CFrame.new(pos), lerpSpeed)
+                    RunService.RenderStepped:Wait()
+                end
+                hrp.CFrame = CFrame.new(pos)
+            end
+
+            while Options.AutoWinTest.Value do
+                for _, pos in ipairs(targets) do
+                    moveTo(pos)
+                end
+                task.wait(4)
+            end
+        end)
+    else
+        Options.AutoWinTest.Value = false
+        setFloat(false)
+    end
+end)
 
 
 --------------------------------------------------
