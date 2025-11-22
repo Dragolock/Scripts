@@ -430,6 +430,36 @@ Tabs.Fishing:CreateToggle("AutoFishBad", {Title = "Auto Fish (Bad)", Default = f
         end
     end)
 
+Tabs.Fishing:CreateButton{
+    Title = "Cartographer Pieces",
+    Description = "Collect all Cartographer Pieces instantly",
+    Callback = function()
+
+        local Players = game:GetService("Players")
+        local player = Players.LocalPlayer
+        local char = player.Character or player.CharacterAdded:Wait()
+        local root = char:WaitForChild("HumanoidRootPart")
+
+        local function fireTouchOnce(obj)
+            local part = obj:FindFirstAncestorWhichIsA("BasePart")
+            if part and firetouchinterest then
+                task.spawn(function()
+                    firetouchinterest(part, root, 1)
+                    task.wait()
+                    firetouchinterest(part, root, 0)
+                end)
+            end
+        end
+
+        for _, d in ipairs(workspace:GetDescendants()) do
+            if d:IsA("TouchTransmitter") then
+                fireTouchOnce(d)
+            end
+        end
+
+    end
+}
+
 --------------------------------------------------
 -- HALLOWEEN EVENT TAB
 --------------------------------------------------
