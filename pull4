@@ -400,35 +400,76 @@ Tabs.Abyss:CreateButton{
 -- FISHING EVENT TAB
 --------------------------------------------------
 
-Tabs.Fishing:CreateToggle("AutoFishBad", {Title = "Auto Fish (Bad)", Default = false})
-    :OnChanged(function(state)
-        local plr = game.Players.LocalPlayer
-        local char = plr.Character or plr.CharacterAdded:Wait()
-        local hrp = char:WaitForChild("HumanoidRootPart")
+Tabs.Fishing:CreateToggle("AutoFishBad", {
+    Title = "Auto Fish (Bad)",
+    Default = false
+}):OnChanged(function(state)
 
-        if state then
-            task.spawn(function()
-                local Fishing = game.ReplicatedStorage.Remotes.Fishing
-                while Options.AutoFishBad.Value and char.Parent do
-                    hrp.CFrame = CFrame.new(-890, 10, -246)
-                    task.wait(2)
-                    hrp.Anchored = true
+    local plr = game.Players.LocalPlayer
+    local char = plr.Character or plr.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
+
+    if not state then
+        hrp.Anchored = false
+        return
+    end
+
+    task.spawn(function()
+        local Fishing = game.ReplicatedStorage.Remotes.Fishing
+        local RunService = game:GetService("RunService")
+
+        local connection
+        local stateStage = "move"         -- move → cast → react → reel → cooldown
+        local stageStartTime = tick()
+
+        local REACT_DURATION = 18         -- reaction time window
+        local COOLDOWN = 1                -- cooldown after reeling
+        local MOVE_TIME = 2               -- time to wait after teleport before cast
+
+        hrp.Anchored = false
+
+        connection = RunService.Heartbeat:Connect(function()
+            if not Options.AutoFishBad.Value or not char.Parent then
+                hrp.Anchored = false
+                connection:Disconnect()
+                return
+            end
+
+            local now = tick()
+
+            if stateStage == "move" then
+                hrp.CFrame = CFrame.new(-890, 10, -246)
+                hrp.Anchored = true
+                stageStartTime = now
+                stateStage = "waitBeforeCast"
+
+            elseif stateStage == "waitBeforeCast" then
+                if now - stageStartTime >= MOVE_TIME then
                     Fishing.CastRod:InvokeServer()
-                    local start = tick()
-                    while tick() - start < 18 do
-                        Fishing.PlayerReaction:FireServer()
-                        task.wait(0.05)
-                    end
+                    stageStartTime = now
+                    stateStage = "react"
+                end
+
+            elseif stateStage == "react" then
+                -- Spam PlayerReaction every frame for 18 seconds
+                Fishing.PlayerReaction:FireServer()
+
+                if now - stageStartTime >= REACT_DURATION then
                     Fishing.ReelIn:FireServer(2.5)
                     Fishing.Stop:FireServer()
-                    task.wait(1)
+                    stageStartTime = now
+                    stateStage = "cooldown"
                 end
-                hrp.Anchored = false
-            end)
-        else
-            hrp.Anchored = false
-        end
+
+            elseif stateStage == "cooldown" then
+                if now - stageStartTime >= COOLDOWN then
+                    stateStage = "move"
+                end
+            end
+        end)
     end)
+end)
+
 
 Tabs.Fishing:CreateButton{
     Title = "Cartographer Pieces",
@@ -488,58 +529,54 @@ local towerDropdown = Tabs.Halloween:CreateDropdown("SelectTower", {
     Default = "Dracula Tower"
 })
 
-Tabs.Halloween:CreateToggle("GenerateCandyKeys", {Title = "Generate Candy/Keys", Default = false})
-    :OnChanged(function(state)
-        if state then
-            task.spawn(function()
-                local bossSelection = candyDropdown.Value
-                local event = game:GetService("ReplicatedStorage"):WaitForChild("EventFolder"):WaitForChild("WinBossEvent")
-                local removeEvent = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC")
+Tabs.Halloween:CreateToggle("GenerateCandyKeys", {
+    Title = "Generate Candy/Keys",
+    Default = false
+}):OnChanged(function(state)
 
-                -- Enable remove event
-                removeEvent:FireServer(1)
-                task.wait(0.1)
+    local removeEvent = game:GetService("ReplicatedStorage")
+        :WaitForChild("Remotes")
+        :WaitForChild("Events")
+        :WaitForChild("RemoveC")
 
-                if bossSelection == "FrankenShock" then
-                    while Options.GenerateCandyKeys.Value and candyDropdown.Value == "FrankenShock" do
-                        for i = 1, 10 do
-                            event:FireServer("1")
-                        end
-                        task.wait()
-                    end
+    if not state then
+        removeEvent:FireServer(0)
+        return
+    end
 
-                elseif bossSelection == "Dracula" then
-                    while Options.GenerateCandyKeys.Value and candyDropdown.Value == "Dracula" do
-                        for i = 1, 10 do
-                            event:FireServer("2")
-                        end
-                        task.wait()
-                    end
+    task.spawn(function()
+        local RunService = game:GetService("RunService")
+        local event = game:GetService("ReplicatedStorage")
+            :WaitForChild("EventFolder")
+            :WaitForChild("WinBossEvent")
 
-                elseif bossSelection == "Cursed Pharaoh" then
-                    while Options.GenerateCandyKeys.Value and candyDropdown.Value == "Cursed Pharaoh" do
-                        for i = 1, 10 do
-                            event:FireServer("3")
-                        end
-                        task.wait()
-                    end
+        removeEvent:FireServer(1)
 
-                elseif bossSelection == "Witch" then
-                    while Options.GenerateCandyKeys.Value and candyDropdown.Value == "Witch" do
-                        for i = 1, 10 do
-                            event:FireServer("4")
-                        end
-                        task.wait()
-                    end
-                end
-            end)
-        else
-            -- Disable remove event
-            local removeArgs = {0}
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC"):FireServer(unpack(removeArgs))
-        end
+        local BOSS_IDS = {
+            ["FrankenShock"]   = "1",
+            ["Dracula"]        = "2",
+            ["Cursed Pharaoh"] = "3",
+            ["Witch"]          = "4"
+        }
+
+        local connection
+        connection = RunService.Heartbeat:Connect(function()
+            if not Options.GenerateCandyKeys.Value then
+                connection:Disconnect()
+                removeEvent:FireServer(0)
+                return
+            end
+
+            local selected = candyDropdown.Value
+            local bossId = BOSS_IDS[selected]
+            if not bossId then return end
+
+            for _ = 1, 15 do
+                event:FireServer(bossId)
+            end
+        end)
     end)
-
+end)
 
 Tabs.Halloween:CreateToggle("AutoTower", {
     Title = "Auto Tower",
@@ -576,7 +613,7 @@ Tabs.Halloween:CreateToggle("AutoTower", {
             if not towerId then return end
 
             -- Super-fast true spam (15 per frame)
-            for _ = 1, 15 do
+            for _ = 1, 20 do
                 towerEvent:FireServer(towerId, true)
             end
 
