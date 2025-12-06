@@ -485,19 +485,13 @@ Tabs.Halloween:CreateToggle("SnowballFarm", {Title = "Snowball Farm", Default = 
                 while Options.SnowballFarm.Value do
                     towerEvent:FireServer("-21", false)
                     
-                    task.wait(0.01)
-                    
                     for i = 1, 11 do
                         towerEvent:FireServer("-21", true)
-                        task.wait(0.01)
                     end
-                    
-                    task.wait(0.1)
                 end
             end)
         end
     end)
-
 
 local candyDropdown = Tabs.Halloween:CreateDropdown("CandyBossSelect", {
     Title = "Select Candy Boss",
