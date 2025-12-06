@@ -489,7 +489,7 @@ Tabs.Halloween:CreateToggle("SnowballFarm", {Title = "Snowball Farm", Default = 
                         towerEvent:FireServer("-21", true)
                     end
                     
-                    task.wait()  -- to prevent crashing si si
+                    task.wait(0.1)  -- to prevent crashing si si
                 end
             end)
         end
