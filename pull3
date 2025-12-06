@@ -489,7 +489,7 @@ Tabs.Halloween:CreateToggle("GenerateSnowballs", {Title = "Generate Snowballs", 
                     lastFalse = tick()
                 end
 
-                for i = 1, 11 do
+                for i = 1, 15 do
                     towerEvent:FireServer("-21", true)
                     task.wait(0.05)
                 end
