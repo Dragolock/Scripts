@@ -476,44 +476,29 @@ Tabs.Halloween:CreateToggle("AutoClick", {Title = "Auto Click", Default = false}
         end
     end)
 
-Tabs.Halloween:CreateToggle("SnowballFarm", {Title = "Snowball Farm", Default = false})
-    :OnChanged(function(state)
-        if state then
-            task.spawn(function()
-                local towerEvent = game:GetService("ReplicatedStorage"):WaitForChild("TowerEventRemotes"):WaitForChild("TowerRewardsEvent")
+Tabs.Halloween:CreateToggle("GenerateSnowballs", {Title = "Generate Snowballs", Default = false})
+:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            local towerEvent = game:GetService("ReplicatedStorage"):WaitForChild("TowerEventRemotes"):WaitForChild("TowerRewardsEvent")
+            local lastFalse = 0
 
-                while Options.SnowballFarm.Value do
+            while Options.GenerateSnowballs.Value do
+                if tick() - lastFalse >= 1 then
                     towerEvent:FireServer("-21", false)
-
-                    for i = 1, 11 do
-                        towerEvent:FireServer("-21", true)
-                    end
-
-                    task.wait()
+                    lastFalse = tick()
                 end
-            end)
-        end
-    end)
 
-
-Tabs.Halloween:CreateToggle("SnowballFarm", {Title = "Snowball Farm", Default = false})
-    :OnChanged(function(state)
-        if state then
-            task.spawn(function()
-                local towerEvent = game:GetService("ReplicatedStorage"):WaitForChild("TowerEventRemotes"):WaitForChild("TowerRewardsEvent")
-                
-                while Options.SnowballFarm.Value do
-                    towerEvent:FireServer("-21", false)
-                    
-                    for i = 1, 11 do
-                        towerEvent:FireServer("-21", true)
-                    end
-                    
-                    task.wait(0.2)
+                for i = 1, 11 do
+                    towerEvent:FireServer("-21", true)
+                    task.wait(0.05)
                 end
-            end)
-        end
-    end)
+
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
 
 
 local candyDropdown = Tabs.Halloween:CreateDropdown("CandyBossSelect", {
