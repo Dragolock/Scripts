@@ -478,16 +478,16 @@ Tabs.Halloween:CreateToggle("AutoClick", {Title = "Auto Click", Default = false}
 
 Tabs.Halloween:CreateToggle("Snowball", {Title = "Snowball", Default = false})
 :OnChanged(function(state)
-    if state then
-        task.spawn(function()
-            local SnowmanUwU = game:GetService("ReplicatedStorage")
-                :WaitForChild("TowerEventRemotes")
-                :WaitForChild("TowerRewardsEvent")
+    task.spawn(function()
+        local SnowmanUwU = game:GetService("ReplicatedStorage")
+            :WaitForChild("TowerEventRemotes")
+            :WaitForChild("TowerRewardsEvent")
 
-            local lastFalse, lastTrue = 0, 0
-            local falseInterval, trueInterval = 0.5, 0.020
+        local lastFalse, lastTrue = 0, 0
+        local falseInterval, trueInterval = 0.5, 0.022
 
-            while state do
+        while true do
+            if Tabs.Halloween:GetToggle("Snowball").Value then
                 local now = tick()
 
                 if now - lastTrue >= trueInterval then
@@ -499,11 +499,10 @@ Tabs.Halloween:CreateToggle("Snowball", {Title = "Snowball", Default = false})
                     SnowmanUwU:FireServer("-21", false)
                     lastFalse = now
                 end
-
-                task.wait() -- prevents locking the thread
             end
-        end)
-    end
+            task.wait()
+        end
+    end)
 end)
 
 
