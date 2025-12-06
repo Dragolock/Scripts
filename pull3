@@ -484,7 +484,7 @@ Tabs.Halloween:CreateToggle("GenerateSnowballs", {Title = "Generate Snowballs", 
             local lastFalse = 0
 
             while Options.GenerateSnowballs.Value do
-                if tick() - lastFalse >= 1 then
+                if tick() - lastFalse >= 0.5 then
                     towerEvent:FireServer("-21", false)
                     lastFalse = tick()
                 end
