@@ -481,16 +481,15 @@ Tabs.Halloween:CreateToggle("SnowballFarm", {Title = "Snowball Farm", Default = 
         if state then
             task.spawn(function()
                 local towerEvent = game:GetService("ReplicatedStorage"):WaitForChild("TowerEventRemotes"):WaitForChild("TowerRewardsEvent")
-
+                
                 while Options.SnowballFarm.Value do
-                    for batch = 1, 60 do
-                        towerEvent:FireServer("-22", false)
-                        for i = 1, 11 do
-                            towerEvent:FireServer("-22", true)
-                        end
+                    towerEvent:FireServer("-21", false)
+                    
+                    for i = 1, 11 do
+                        towerEvent:FireServer("-21", true)
                     end
-
-                    task.wait()
+                    
+                    task.wait(0.2)
                 end
             end)
         end
