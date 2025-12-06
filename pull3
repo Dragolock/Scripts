@@ -476,25 +476,36 @@ Tabs.Halloween:CreateToggle("AutoClick", {Title = "Auto Click", Default = false}
         end
     end)
 
-Tabs.Halloween:CreateToggle("GenerateSnowballs", {Title = "Generate Snowballs", Default = false})
+Tabs.Halloween:CreateToggle("Generate Snowballs", {Title = "Generate Snowballs", Default = false})
 :OnChanged(function(state)
     if state then
+        local TowerRewards = game:GetService("ReplicatedStorage")
+            :WaitForChild("TowerEventRemotes")
+            :WaitForChild("TowerRewardsEvent")
+
+        local lastFalse, lastTrue = 0, 0
+        local falseInterval, trueInterval = 0.5, 0.033
+
         task.spawn(function()
-            local towerEvent = game:GetService("ReplicatedStorage"):WaitForChild("TowerEventRemotes"):WaitForChild("TowerRewardsEvent")
-            local lastFalse = 0
-
             while Options.GenerateSnowballs.Value do
-                if tick() - lastFalse >= 0.5 then
-                    towerEvent:FireServer("-21", false)
-                    lastFalse = tick()
+                game:GetService("ReplicatedStorage")
+                    :WaitForChild("Remotes")
+                    :WaitForChild("Events")
+                    :WaitForChild("ClickEvent")
+                    :FireServer()
+
+                local now = tick()
+                if now - lastTrue >= trueInterval then
+                    TowerRewards:FireServer("-21", true)
+                    lastTrue = now
                 end
 
-                for i = 1, 15 do
-                    towerEvent:FireServer("-21", true)
-                    task.wait(0.05)
+                if now - lastFalse >= falseInterval then
+                    TowerRewards:FireServer("-21", false)
+                    lastFalse = now
                 end
 
-                task.wait(0.1)
+                task.wait()
             end
         end)
     end
