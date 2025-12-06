@@ -504,7 +504,7 @@ local candyDropdown = Tabs.Halloween:CreateDropdown("CandyBossSelect", {
 
 local towerDropdown = Tabs.Halloween:CreateDropdown("SelectTower", {
     Title = "Select Tower",
-    Values = {"Dracula Tower", "Witch Tower", "Skeleton Tower"},
+    Values = {"Dracula Tower", "Witch Tower", "Skeleton Tower", "Snowball"},
     Default = "Dracula Tower"
 })
 
@@ -601,11 +601,24 @@ Tabs.Halloween:CreateToggle("AutoTower", {Title = "Auto Tower", Default = false}
                         end
                         task.wait(0.01)
                     end
+
+                -- Snowball Tower
+                elseif selectedTower == "Snowball" then
+                    while Options.AutoTower.Value and towerDropdown.Value == "Snowball" do
+                        towerEvent:FireServer("-23", true)  -- new ID for Snowball
+                        if tick() - lastFalse >= 0.2 then
+                            towerEvent:FireServer("-23", false)
+                            lastFalse = tick()
+                        end
+                        task.wait(0.01)
+                    end
+
                 end
 
             end)
         end
     end)
+
 
 
 Tabs.Halloween:CreateToggle("CollectPumpkins", {Title = "Collect Pumpkins", Default = false})
