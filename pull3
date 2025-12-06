@@ -476,36 +476,31 @@ Tabs.Halloween:CreateToggle("AutoClick", {Title = "Auto Click", Default = false}
         end
     end)
 
-Tabs.Halloween:CreateToggle("Generate Snowballs", {Title = "Generate Snowballs", Default = false})
+Tabs.Halloween:CreateToggle("Snowball", {Title = "Snowball", Default = false})
 :OnChanged(function(state)
     if state then
-        local TowerRewards = game:GetService("ReplicatedStorage")
-            :WaitForChild("TowerEventRemotes")
-            :WaitForChild("TowerRewardsEvent")
-
-        local lastFalse, lastTrue = 0, 0
-        local falseInterval, trueInterval = 0.5, 0.033
-
         task.spawn(function()
-            while Options.GenerateSnowballs.Value do
-                game:GetService("ReplicatedStorage")
-                    :WaitForChild("Remotes")
-                    :WaitForChild("Events")
-                    :WaitForChild("ClickEvent")
-                    :FireServer()
+            local SnowmanUwU = game:GetService("ReplicatedStorage")
+                :WaitForChild("TowerEventRemotes")
+                :WaitForChild("TowerRewardsEvent")
 
+            local lastFalse, lastTrue = 0, 0
+            local falseInterval, trueInterval = 0.5, 0.020
+
+            while state do
                 local now = tick()
+
                 if now - lastTrue >= trueInterval then
-                    TowerRewards:FireServer("-21", true)
+                    SnowmanUwU:FireServer("-21", true)
                     lastTrue = now
                 end
 
                 if now - lastFalse >= falseInterval then
-                    TowerRewards:FireServer("-21", false)
+                    SnowmanUwU:FireServer("-21", false)
                     lastFalse = now
                 end
 
-                task.wait()
+                task.wait() -- prevents locking the thread
             end
         end)
     end
