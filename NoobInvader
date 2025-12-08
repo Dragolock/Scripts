@@ -93,48 +93,60 @@ Tabs.mainTab:CreateToggle("TPSafeZone", {Title = "TP Safe Zone", Default = false
         if state then
             task.spawn(function()
                 while Options.TPSafeZone.Value do
-
                     local char = game.Players.LocalPlayer.Character
-                    local root = char and char:FindFirstChild("HumanoidRootPart")
-                    if root then
-                        root.CFrame = CFrame.new(252, 32, -289)
+                    if char then
+                        local root = char:FindFirstChild("HumanoidRootPart")
+                        local humanoid = char:FindFirstChildOfClass("Humanoid")
+                        if root and humanoid then
+                            root.CFrame = CFrame.new(252, 32, -289)
+                            humanoid.PlatformStand = true -- simple noclip/freeze to prevent falling
+                        end
                     end
-
                     task.wait()
+                end
+
+                -- reset PlatformStand when toggle is off
+                local char = game.Players.LocalPlayer.Character
+                if char then
+                    local humanoid = char:FindFirstChildOfClass("Humanoid")
+                    if humanoid then
+                        humanoid.PlatformStand = false
+                    end
                 end
             end)
         end
     end)
 
+Tabs.mainTab:CreateToggle("DeleteLimbs", {Title = "Delete Limbs", Default = false})
+    :OnChanged(function(state)
+        if state then
+            task.spawn(function()
+                while Options.DeleteLimbs.Value do
+                    local partsToDelete = {
+                        ["Head"] = true,
+                        ["Left Arm"] = true,
+                        ["Right Arm"] = true,
+                        ["Left Leg"] = true,
+                        ["Right Leg"] = true
+                    }
 
-Tabs.mainTab:CreateButton{
-    Title = "Delete Limbs",
-    Description = "Deletes head, arms, and legs (ignores players).",
-    Callback = function()
+                    for _, v in ipairs(workspace:GetDescendants()) do
+                        if v:IsA("BasePart") then
+                            local model = v:FindFirstAncestorOfClass("Model")
+                            if model and game.Players:GetPlayerFromCharacter(model) then
+                                continue
+                            end
+                            if partsToDelete[v.Name] then
+                                v:Destroy()
+                            end
+                        end
+                    end
 
-        local partsToDelete = {
-            ["Head"] = true,
-            ["Left Arm"] = true,
-            ["Right Arm"] = true,
-            ["Left Leg"] = true,
-            ["Right Leg"] = true
-        }
-
-        for _, v in ipairs(workspace:GetDescendants()) do
-            if v:IsA("BasePart") then
-                local model = v:FindFirstAncestorOfClass("Model")
-                if model and game.Players:GetPlayerFromCharacter(model) then
-                    continue
+                    task.wait(1)
                 end
-                if partsToDelete[v.Name] then
-                    v:Destroy()
-                end
-            end
+            end)
         end
-
-    end
-}
-
+    end)
 
 --------------------------------------------------
 -- CONFIGURATION / MANAGERS
