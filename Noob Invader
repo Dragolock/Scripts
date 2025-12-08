@@ -1,0 +1,110 @@
+local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
+local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
+local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
+
+local Window = Library:Window{
+    Title = "Noob Invador Script",
+    SubTitle = "By coco",
+    TabWidth = 130,
+    Size =  UDim2.fromOffset(500, 430),
+    Resize = false, 
+    Theme = "Darker",
+    MinimizeKey = Enum.KeyCode.LeftShift
+}
+
+-- Tabs
+local Tabs = {
+    mainTab = Window:CreateTab{Title = "Main Game", Icon = "phosphor-sword-bold"},
+    Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
+}
+
+local Options = Library.Options
+
+--------------------------------------------------
+-- ABYSS EVENT TAB
+--------------------------------------------------
+
+Tabs.mainTab:CreateToggle("TeleportTorso", {Title = "Teleport Torso", Default = false})
+    :OnChanged(function(state)
+        if state then
+            task.spawn(function()
+                while Options.TeleportTorso.Value do
+                    
+                    local speaker = game.Players.LocalPlayer
+
+                    local function getRoot(char)
+                        for _, part in ipairs(char:GetChildren()) do
+                            if part:IsA("BasePart") and (part.Name == "HumanoidRootPart" or part.Name == "Torso") then
+                                return part
+                            end
+                        end
+                        return nil
+                    end
+
+                    local root = getRoot(speaker.Character)
+                    if root then
+                        local target = root.CFrame * CFrame.new(0, 0, -2)
+
+                        for _, v in ipairs(workspace:GetDescendants()) do
+                            if v:IsA("BasePart") and v.Name:lower() == "torso" then
+
+                                -- Ignore torsos belonging to any player
+                                local model = v:FindFirstAncestorOfClass("Model")
+                                if model and game.Players:GetPlayerFromCharacter(model) then
+                                    continue
+                                end
+
+                                v.CFrame = target
+                            end
+                        end
+                    end
+
+                    task.wait()
+                end
+            end)
+        end
+    end)
+
+Tabs.mainTab:CreateToggle("AutoAttack", {Title = "Auto Attack", Default = false})
+    :OnChanged(function(state)
+        if state then
+            task.spawn(function()
+                while Options.AutoAttack.Value do
+                    
+                    local args = {
+                        CFrame.new(226.57772827148438, 3.356313943862915, -285.83770751953125, 
+                        0.06595831364393234, -7.147547620434125e-08, 0.9978224039077759, 
+                        2.110936092591942e-09, 1, 7.14919252686741e-08, 
+                        -0.9978224039077759, -2.6091473426248513e-09, 0.06595831364393234)
+                    }
+
+                    game:GetService("ReplicatedStorage")
+                        :WaitForChild("MeleeRemote")
+                        :FireServer(unpack(args))
+
+                    task.wait(0.1)
+                end
+            end)
+        end
+    end)
+
+
+--------------------------------------------------
+-- CONFIGURATION / MANAGERS
+--------------------------------------------------
+
+SaveManager:SetLibrary(Library)
+InterfaceManager:SetLibrary(Library)
+
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+
+InterfaceManager:SetFolder("FluentEventsHub")
+SaveManager:SetFolder("FluentEventsHub/SpecificGame")
+
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+
+Window:SelectTab(1)
+Library:Notify{Title = "Fluent", Content = "Script loaded successfully!", Duration = 8}
+SaveManager:LoadAutoloadConfig()
