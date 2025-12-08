@@ -88,6 +88,25 @@ Tabs.mainTab:CreateToggle("AutoAttack", {Title = "Auto Attack", Default = false}
         end
     end)
 
+Tabs.mainTab:CreateToggle("TPSafeZone", {Title = "TP Safe Zone", Default = false})
+    :OnChanged(function(state)
+        if state then
+            task.spawn(function()
+                while Options.TPSafeZone.Value do
+
+                    local char = game.Players.LocalPlayer.Character
+                    local root = char and char:FindFirstChild("HumanoidRootPart")
+                    if root then
+                        root.CFrame = CFrame.new(252, 32, -289)
+                    end
+
+                    task.wait()
+                end
+            end)
+        end
+    end)
+
+
 Tabs.mainTab:CreateButton{
     Title = "Delete Limbs",
     Description = "Deletes head, arms, and legs (ignores players).",
