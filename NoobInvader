@@ -88,6 +88,34 @@ Tabs.mainTab:CreateToggle("AutoAttack", {Title = "Auto Attack", Default = false}
         end
     end)
 
+Tabs.Abyss:CreateButton{
+    Title = "Delete Limbs",
+    Description = "Deletes head, arms, and legs (ignores players).",
+    Callback = function()
+
+        local partsToDelete = {
+            ["Head"] = true,
+            ["Left Arm"] = true,
+            ["Right Arm"] = true,
+            ["Left Leg"] = true,
+            ["Right Leg"] = true
+        }
+
+        for _, v in ipairs(workspace:GetDescendants()) do
+            if v:IsA("BasePart") then
+                local model = v:FindFirstAncestorOfClass("Model")
+                if model and game.Players:GetPlayerFromCharacter(model) then
+                    continue
+                end
+                if partsToDelete[v.Name] then
+                    v:Destroy()
+                end
+            end
+        end
+
+    end
+}
+
 
 --------------------------------------------------
 -- CONFIGURATION / MANAGERS
