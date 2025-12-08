@@ -88,7 +88,7 @@ Tabs.mainTab:CreateToggle("AutoAttack", {Title = "Auto Attack", Default = false}
         end
     end)
 
-Tabs.Abyss:CreateButton{
+Tabs.mainTab:CreateButton{
     Title = "Delete Limbs",
     Description = "Deletes head, arms, and legs (ignores players).",
     Callback = function()
