@@ -26,7 +26,7 @@ local Options = Library.Options
 
 local worldDropdown = Tabs.mainTab:CreateDropdown("WorldSelect", {
     Title = "Select World",
-    Values = {"W1", "W2"},
+    Values = {"W1", "W2", "W3", "W4"},
     Default = "W1"
 })
 
@@ -54,10 +54,37 @@ Tabs.mainTab:CreateToggle("InfiniteCash", {Title = "Infinite Cash", Default = fa
                                 0, 1, 0,
                                 0, 0, 1
                             )
+                        elseif worldDropdown.Value == "W3" then
+                            hrp.CFrame = CFrame.new(
+                                984.145325, 163.124695, -965.712402,
+                                1, 0, 0,
+                                0, 1, 0,
+                                0, 0, 1
+                            )
+                        elseif worldDropdown.Value == "W4" then
+                            hrp.CFrame = CFrame.new(
+                                664.771667, 584.625, 6003.70557,
+                                1, 0, 0,
+                                0, 1, 0,
+                                0, 0, 1
+                            )
                         end
                     end
 
                     task.wait(0.1)
+                end
+            end)
+        end
+    end)
+
+
+Tabs.mainTab:CreateToggle("AutoRebirth", {Title = "Auto Rebirth", Default = false})
+    :OnChanged(function(state)
+        if state then
+            task.spawn(function()
+                while Options.AutoRebirth.Value do
+                    game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Rebirth"):WaitForChild("Rebirth"):FireServer()
+                    task.wait(2)
                 end
             end)
         end
