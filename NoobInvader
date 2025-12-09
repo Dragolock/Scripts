@@ -88,37 +88,44 @@ Tabs.mainTab:CreateToggle("AutoAttack", {Title = "Auto Attack", Default = false}
     end)
 
 Tabs.mainTab:CreateToggle("TPSafeZone", {Title = "TP Safe Zone", Default = false})
-    :OnChanged(function(state)
-        local platform
+:OnChanged(function(state)
+    local platform, outline
 
-        if state then
-            platform = Instance.new("Part")
-            platform.Name = "SafeZonePlatform"
-            platform.Size = Vector3.new(35, 1, 35)
-            platform.Position = Vector3.new(252, 28.3, -289)
-            platform.Anchored = true
-            platform.CanCollide = true
-            platform.Color = Color3.fromRGB(255, 255, 255)
-            platform.Transparency = 0.8
-            platform.Parent = workspace
+    if state then
+        platform = Instance.new("Part")
+        platform.Name = "SafeZonePlatform"
+        platform.Size = Vector3.new(35, 1, 35)
+        platform.Position = Vector3.new(252, 28.3, -289)
+        platform.Anchored = true
+        platform.CanCollide = true
+        platform.Color = Color3.fromRGB(255, 255, 255)
+        platform.Transparency = 0.8
+        platform.Parent = workspace
 
-            task.spawn(function()
-                while Options.TPSafeZone.Value do
-                    local char = game.Players.LocalPlayer.Character
-                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                    if hrp then
-                        hrp.CFrame = CFrame.new(252, 32, -289)
-                    end
-                    task.wait(0.5)
+        outline = Instance.new("SelectionBox")
+        outline.Adornee = platform
+        outline.LineThickness = 0.05
+        outline.Color3 = Color3.fromRGB(0, 0, 0)
+        outline.SurfaceTransparency = 1
+        outline.Parent = platform
+
+        task.spawn(function()
+            while Options.TPSafeZone.Value do
+                local char = game.Players.LocalPlayer.Character
+                local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    hrp.CFrame = CFrame.new(252, 32, -289)
                 end
-            end)
+                task.wait()
+            end
+        end)
 
-        else
-            -- Delete platform when disabled
-            local existing = workspace:FindFirstChild("SafeZonePlatform")
-            if existing then existing:Destroy() end
-        end
-    end)
+    else
+        local existing = workspace:FindFirstChild("SafeZonePlatform")
+        if existing then existing:Destroy() end
+    end
+end)
+
 
 Tabs.mainTab:CreateToggle("DeleteBodyParts", {Title = "Delete Body Parts", Default = false})
 :OnChanged(function(state)
