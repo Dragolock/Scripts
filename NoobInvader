@@ -120,27 +120,16 @@ Tabs.mainTab:CreateToggle("TPSafeZone", {Title = "TP Safe Zone", Default = false
         end
     end)
 
-Tabs.mainTab:CreateToggle("DeleteLimbs", {Title = "Delete Limbs", Default = false})
+Tabs.mainTab:CreateToggle("DeleteBodyParts", {Title = "Delete Body Parts", Default = false})
 :OnChanged(function(state)
     if state then
         task.spawn(function()
-            while Options.DeleteLimbs.Value do
-                -- List of limb names to delete
-                local limbs = {
-                    "Head",
-                    "LeftUpperArm",
-                    "LeftLowerArm",
-                    "RightUpperArm",
-                    "RightLowerArm",
-                    "LeftUpperLeg",
-                    "LeftLowerLeg",
-                    "RightUpperLeg",
-                    "RightLowerLeg"
-                }
+            local partsToDelete = {"Left Arm", "Right Arm", "Left Leg", "Right Leg", "Torso"}
 
-                for _, limbName in ipairs(limbs) do
-                    for _, v in ipairs(workspace:GetDescendants()) do
-                        if v:IsA("BasePart") and v.Name:lower() == limbName:lower() then
+            while Options.DeleteBodyParts.Value do
+                for _, partName in ipairs(partsToDelete) do
+                    for i, v in pairs(workspace:GetDescendants()) do
+                        if v:IsA("BasePart") and v.Name:lower() == partName:lower() then
                             local model = v:FindFirstAncestorOfClass("Model")
                             if model and game.Players:GetPlayerFromCharacter(model) then
                                 continue
