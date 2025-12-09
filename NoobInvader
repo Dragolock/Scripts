@@ -89,7 +89,7 @@ Tabs.mainTab:CreateToggle("AutoAttack", {Title = "Auto Attack", Default = false}
 
 Tabs.mainTab:CreateToggle("TPSafeZone", {Title = "TP Safe Zone", Default = false})
 :OnChanged(function(state)
-    local platform, outline
+    local platform
 
     if state then
         platform = Instance.new("Part")
@@ -98,16 +98,11 @@ Tabs.mainTab:CreateToggle("TPSafeZone", {Title = "TP Safe Zone", Default = false
         platform.Position = Vector3.new(252, 28.3, -289)
         platform.Anchored = true
         platform.CanCollide = true
+        platform.Material = Enum.Material.Glass
+        platform.Reflectance = 0.00005
         platform.Color = Color3.fromRGB(255, 255, 255)
-        platform.Transparency = 0.8
+        platform.Transparency = 0.3
         platform.Parent = workspace
-
-        outline = Instance.new("SelectionBox")
-        outline.Adornee = platform
-        outline.LineThickness = 0.05
-        outline.Color3 = Color3.fromRGB(0, 0, 0)
-        outline.SurfaceTransparency = 1
-        outline.Parent = platform
 
         task.spawn(function()
             while Options.TPSafeZone.Value do
@@ -125,7 +120,6 @@ Tabs.mainTab:CreateToggle("TPSafeZone", {Title = "TP Safe Zone", Default = false
         if existing then existing:Destroy() end
     end
 end)
-
 
 Tabs.mainTab:CreateToggle("DeleteBodyParts", {Title = "Delete Body Parts", Default = false})
 :OnChanged(function(state)
