@@ -84,7 +84,7 @@ Tabs.mainTab:CreateToggle("AutoRebirth", {Title = "Auto Rebirth", Default = fals
             task.spawn(function()
                 while Options.AutoRebirth.Value do
                     game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Rebirth"):WaitForChild("Rebirth"):FireServer()
-                    task.wait(2)
+                    task.wait()
                 end
             end)
         end
