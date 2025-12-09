@@ -43,12 +43,11 @@ Tabs.mainTab:CreateToggle("TeleportTorso", {Title = "Teleport Torso", Default = 
 
                     local root = getRoot(speaker.Character)
                     if root then
-                        local target = root.CFrame * CFrame.new(0, 0, -2)
+                        local target = root.CFrame * CFrame.new(0, 0, -5)
 
                         for _, v in ipairs(workspace:GetDescendants()) do
                             if v:IsA("BasePart") and v.Name:lower() == "torso" then
 
-                                -- Ignore torsos belonging to any player
                                 local model = v:FindFirstAncestorOfClass("Model")
                                 if model and game.Players:GetPlayerFromCharacter(model) then
                                     continue
@@ -88,66 +87,36 @@ Tabs.mainTab:CreateToggle("AutoAttack", {Title = "Auto Attack", Default = false}
         end
     end)
 
-local SAFE_POS = Vector3.new(252, 32, -289)
-
--- CreateToggle
 Tabs.mainTab:CreateToggle("TPSafeZone", {Title = "TP Safe Zone", Default = false})
     :OnChanged(function(state)
+        local platform
+
         if state then
-            
-            --// Create platform if it doesn't exist
-            if not workspace:FindFirstChild("TPSafeZonePlatform") then
-                local platform = Instance.new("Part")
-                platform.Name = "TPSafeZonePlatform"
-                platform.Size = Vector3.new(20, 1, 20) -- Make the platform bigger
-                platform.Position = SAFE_POS - Vector3.new(0, 3, 0) -- Slightly below your TP position
-                platform.Anchored = true
-                platform.CanCollide = true
-                platform.Color = Color3.fromRGB(0, 255, 0)
-                platform.Material = Enum.Material.Neon
-                platform.Transparency = 0.2
-                platform.Parent = workspace
-            end
+            platform = Instance.new("Part")
+            platform.Name = "SafeZonePlatform"
+            platform.Size = Vector3.new(20, 1, 20)
+            platform.Position = Vector3.new(252, 27, -289)
+            platform.Anchored = true
+            platform.CanCollide = true
+            platform.Color = Color3.fromRGB(255, 255, 255)
+            platform.Transparency = 0.8
+            platform.Parent = workspace
 
             task.spawn(function()
                 while Options.TPSafeZone.Value do
-                    local player = game.Players.LocalPlayer
-                    local char = player.Character
-                    if char then
-                        local root = char:FindFirstChild("HumanoidRootPart")
-                        local humanoid = char:FindFirstChildOfClass("Humanoid")
-                        if root and humanoid then
-
-                            -- teleport
-                            root.CFrame = CFrame.new(SAFE_POS)
-
-                            -- Freeze physics
-                            root.AssemblyLinearVelocity = Vector3.zero
-                            root.AssemblyAngularVelocity = Vector3.zero
-                            humanoid.PlatformStand = true
-                        end
+                    local char = game.Players.LocalPlayer.Character
+                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                    if hrp then
+                        hrp.CFrame = CFrame.new(252, 32, -289)
                     end
                     task.wait(0.5)
                 end
-
-                -- Reset physics when OFF
-                local char = game.Players.LocalPlayer.Character
-                if char then
-                    local root = char:FindFirstChild("HumanoidRootPart")
-                    local humanoid = char:FindFirstChildOfClass("Humanoid")
-                    if root then
-                        root.AssemblyLinearVelocity = Vector3.zero
-                        root.AssemblyAngularVelocity = Vector3.zero
-                    end
-                    if humanoid then
-                        humanoid.PlatformStand = false
-                    end
-                end
-
-                -- Remove platform
-                local p = workspace:FindFirstChild("TPSafeZonePlatform")
-                if p then p:Destroy() end
             end)
+
+        else
+            -- Delete platform when disabled
+            local existing = workspace:FindFirstChild("SafeZonePlatform")
+            if existing then existing:Destroy() end
         end
     end)
 
@@ -177,7 +146,7 @@ Tabs.mainTab:CreateToggle("DeleteLimbs", {Title = "Delete Limbs", Default = fals
                         end
                     end
 
-                    task.wait(1)
+                    task.wait(0.3)
                 end
             end)
         end
