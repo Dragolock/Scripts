@@ -24,45 +24,37 @@ local Options = Library.Options
 -- ABYSS EVENT TAB
 --------------------------------------------------
 
-local worlds = {
-    W1 = CFrame.new(
-        1112.00793, 853.375, 4881.04834,
-        1, 0, 0,
-        0, 1, 0,
-        0, 0, 1
-    ),
-    W2 = CFrame.new(
-        -279.66748, 34.125, 1639.08789,
-        1, 0, 0,
-        0, 1, 0,
-        0, 0, 1
-    )
-}
-
-local selectedWorld = "W1"
-
-local worldDropdown = Tabs.maintab:CreateDropdown("WorldSelect", {
+local worldDropdown = Tabs.mainTab:CreateDropdown("WorldSelect", {
     Title = "Select World",
     Values = {"W1", "W2"},
     Default = "W1"
 })
 
-worldDropdown:OnChanged(function(value)
-    selectedWorld = value
-end)
-
-Tabs.maintab:CreateToggle("InfiniteCash", {Title = "Infinite Cash", Default = false})
+Tabs.mainTab:CreateToggle("InfiniteCash", {Title = "Infinite Cash", Default = false})
     :OnChanged(function(state)
         if state then
             task.spawn(function()
                 while Options.InfiniteCash.Value do
-                    local cf = worlds[selectedWorld]
                     local player = game.Players.LocalPlayer
                     local char = player.Character
                     local hrp = char and char:FindFirstChild("HumanoidRootPart")
 
                     if hrp then
-                        hrp.CFrame = cf
+                        if worldDropdown.Value == "W1" then
+                            hrp.CFrame = CFrame.new(
+                                1112.00793, 853.375, 4881.04834,
+                                1, 0, 0,
+                                0, 1, 0,
+                                0, 0, 1
+                            )
+                        elseif worldDropdown.Value == "W2" then
+                            hrp.CFrame = CFrame.new(
+                                -279.66748, 34.125, 1639.08789,
+                                1, 0, 0,
+                                0, 1, 0,
+                                0, 0, 1
+                            )
+                        end
                     end
 
                     task.wait(0.1)
