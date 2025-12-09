@@ -124,7 +124,7 @@ Tabs.mainTab:CreateToggle("DeleteBodyParts", {Title = "Delete Body Parts", Defau
 :OnChanged(function(state)
     if state then
         task.spawn(function()
-            local partsToDelete = {"Left Arm", "Right Arm", "Left Leg", "Right Leg", "Torso"}
+            local partsToDelete = {"Left Arm", "Right Arm", "Left Leg", "Right Leg", "Head"}
 
             while Options.DeleteBodyParts.Value do
                 for _, partName in ipairs(partsToDelete) do
@@ -139,7 +139,7 @@ Tabs.mainTab:CreateToggle("DeleteBodyParts", {Title = "Delete Body Parts", Defau
                     end
                 end
 
-                task.wait(0.3)
+                task.wait(0.5)
             end
         end)
     end
