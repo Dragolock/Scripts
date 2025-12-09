@@ -43,7 +43,7 @@ Tabs.mainTab:CreateToggle("TeleportTorso", {Title = "Teleport Torso", Default = 
 
                     local root = getRoot(speaker.Character)
                     if root then
-                        local target = root.CFrame * CFrame.new(0, 0, -5)
+                        local target = root.CFrame * CFrame.new(0, 0, -2.5)
 
                         for _, v in ipairs(workspace:GetDescendants()) do
                             if v:IsA("BasePart") and v.Name:lower() == "torso" then
@@ -95,7 +95,7 @@ Tabs.mainTab:CreateToggle("TPSafeZone", {Title = "TP Safe Zone", Default = false
             platform = Instance.new("Part")
             platform.Name = "SafeZonePlatform"
             platform.Size = Vector3.new(20, 1, 20)
-            platform.Position = Vector3.new(252, 27, -289)
+            platform.Position = Vector3.new(252, 29, -289)
             platform.Anchored = true
             platform.CanCollide = true
             platform.Color = Color3.fromRGB(255, 255, 255)
