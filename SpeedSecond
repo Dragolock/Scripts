@@ -45,7 +45,7 @@ Tabs.mainTab:CreateToggle("FarmWins", {Title = "Farm Wins", Default = false})
                         hrp.CFrame = cf
                     end
 
-                    task.wait(1)
+                    task.wait()
                 end
             end)
         end
