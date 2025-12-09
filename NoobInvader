@@ -97,7 +97,7 @@ Tabs.mainTab:CreateToggle("TPSafeZone", {Title = "TP Safe Zone", Default = false
         platform = Instance.new("Part")
         platform.Name = "SafeZonePlatform"
         platform.Size = Vector3.new(35, 1, 35)
-        platform.Position = Vector3.new(252, 78, -289)
+        platform.Position = Vector3.new(252, 77.6, -289)
         platform.Anchored = true
         platform.CanCollide = true
         platform.Material = Enum.Material.Glass
