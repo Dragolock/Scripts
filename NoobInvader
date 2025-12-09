@@ -97,7 +97,7 @@ Tabs.mainTab:CreateToggle("TPSafeZone", {Title = "TP Safe Zone", Default = false
         platform = Instance.new("Part")
         platform.Name = "SafeZonePlatform"
         platform.Size = Vector3.new(35, 1, 35)
-        platform.Position = Vector3.new(252, 77.6, -289)
+        platform.Position = Vector3.new(252, 147, -289)
         platform.Anchored = true
         platform.CanCollide = true
         platform.Material = Enum.Material.Glass
@@ -119,7 +119,7 @@ Tabs.mainTab:CreateToggle("TPSafeZone", {Title = "TP Safe Zone", Default = false
                 local char = game.Players.LocalPlayer.Character
                 local hrp = char and char:FindFirstChild("HumanoidRootPart")
                 if hrp then
-                    hrp.CFrame = CFrame.new(252, 80, -289)
+                    hrp.CFrame = CFrame.new(252, 150, -289)
                 end
                 task.wait()
             end
