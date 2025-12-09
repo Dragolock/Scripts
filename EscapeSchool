@@ -26,7 +26,7 @@ local Options = Library.Options
 
 local worldDropdown = Tabs.mainTab:CreateDropdown("WorldSelect", {
     Title = "Select World",
-    Values = {"W1", "W2", "W3", "W4"},
+    Values = {"W1", "W2", "W3", "W4", "W5"},
     Default = "W1"
 })
 
@@ -66,6 +66,13 @@ Tabs.mainTab:CreateToggle("InfiniteCash", {Title = "Infinite Cash", Default = fa
                                 664.771667, 584.625, 6003.70557,
                                 1, 0, 0,
                                 0, 1, 0,
+                                0, 0, 1
+                            )
+                        elseif worldDropdown.Value == "W5" then
+                            hrp.CFrame = CFrame.new(
+                                -0.948899388, 111.742004, 17523.8066,
+                                0.499959469, 0.866048813, 0,
+                                -0.866048813, 0.499959469, 0,
                                 0, 0, 1
                             )
                         end
