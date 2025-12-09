@@ -31,9 +31,9 @@ Tabs.mainTab:CreateToggle("FarmWins", {Title = "Farm Wins", Default = false})
                 while Options.FarmWins.Value do
 
                     local cf = CFrame.new(
-                        2097.47461, 96.4683762, -3207.58105, 
-                        0, 0, -1, 
-                        0, 1, 0, 
+                        2097.47461, 96.4683762, -3207.58105,
+                        0, 0, -1,
+                        0, 1, 0,
                         1, 0, 0
                     )
 
@@ -44,10 +44,13 @@ Tabs.mainTab:CreateToggle("FarmWins", {Title = "Farm Wins", Default = false})
                     if hrp then
                         hrp.CFrame = cf
                     end
+
+                    task.wait(1)
                 end
             end)
         end
     end)
+
 
 Tabs.mainTab:CreateToggle("FarmSpeed", {Title = "Farm Speed", Default = false})
     :OnChanged(function(state)
