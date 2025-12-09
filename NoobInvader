@@ -125,20 +125,37 @@ Tabs.mainTab:CreateToggle("DeleteLimbs", {Title = "Delete Limbs", Default = fals
     if state then
         task.spawn(function()
             while Options.DeleteLimbs.Value do
-                for _, v in ipairs(workspace:GetDescendants()) do
-                    if v:IsA("BasePart") and v.Name ~= "Torso" then
-                        local model = v:FindFirstAncestorOfClass("Model")
-                        if model and game.Players:GetPlayerFromCharacter(model) then
-                            continue
+                -- List of limb names to delete
+                local limbs = {
+                    "Head",
+                    "LeftUpperArm",
+                    "LeftLowerArm",
+                    "RightUpperArm",
+                    "RightLowerArm",
+                    "LeftUpperLeg",
+                    "LeftLowerLeg",
+                    "RightUpperLeg",
+                    "RightLowerLeg"
+                }
+
+                for _, limbName in ipairs(limbs) do
+                    for _, v in ipairs(workspace:GetDescendants()) do
+                        if v:IsA("BasePart") and v.Name:lower() == limbName:lower() then
+                            local model = v:FindFirstAncestorOfClass("Model")
+                            if model and game.Players:GetPlayerFromCharacter(model) then
+                                continue
+                            end
+                            v:Destroy()
                         end
-                        v:Destroy()
                     end
                 end
+
                 task.wait(0.3)
             end
         end)
     end
 end)
+
 
 Tabs.mainTab:CreateButton({
     Title = "Anti AFK",
