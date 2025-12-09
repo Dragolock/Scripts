@@ -15,7 +15,6 @@ local Window = Library:Window{
 -- Tabs
 local Tabs = {
     mainTab = Window:CreateTab{Title = "Main Game", Icon = "phosphor-sword-bold"},
-    experimentTab = Window:CreateTab{Title = "Experimenting", Icon = "phosphor-sword-bold"},
     Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
 }
 
@@ -238,69 +237,6 @@ Tabs.mainTab:CreateButton({
         end)
     end
 })
-
-Tabs.experimentTab:CreateToggle("TPSnowflake", {Title = "TP Snowflake Zone", Default = false})
-:OnChanged(function(state)
-    local platformParts = {}
-
-    local function createArm(position, size, orientation)
-        local part = Instance.new("Part")
-        part.Size = size
-        part.Position = position
-        part.Anchored = true
-        part.CanCollide = true
-        part.Material = Enum.Material.Glass
-        part.Color = Color3.fromRGB(255, 255, 255)
-        part.Transparency = 0.8
-        part.TopSurface = Enum.SurfaceType.Smooth
-        part.BottomSurface = Enum.SurfaceType.Smooth
-        part.Parent = workspace
-
-        local outline = Instance.new("SelectionBox")
-        outline.Adornee = part
-        outline.LineThickness = 0.05
-        outline.Color3 = Color3.new(0, 0, 0)
-        outline.SurfaceTransparency = 1
-        outline.Parent = part
-
-        if orientation then
-            part.CFrame = part.CFrame * CFrame.Angles(unpack(orientation))
-        end
-
-        table.insert(platformParts, part)
-    end
-
-    local function createSnowflake(center)
-        local arms = 6
-        local length = 20
-        local thickness = 2
-        for i = 0, arms-1 do
-            local angle = math.rad((360 / arms) * i)
-            local offset = Vector3.new(math.cos(angle)*length/2, 0, math.sin(angle)*length/2)
-            createArm(center + offset, Vector3.new(thickness, 1, length), {0, angle, 0})
-        end
-    end
-
-    if state then
-        createSnowflake(Vector3.new(252, 28.3, -289))
-        task.spawn(function()
-            while Options.TPSnowflake.Value do
-                local char = game.Players.LocalPlayer.Character
-                local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                if hrp then
-                    hrp.CFrame = CFrame.new(252, 32, -289)
-                end
-                task.wait(0.5)
-            end
-        end)
-    else
-        for _, part in ipairs(platformParts) do
-            if part then part:Destroy() end
-        end
-        platformParts = {}
-    end
-end)
-
 
 --------------------------------------------------
 -- CONFIGURATION / MANAGERS
