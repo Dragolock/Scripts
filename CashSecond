@@ -90,7 +90,7 @@ Tabs.mainTab:CreateToggle("InfCash", {Title = "Inf Cash", Default = false})
                         hrp.CFrame = CFrame.new(coords[index] + Vector3.new(0, 2, 0))
                         index = index % #coords + 1
                     end
-                    task.wait(0.0001)
+                    task.wait(0.01)
                 end
             end)
         else
