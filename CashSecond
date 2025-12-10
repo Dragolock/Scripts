@@ -47,61 +47,61 @@ Tabs.mainTab:CreateToggle("FarmDia", {Title = "Farm Diamonds", Default = false})
         end
     end)
 
-Tabs.mainTab:CreateToggle("InfSpeed", {Title = "Inf Speed", Default = false})
-:OnChanged(function(state)
-    local platforms = {}
-    local coords = {
-        Vector3.new(360, 733, -178),
-        Vector3.new(110, 763, -271)
-    }
-    local player = game.Players.LocalPlayer
+Tabs.mainTab:CreateToggle("TPSafeZone", {Title = "Teleport SafeZone", Default = false})
+    :OnChanged(function(state)
+        if state then
+            task.spawn(function()
+                local coordinates = {
+                    Vector3.new(360, 728, -178),  -- 733 - 5
+                    Vector3.new(110, 758, -271)   -- 763 - 5
+                }
 
-    if state then
-        for _, pos in ipairs(coords) do
-            local platform = Instance.new("Part")
-            platform.Name = "SafeZonePlatform"
-            platform.Size = Vector3.new(35, 1, 35)
-            platform.Position = pos
-            platform.Anchored = true
-            platform.CanCollide = true
-            platform.Material = Enum.Material.Glass
-            platform.Reflectance = 0.00005
-            platform.Color = Color3.fromRGB(255, 255, 255)
-            platform.Transparency = 0.8
-            platform.Parent = workspace
+                local platforms = {}
 
-            local outline = Instance.new("SelectionBox")
-            outline.Adornee = platform
-            outline.LineThickness = 0.05
-            outline.Color3 = Color3.new(0, 0, 0)
-            outline.SurfaceTransparency = 0
-            outline.Parent = platform
+                -- Create platforms
+                for _, coord in pairs(coordinates) do
+                    local platform = Instance.new("Part")
+                    platform.Name = "SafeZonePlatform"
+                    platform.Size = Vector3.new(35, 1, 35)
+                    platform.Position = coord  -- Already subtracted 5
+                    platform.Anchored = true
+                    platform.CanCollide = true
+                    platform.Material = Enum.Material.Glass
+                    platform.Reflectance = 0.00005
+                    platform.Color = Color3.fromRGB(255, 255, 255)
+                    platform.Transparency = 0.8
+                    platform.Parent = workspace
+                    table.insert(platforms, platform)
 
-            table.insert(platforms, platform)
-        end
-
-        task.spawn(function()
-            while state do
-                local char = player.Character
-                local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                if hrp then
-                    hrp.CFrame = CFrame.new(coords[1])
-                    task.wait(0.0001)
-                    hrp.CFrame = CFrame.new(coords[2])
-                    task.wait(0.0001)
+                    local outline = Instance.new("SelectionBox")
+                    outline.Adornee = platform
+                    outline.LineThickness = 0.05
+                    outline.Color3 = Color3.new(0, 0, 0)
+                    outline.SurfaceTransparency = 0
+                    outline.Parent = platform
                 end
-                task.wait()
-            end
-        end)
 
-    else
-        for _, platform in ipairs(platforms) do
-            if platform then
-                platform:Destroy()
+                -- Teleport player above the first platform while toggle is on
+                while Options.TPSafeZone.Value do
+                    local player = game.Players.LocalPlayer
+                    local char = player.Character
+                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+
+                    if hrp then
+                        hrp.CFrame = CFrame.new(platforms[1].Position + Vector3.new(0, 2, 0))
+                    end
+                    task.wait()
+                end
+            end)
+        else
+            -- Remove all SafeZonePlatforms when toggle is off
+            for _, part in pairs(workspace:GetChildren()) do
+                if part.Name == "SafeZonePlatform" then
+                    part:Destroy()
+                end
             end
         end
-    end
-end)
+    end)
 
    
 Tabs.mainTab:CreateButton({
