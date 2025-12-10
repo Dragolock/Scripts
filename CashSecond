@@ -72,7 +72,7 @@ Tabs.mainTab:CreateButton({
 
 Tabs.mainTab:CreateButton({
     Title = "Infinite Cash",
-    Description = "Gives you cash. (9,220,000,000,000,000,000 to get leaderboard number)",
+    Description = "Gives you cash. (9,220,000,000,000,000,000 to get leaderboard number, only works 18 times, dont press twice)",
     Callback = function()
         local args = {infiniteCashAmount}
         game:GetService("ReplicatedStorage"):WaitForChild("PigCash"):FireServer(unpack(args))
@@ -80,12 +80,15 @@ Tabs.mainTab:CreateButton({
 })
    
 Tabs.mainTab:CreateButton({
-    Title = "Copy Number",
-    Description = "Copies leaderboar number to your clipboard.",
+    Title = "Infinite Cash",
+    Description = "Copies 9,220,000,000,000,000,000 to your clipboard.",
     Callback = function()
-        setclipboard("9220000000000000000")
+        task.spawn(function()
+            setclipboard("9220000000000000000")
+        end)
     end
 })
+
 
 --------------------------------------------------
 -- CONFIGURATION / MANAGERS
