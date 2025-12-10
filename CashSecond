@@ -47,7 +47,7 @@ Tabs.mainTab:CreateToggle("FarmDia", {Title = "Farm Diamonds", Default = false})
         end
     end)
 
-Tabs.mainTab:CreateToggle("TPSafeZone", {Title = "Teleport SafeZone", Default = false})
+Tabs.mainTab:CreateToggle("InfCash", {Title = "Inf Cash", Default = false})
     :OnChanged(function(state)
         if state then
             task.spawn(function()
@@ -58,7 +58,6 @@ Tabs.mainTab:CreateToggle("TPSafeZone", {Title = "Teleport SafeZone", Default = 
 
                 local platforms = {}
 
-                -- Create platforms at the coordinates
                 for _, pos in pairs(coords) do
                     local platform = Instance.new("Part")
                     platform.Name = "SafeZonePlatform"
@@ -81,22 +80,20 @@ Tabs.mainTab:CreateToggle("TPSafeZone", {Title = "Teleport SafeZone", Default = 
                     outline.Parent = platform
                 end
 
-                -- Teleport player to each coordinate
-                while Options.TPSafeZone.Value do
+                local index = 1
+
+                while Options.InfCash.Value do
                     local player = game.Players.LocalPlayer
                     local char = player.Character
                     local hrp = char and char:FindFirstChild("HumanoidRootPart")
                     if hrp then
-                        for _, pos in pairs(coords) do
-                            hrp.CFrame = CFrame.new(pos + Vector3.new(0, 2, 0)) -- teleport slightly above
-                            task.wait(1) -- wait 1 second before next teleport
-                        end
+                        hrp.CFrame = CFrame.new(coords[index] + Vector3.new(0, 2, 0))
+                        index = index % #coords + 1
                     end
-                    task.wait()
+                    task.wait(0.0001)
                 end
             end)
         else
-            -- Remove all SafeZonePlatforms when toggle is off
             for _, part in pairs(workspace:GetChildren()) do
                 if part.Name == "SafeZonePlatform" then
                     part:Destroy()
@@ -104,7 +101,6 @@ Tabs.mainTab:CreateToggle("TPSafeZone", {Title = "Teleport SafeZone", Default = 
             end
         end
     end)
-
 
    
 Tabs.mainTab:CreateButton({
