@@ -24,29 +24,6 @@ local Options = Library.Options
 -- ABYSS EVENT TAB
 --------------------------------------------------
 
-Tabs.mainTab:CreateToggle("FarmDia", {Title = "Farm Diamonds", Default = false})
-    :OnChanged(function(state)
-        if state then
-            task.spawn(function()
-
-                local cf = CFrame.new(-95.0001221, 2.4655726, 400.000031, 1, 0, 0, 0, 1, 0, 0, 0, 1)
-
-                while Options.FarmDia.Value do
-
-                    local player = game.Players.LocalPlayer
-                    local char = player.Character
-                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-
-                    if hrp then
-                        hrp.CFrame = cf
-                    end
-
-                    task.wait()
-                end
-            end)
-        end
-    end)
-
 local infiniteCashAmount = 100
 
 local Input = Tabs.mainTab:CreateInput("InfiniteCashInput", {
@@ -103,8 +80,8 @@ Tabs.mainTab:CreateButton({
 })
    
 Tabs.mainTab:CreateButton({
-    Title = "Copy leaderboard number",
-    Description = "Copies number to ur clipboard",
+    Title = "Copy Number",
+    Description = "Copies leaderboar number to your clipboard.",
     Callback = function()
         setclipboard("9220000000000000000")
     end
