@@ -53,7 +53,7 @@ Tabs.mainTab:CreateToggle("InfCash", {Title = "Inf Cash", Default = false})
             task.spawn(function()
                 local coords = {
                     Vector3.new(360, 732, -178),
-                    Vector3.new(110, 762, -271)
+                    Vector3.new(660, 732, -178)
                 }
 
                 local platforms = {}
@@ -102,6 +102,31 @@ Tabs.mainTab:CreateToggle("InfCash", {Title = "Inf Cash", Default = false})
         end
     end)
 
+local infiniteCashAmount = 100
+
+local Input = Tabs.mainTab:CreateInput("InfiniteCashInput", {
+    Title = "Infinite Cash Amount",
+    Default = tostring(infiniteCashAmount),
+    Placeholder = "Enter amount",
+    Numeric = true,
+    Finished = false,
+    Callback = function(Value)
+        local numberValue = tonumber(Value)
+        if numberValue then
+            infiniteCashAmount = numberValue
+        end
+    end
+})
+
+Tabs.mainTab:CreateButton({
+    Title = "Infinite Cash",
+    Description = "Gives you infinite cash depending on the number you typed in.",
+    Callback = function()
+        local args = {infiniteCashAmount}
+        game:GetService("ReplicatedStorage"):WaitForChild("PigCash"):FireServer(unpack(args))
+    end
+})
+
    
 Tabs.mainTab:CreateButton({
     Title = "Anti AFK",
@@ -119,6 +144,8 @@ Tabs.mainTab:CreateButton({
         })
     end
 })
+
+
 
 Tabs.mainTab:CreateButton({
     Title = "Anti Lag",
