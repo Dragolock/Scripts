@@ -1,0 +1,205 @@
+local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
+local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
+local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
+
+local Window = Library:Window{
+    Title = "+1 Speed A Second",
+    SubTitle = "By coco",
+    TabWidth = 130,
+    Size =  UDim2.fromOffset(500, 430),
+    Resize = false, 
+    Theme = "Darker",
+    MinimizeKey = Enum.KeyCode.LeftShift
+}
+
+-- Tabs
+local Tabs = {
+    mainTab = Window:CreateTab{Title = "Main Game", Icon = "phosphor-sword-bold"},
+    Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
+}
+
+local Options = Library.Options
+
+--------------------------------------------------
+-- ABYSS EVENT TAB
+--------------------------------------------------
+
+Tabs.mainTab:CreateToggle("FarmDia", {Title = "Farm Diamonds", Default = false})
+    :OnChanged(function(state)
+        if state then
+            task.spawn(function()
+
+                local cf = CFrame.new(-95.0001221, 2.4655726, 400.000031, 1, 0, 0, 0, 1, 0, 0, 0, 1)
+
+                while Options.FarmDia.Value do
+
+                    local player = game.Players.LocalPlayer
+                    local char = player.Character
+                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+
+                    if hrp then
+                        hrp.CFrame = cf
+                    end
+
+                    task.wait()
+                end
+            end)
+        end
+    end)
+
+Tabs.mainTab:CreateToggle("InfSpeed", {Title = "Inf Speed", Default = false})
+:OnChanged(function(state)
+    local platforms = {}
+    local coords = {
+        Vector3.new(360, 733, -178),
+        Vector3.new(110, 763, -271)
+    }
+    local player = game.Players.LocalPlayer
+
+    if state then
+        for _, pos in ipairs(coords) do
+            local platform = Instance.new("Part")
+            platform.Name = "SafeZonePlatform"
+            platform.Size = Vector3.new(35, 1, 35)
+            platform.Position = pos
+            platform.Anchored = true
+            platform.CanCollide = true
+            platform.Material = Enum.Material.Glass
+            platform.Reflectance = 0.00005
+            platform.Color = Color3.fromRGB(255, 255, 255)
+            platform.Transparency = 0.8
+            platform.Parent = workspace
+
+            local outline = Instance.new("SelectionBox")
+            outline.Adornee = platform
+            outline.LineThickness = 0.05
+            outline.Color3 = Color3.new(0, 0, 0)
+            outline.SurfaceTransparency = 0
+            outline.Parent = platform
+
+            table.insert(platforms, platform)
+        end
+
+        task.spawn(function()
+            while state do
+                local char = player.Character
+                local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    hrp.CFrame = CFrame.new(coords[1])
+                    task.wait(0.0001)
+                    hrp.CFrame = CFrame.new(coords[2])
+                    task.wait(0.0001)
+                end
+                task.wait()
+            end
+        end)
+
+    else
+        for _, platform in ipairs(platforms) do
+            if platform then
+                platform:Destroy()
+            end
+        end
+    end
+end)
+
+   
+Tabs.mainTab:CreateButton({
+    Title = "Anti AFK",
+    Description = "Helps you to not get kicked.",
+    Callback = function()
+        game:GetService('Players').LocalPlayer.Idled:Connect(function()
+            game:GetService('VirtualUser'):CaptureController()
+            game:GetService('VirtualUser'):ClickButton2(Vector2.new())
+        end)
+
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Anti-AFK",
+            Text = "Anti-AFK is now enabled!",
+            Duration = 3
+        })
+    end
+})
+
+Tabs.mainTab:CreateButton({
+    Title = "Anti Lag",
+    Description = "Decrease quality to not lag.",
+    Callback = function()
+        local Lighting = game:GetService("Lighting")
+        local RunService = game:GetService("RunService")
+        local Terrain = workspace:FindFirstChildWhichIsA("Terrain")
+
+        -- Terrain settings
+        if Terrain then
+            Terrain.WaterWaveSize = 0
+            Terrain.WaterWaveSpeed = 0
+            Terrain.WaterReflectance = 0
+            Terrain.WaterTransparency = 1
+        end
+
+        -- Lighting settings
+        Lighting.GlobalShadows = false
+        Lighting.FogStart = 9e9
+        Lighting.FogEnd = 9e9
+        settings().Rendering.QualityLevel = 1
+
+        -- Optimize workspace parts
+        for _, v in pairs(game:GetDescendants()) do
+            if v:IsA("BasePart") then
+                v.CastShadow = false
+                v.Material = "Plastic"
+                v.Reflectance = 0
+                v.BackSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.BottomSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.FrontSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.LeftSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.RightSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.TopSurface = Enum.SurfaceType.SmoothNoOutlines
+            elseif v:IsA("Decal") then
+                v.Transparency = 1
+                v.Texture = ""
+            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                v.Lifetime = NumberRange.new(0)
+            end
+        end
+
+        -- Disable post effects in Lighting
+        for _, v in pairs(Lighting:GetDescendants()) do
+            if v:IsA("PostEffect") then
+                v.Enabled = false
+            end
+        end
+
+        -- Remove new unwanted objects dynamically
+        workspace.DescendantAdded:Connect(function(child)
+            task.spawn(function()
+                if child:IsA("ForceField") or child:IsA("Sparkles") or child:IsA("Smoke") or child:IsA("Fire") or child:IsA("Beam") then
+                    RunService.Heartbeat:Wait()
+                    child:Destroy()
+                elseif child:IsA("BasePart") then
+                    child.CastShadow = false
+                end
+            end)
+        end)
+    end
+})
+
+--------------------------------------------------
+-- CONFIGURATION / MANAGERS
+--------------------------------------------------
+
+SaveManager:SetLibrary(Library)
+InterfaceManager:SetLibrary(Library)
+
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+
+InterfaceManager:SetFolder("FluentEventsHub")
+SaveManager:SetFolder("FluentEventsHub/SpecificGame")
+
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+
+Window:SelectTab(1)
+Library:Notify{Title = "Fluent", Content = "Script loaded successfully!", Duration = 8}
+SaveManager:LoadAutoloadConfig()
