@@ -93,7 +93,6 @@ Tabs.mainTab:CreateButton({
 })
 
 
-
 Tabs.mainTab:CreateButton({
     Title = "Infinite Cash",
     Description = "Gives you cash. (9,220,000,000,000,000,000 to get leaderboard number)",
@@ -103,7 +102,7 @@ Tabs.mainTab:CreateButton({
     end
 })
    
-Tabs.Main:CreateButton({
+Tabs.mainTab:CreateButton({
     Title = "Copy leaderboard number",
     Description = "Copies number to ur clipboard",
     Callback = function()
