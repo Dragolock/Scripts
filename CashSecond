@@ -51,19 +51,19 @@ Tabs.mainTab:CreateToggle("TPSafeZone", {Title = "Teleport SafeZone", Default = 
     :OnChanged(function(state)
         if state then
             task.spawn(function()
-                local coordinates = {
-                    Vector3.new(360, 728, -178),  -- 733 - 5
-                    Vector3.new(110, 758, -271)   -- 763 - 5
+                local coords = {
+                    Vector3.new(360, 732, -178),
+                    Vector3.new(110, 762, -271)
                 }
 
                 local platforms = {}
 
-                -- Create platforms
-                for _, coord in pairs(coordinates) do
+                -- Create platforms at the coordinates
+                for _, pos in pairs(coords) do
                     local platform = Instance.new("Part")
                     platform.Name = "SafeZonePlatform"
                     platform.Size = Vector3.new(35, 1, 35)
-                    platform.Position = coord  -- Already subtracted 5
+                    platform.Position = pos
                     platform.Anchored = true
                     platform.CanCollide = true
                     platform.Material = Enum.Material.Glass
@@ -81,14 +81,16 @@ Tabs.mainTab:CreateToggle("TPSafeZone", {Title = "Teleport SafeZone", Default = 
                     outline.Parent = platform
                 end
 
-                -- Teleport player above the first platform while toggle is on
+                -- Teleport player to each coordinate
                 while Options.TPSafeZone.Value do
                     local player = game.Players.LocalPlayer
                     local char = player.Character
                     local hrp = char and char:FindFirstChild("HumanoidRootPart")
-
                     if hrp then
-                        hrp.CFrame = CFrame.new(platforms[1].Position + Vector3.new(0, 2, 0))
+                        for _, pos in pairs(coords) do
+                            hrp.CFrame = CFrame.new(pos + Vector3.new(0, 2, 0)) -- teleport slightly above
+                            task.wait(1) -- wait 1 second before next teleport
+                        end
                     end
                     task.wait()
                 end
@@ -102,6 +104,7 @@ Tabs.mainTab:CreateToggle("TPSafeZone", {Title = "Teleport SafeZone", Default = 
             end
         end
     end)
+
 
    
 Tabs.mainTab:CreateButton({
