@@ -53,7 +53,7 @@ Tabs.mainTab:CreateToggle("InfCash", {Title = "Inf Cash", Default = false})
             task.spawn(function()
                 local coords = {
                     Vector3.new(360, 732, -178),
-                    Vector3.new(660, 732, -178)
+                    Vector3.new(460, 732, -178)
                 }
 
                 local platforms = {}
@@ -108,7 +108,7 @@ local Input = Tabs.mainTab:CreateInput("InfiniteCashInput", {
     Title = "Infinite Cash Amount",
     Default = tostring(infiniteCashAmount),
     Placeholder = "Enter amount",
-    Numeric = true,
+    Numeric = false,
     Finished = false,
     Callback = function(Value)
         local numberValue = tonumber(Value)
