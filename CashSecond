@@ -47,61 +47,6 @@ Tabs.mainTab:CreateToggle("FarmDia", {Title = "Farm Diamonds", Default = false})
         end
     end)
 
-Tabs.mainTab:CreateToggle("InfCash", {Title = "Inf Cash", Default = false})
-    :OnChanged(function(state)
-        if state then
-            task.spawn(function()
-                local coords = {
-                    Vector3.new(360, 732, -178),
-                    Vector3.new(460, 732, -178)
-                }
-
-                local platforms = {}
-
-                for _, pos in pairs(coords) do
-                    local platform = Instance.new("Part")
-                    platform.Name = "SafeZonePlatform"
-                    platform.Size = Vector3.new(35, 1, 35)
-                    platform.Position = pos
-                    platform.Anchored = true
-                    platform.CanCollide = true
-                    platform.Material = Enum.Material.Glass
-                    platform.Reflectance = 0.00005
-                    platform.Color = Color3.fromRGB(255, 255, 255)
-                    platform.Transparency = 0.8
-                    platform.Parent = workspace
-                    table.insert(platforms, platform)
-
-                    local outline = Instance.new("SelectionBox")
-                    outline.Adornee = platform
-                    outline.LineThickness = 0.05
-                    outline.Color3 = Color3.new(0, 0, 0)
-                    outline.SurfaceTransparency = 0
-                    outline.Parent = platform
-                end
-
-                local index = 1
-
-                while Options.InfCash.Value do
-                    local player = game.Players.LocalPlayer
-                    local char = player.Character
-                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                    if hrp then
-                        hrp.CFrame = CFrame.new(coords[index] + Vector3.new(0, 2, 0))
-                        index = index % #coords + 1
-                    end
-                    task.wait(0.01)
-                end
-            end)
-        else
-            for _, part in pairs(workspace:GetChildren()) do
-                if part.Name == "SafeZonePlatform" then
-                    part:Destroy()
-                end
-            end
-        end
-    end)
-
 local infiniteCashAmount = 100
 
 local Input = Tabs.mainTab:CreateInput("InfiniteCashInput", {
@@ -118,95 +63,51 @@ local Input = Tabs.mainTab:CreateInput("InfiniteCashInput", {
     end
 })
 
+local infiniteDiamondsAmount = -100
+
+local Input = Tabs.mainTab:CreateInput("InfiniteDiamondsInput", {
+    Title = "Infinite Diamonds Amount",
+    Default = tostring(infiniteDiamondsAmount),
+    Placeholder = "Enter amount",
+    Numeric = false, -- allow scientific notation if needed
+    Finished = false,
+    Callback = function(Value)
+        local success, numberValue = pcall(function()
+            return load("return " .. Value)()
+        end)
+        if success and type(numberValue) == "number" then
+            infiniteDiamondsAmount = numberValue
+        else
+            warn("Invalid number entered")
+        end
+    end
+})
+
+Tabs.mainTab:CreateButton({
+    Title = "Infinite Diamonds",
+    Description = "Infinite diamonds (9,220,000,000,000,000,000 to get leaderboard number)",
+    Callback = function()
+        local args = {infiniteDiamondsAmount}
+        game:GetService("ReplicatedStorage"):WaitForChild("BuyFans"):FireServer(unpack(args))
+    end
+})
+
+
+
 Tabs.mainTab:CreateButton({
     Title = "Infinite Cash",
-    Description = "Gives you infinite cash depending on the number you typed in.",
+    Description = "Gives you cash. (9,220,000,000,000,000,000 to get leaderboard number)",
     Callback = function()
         local args = {infiniteCashAmount}
         game:GetService("ReplicatedStorage"):WaitForChild("PigCash"):FireServer(unpack(args))
     end
 })
-
    
-Tabs.mainTab:CreateButton({
-    Title = "Anti AFK",
-    Description = "Helps you to not get kicked.",
+Tabs.Main:CreateButton({
+    Title = "Copy leaderboard number",
+    Description = "Copies number to ur clipboard",
     Callback = function()
-        game:GetService('Players').LocalPlayer.Idled:Connect(function()
-            game:GetService('VirtualUser'):CaptureController()
-            game:GetService('VirtualUser'):ClickButton2(Vector2.new())
-        end)
-
-        game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "Anti-AFK",
-            Text = "Anti-AFK is now enabled!",
-            Duration = 3
-        })
-    end
-})
-
-
-
-Tabs.mainTab:CreateButton({
-    Title = "Anti Lag",
-    Description = "Decrease quality to not lag.",
-    Callback = function()
-        local Lighting = game:GetService("Lighting")
-        local RunService = game:GetService("RunService")
-        local Terrain = workspace:FindFirstChildWhichIsA("Terrain")
-
-        -- Terrain settings
-        if Terrain then
-            Terrain.WaterWaveSize = 0
-            Terrain.WaterWaveSpeed = 0
-            Terrain.WaterReflectance = 0
-            Terrain.WaterTransparency = 1
-        end
-
-        -- Lighting settings
-        Lighting.GlobalShadows = false
-        Lighting.FogStart = 9e9
-        Lighting.FogEnd = 9e9
-        settings().Rendering.QualityLevel = 1
-
-        -- Optimize workspace parts
-        for _, v in pairs(game:GetDescendants()) do
-            if v:IsA("BasePart") then
-                v.CastShadow = false
-                v.Material = "Plastic"
-                v.Reflectance = 0
-                v.BackSurface = Enum.SurfaceType.SmoothNoOutlines
-                v.BottomSurface = Enum.SurfaceType.SmoothNoOutlines
-                v.FrontSurface = Enum.SurfaceType.SmoothNoOutlines
-                v.LeftSurface = Enum.SurfaceType.SmoothNoOutlines
-                v.RightSurface = Enum.SurfaceType.SmoothNoOutlines
-                v.TopSurface = Enum.SurfaceType.SmoothNoOutlines
-            elseif v:IsA("Decal") then
-                v.Transparency = 1
-                v.Texture = ""
-            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
-                v.Lifetime = NumberRange.new(0)
-            end
-        end
-
-        -- Disable post effects in Lighting
-        for _, v in pairs(Lighting:GetDescendants()) do
-            if v:IsA("PostEffect") then
-                v.Enabled = false
-            end
-        end
-
-        -- Remove new unwanted objects dynamically
-        workspace.DescendantAdded:Connect(function(child)
-            task.spawn(function()
-                if child:IsA("ForceField") or child:IsA("Sparkles") or child:IsA("Smoke") or child:IsA("Fire") or child:IsA("Beam") then
-                    RunService.Heartbeat:Wait()
-                    child:Destroy()
-                elseif child:IsA("BasePart") then
-                    child.CastShadow = false
-                end
-            end)
-        end)
+        setclipboard("9220000000000000000")
     end
 })
 
