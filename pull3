@@ -682,7 +682,7 @@ Tabs.Halloween:CreateButton{
     end
 }
 
-local r = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events")
+local r = game:GetService("ReplicatedStorage"):WaitForChild("EventFolder"):WaitForChild("WinBossEvent"):FireServer(unpack(args))
 
 Tabs.Xmas:CreateToggle("GenMaterials", {
     Title = "Inf Materials (XMAS)",
@@ -692,7 +692,7 @@ Tabs.Xmas:CreateToggle("GenMaterials", {
         r.RemoveC:FireServer(1)
         task.spawn(function()
             while Options.GenMaterials.Value do
-                local args = {"Boss1"}
+                local args = {"1"}
                 r.WinBossEvent:FireServer(unpack(args))
                 task.wait()
             end
@@ -710,34 +710,78 @@ Tabs.Xmas:CreateToggle("AutoCraftXmasItem", {
         task.spawn(function()
             while Options.AutoCraftXmasItem.Value do
                 local args = {selectedItemNumber}
-                r.BuyIngredientForXmas:FireServer(unpack(args))
+                rCraft:FireServer(unpack(args))
                 task.wait(1)
             end
         end)
     end
 end)
 
-local r = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("BuyIngredientForXmas")
+local rCraft = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("BuyIngredientForXmas")
+local rShop = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Functions"):WaitForChild("Shops"):WaitForChild("OnEventShopRequest")
 
 local selectedItemNumber = 1
+local selectedRemote = rCraft
 
 local xmasItemDropdown = Tabs.Xmas:CreateDropdown("SelectXmasItem", {
     Title = "Select Xmas Item",
-    Values = {"Cookies Book", "Santas Helper", "Santas GreatSword", "Strength Potion", "Mega Potion"},
+    Values = {
+        "Cookies Book",
+        "Santas Helper",
+        "Santas GreatSword",
+        "Strength Potion",
+        "Mega Potion",
+        "Extalia",
+        "JollyBox",
+        "SuperRebirth"
+    },
     Default = "Cookies Book"
 }):OnChanged(function(value)
     if value == "Cookies Book" then
         selectedItemNumber = 1
+        selectedRemote = rCraft
     elseif value == "Santas Helper" then
         selectedItemNumber = 2
+        selectedRemote = rCraft
     elseif value == "Santas GreatSword" then
         selectedItemNumber = 3
+        selectedRemote = rCraft
     elseif value == "Strength Potion" then
         selectedItemNumber = 11
+        selectedRemote = rCraft
     elseif value == "Mega Potion" then
         selectedItemNumber = 12
+        selectedRemote = rCraft
+    elseif value == "Extalia" then
+        selectedItemNumber = 13
+        selectedRemote = rShop
+    elseif value == "JollyBox" then
+        selectedItemNumber = 14
+        selectedRemote = rShop
+    elseif value == "SuperRebirth" then
+        selectedItemNumber = 15
+        selectedRemote = rShop
     end
 end)
+
+Tabs.Xmas:CreateToggle("AutoCraftXmasItem", {
+    Title = "Auto Craft Xmas Item",
+    Default = false
+}):OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            while Options.AutoCraftXmasItem.Value do
+                if selectedRemote == rCraft then
+                    selectedRemote:FireServer(selectedItemNumber)
+                else
+                    selectedRemote:InvokeServer(selectedItemNumber)
+                end
+                task.wait(1)
+            end
+        end)
+    end
+end)
+
 
 local r = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events")
 
