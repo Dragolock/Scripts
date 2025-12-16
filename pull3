@@ -682,10 +682,6 @@ Tabs.Halloween:CreateButton{
     end
 }
 
-local rWinBoss = game:GetService("ReplicatedStorage"):WaitForChild("EventFolder"):WaitForChild("WinBossEvent")
-local rCraft = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("BuyIngredientForXmas")
-local rMaterials = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events")
-
 
 Tabs.Xmas:CreateToggle("GenMaterials", {
     Title = "Inf Materials (XMAS)",
@@ -720,6 +716,7 @@ Tabs.Xmas:CreateToggle("AutoCraftXmasItem", {
     end
 end)
 
+local rCraft = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("BuyIngredientForXmas")
 local selectedItemNumber = 1
 
 local xmasItemDropdown = Tabs.Xmas:CreateDropdown("SelectXmasItem", {
@@ -734,9 +731,9 @@ local xmasItemDropdown = Tabs.Xmas:CreateDropdown("SelectXmasItem", {
     elseif value == "Santas GreatSword" then
         selectedItemNumber = 3
     elseif value == "Strength Potion" then
-        selectedItemNumber = 4
+        selectedItemNumber = 11
     elseif value == "Mega Potion" then
-        selectedItemNumber = 5
+        selectedItemNumber = 12
     end
 end)
 
@@ -755,6 +752,7 @@ Tabs.Xmas:CreateToggle("AutoCraftXmasItem", {
     end
 end)
 
+local r = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("BuyIngredientForXmas")
 local selectedMaterial = "RedRibbons"
 
 local xmasDropdown = Tabs.Xmas:CreateDropdown("SelectMaterial", {
