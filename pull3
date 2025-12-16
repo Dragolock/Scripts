@@ -742,7 +742,7 @@ Tabs.Xmas:CreateToggle("AutoCraftXmasItem", {
     end
 end)
 
-local r = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("BuyIngredientForXmas")
+local rBuy = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("BuyIngredientForXmas")
 local selectedMaterial = "RedRibbons"
 
 local xmasDropdown = Tabs.Xmas:CreateDropdown("SelectMaterial", {
@@ -772,13 +772,13 @@ Tabs.Xmas:CreateToggle("AutoBuy", {
     if state then
         task.spawn(function()
             while Options.AutoBuy.Value do
-                local args = {selectedMaterial}
-                    r:FireServer(selectedMaterial)
+                rBuy:FireServer(selectedMaterial)
                 task.wait(1)
             end
         end)
     end
 end)
+
 
 Tabs.Xmas:CreateToggle("AutoBuyAll", {
     Title = "Auto Buy All",
@@ -789,14 +789,13 @@ Tabs.Xmas:CreateToggle("AutoBuyAll", {
             while Options.AutoBuyAll.Value do
                 local allMaterials = {"RedRibbons", "Bell", "WrappingPaper", "ElfsClue", "LumpOfCoal", "PaintBucket"}
                 for _, material in ipairs(allMaterials) do
-                    r:FireServer(material)
+                    rBuy:FireServer(material)
                 end
                 task.wait(1)
             end
         end)
     end
 end)
-
 
 Tabs.Xmas:CreateButton({
     Title = "Claim XMAS Daily",
