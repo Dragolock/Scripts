@@ -773,7 +773,7 @@ Tabs.Xmas:CreateToggle("AutoBuy", {
         task.spawn(function()
             while Options.AutoBuy.Value do
                 local args = {selectedMaterial}
-                r.BuyIngredientForXmas:FireServer(unpack(args))
+                    r:FireServer(material)
                 task.wait(1)
             end
         end)
@@ -789,7 +789,7 @@ Tabs.Xmas:CreateToggle("AutoBuyAll", {
             while Options.AutoBuyAll.Value do
                 local allMaterials = {"RedRibbons", "Bell", "WrappingPaper", "ElfsClue", "LumpOfCoal", "PaintBucket"}
                 for _, material in ipairs(allMaterials) do
-                    r.BuyIngredientForXmas:FireServer(material)
+                    r:FireServer(material)
                 end
                 task.wait(1)
             end
