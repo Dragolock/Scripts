@@ -18,6 +18,7 @@ local Tabs = {
     AbyssDungeon = Window:CreateTab{Title = "Abyss Dungeon", Icon = "phosphor-sword-bold"},
     Fishing = Window:CreateTab{Title = "Fishing Event", Icon = "phosphor-sword-bold"},
     Halloween = Window:CreateTab{Title = "Halloween Event", Icon = "phosphor-sword-bold"},
+    Xmas = Window:CreateTab{Title = "Christmas Event", Icon = "phosphor-sword-bold"},
     PvP = Window:CreateTab{Title = "PvP", Icon = "phosphor-sword-bold"},
     Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
 }
@@ -680,6 +681,45 @@ Tabs.Halloween:CreateButton{
         end)
     end
 }
+
+Tabs.Xmas:CreateToggle("InfMaterials", {
+    Title = "Inf Materials",
+    Default = false
+}):OnChanged(function(state)
+    
+    if state then
+        task.spawn(function()
+            game:GetService("ReplicatedStorage")
+                :WaitForChild("Remotes")
+                :WaitForChild("Events")
+                :WaitForChild("RemoveC")
+                :FireServer(1)
+
+            task.wait(0.1)
+
+            for i = 1, 20 do
+                if not Options.InfMaterials.Value then
+                    break
+                end
+
+                game:GetService("ReplicatedStorage")
+                    :WaitForChild("Remotes")
+                    :WaitForChild("Events")
+                    :WaitForChild("WinBossEvent")
+                    :FireServer("Boss1")
+
+                task.wait()
+            end
+        end)
+    else
+        game:GetService("ReplicatedStorage")
+            :WaitForChild("Remotes")
+            :WaitForChild("Events")
+            :WaitForChild("RemoveC")
+            :FireServer(0)
+    end
+end)
+
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
