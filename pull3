@@ -682,41 +682,23 @@ Tabs.Halloween:CreateButton{
     end
 }
 
-Tabs.Xmas:CreateToggle("InfMaterials", {
-    Title = "Inf Materials",
+local r = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events")
+
+Tabs.Xmas:CreateToggle("GenMaterials", {
+    Title = "Inf Materials (XMAS)",
     Default = false
 }):OnChanged(function(state)
-    
     if state then
+        r.RemoveC:FireServer(1)
         task.spawn(function()
-            game:GetService("ReplicatedStorage")
-                :WaitForChild("Remotes")
-                :WaitForChild("Events")
-                :WaitForChild("RemoveC")
-                :FireServer(1)
-
-            task.wait(0.1)
-
-            for i = 1, 20 do
-                if not Options.InfMaterials.Value then
-                    break
-                end
-
-                game:GetService("ReplicatedStorage")
-                    :WaitForChild("Remotes")
-                    :WaitForChild("Events")
-                    :WaitForChild("WinBossEvent")
-                    :FireServer("Boss1")
-
+            while Options.GenMaterials.Value do
+                local args = {"Boss1"}
+                r.WinBossEvent:FireServer(unpack(args))
                 task.wait()
             end
         end)
     else
-        game:GetService("ReplicatedStorage")
-            :WaitForChild("Remotes")
-            :WaitForChild("Events")
-            :WaitForChild("RemoveC")
-            :FireServer(0)
+        r.RemoveC:FireServer(0)
     end
 end)
 
