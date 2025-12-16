@@ -752,13 +752,13 @@ local xmasItemDropdown = Tabs.Xmas:CreateDropdown("SelectXmasItem", {
     elseif value == "Mega Potion" then
         selectedItemNumber = 12
         selectedRemote = rCraft
-    elseif value == "Extalia" then
+    elseif value == "Extalia (700)" then
         selectedItemNumber = 13
         selectedRemote = rShop
-    elseif value == "JollyBox" then
+    elseif value == "JollyBox (700)" then
         selectedItemNumber = 14
         selectedRemote = rShop
-    elseif value == "SuperRebirth" then
+    elseif value == "SuperRebirth (800)" then
         selectedItemNumber = 15
         selectedRemote = rShop
     end
