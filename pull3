@@ -717,7 +717,7 @@ Tabs.Xmas:CreateToggle("AutoCraftXmasItem", {
     end
 end)
 
-local r = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events")
+local r = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("BuyIngredientForXmas")
 
 local selectedItemNumber = 1
 
@@ -733,9 +733,9 @@ local xmasItemDropdown = Tabs.Xmas:CreateDropdown("SelectXmasItem", {
     elseif value == "Santas GreatSword" then
         selectedItemNumber = 3
     elseif value == "Strength Potion" then
-        selectedItemNumber = 4
+        selectedItemNumber = 11
     elseif value == "Mega Potion" then
-        selectedItemNumber = 5
+        selectedItemNumber = 12
     end
 end)
 
