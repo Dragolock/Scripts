@@ -682,6 +682,8 @@ Tabs.Halloween:CreateButton{
     end
 }
 
+local rBoss = game:GetService("ReplicatedStorage"):WaitForChild("EventFolder"):WaitForChild("WinBossEvent")
+
 
 Tabs.Xmas:CreateToggle("GenMaterials", {
     Title = "Inf Materials (XMAS)",
@@ -692,27 +694,12 @@ Tabs.Xmas:CreateToggle("GenMaterials", {
         task.spawn(function()
             while Options.GenMaterials.Value do
                 local args = {"1"}
-                r.WinBossEvent:FireServer(unpack(args))
+                rBoss:FireServer(unpack(args))
                 task.wait()
             end
         end)
     else
         r.RemoveC:FireServer(0)
-    end
-end)
-
-Tabs.Xmas:CreateToggle("AutoCraftXmasItem", {
-    Title = "Auto Craft Xmas Item",
-    Default = false
-}):OnChanged(function(state)
-    if state then
-        task.spawn(function()
-            while Options.AutoCraftXmasItem.Value do
-                local args = {selectedItemNumber}
-                rCraft:FireServer(unpack(args))
-                task.wait(1)
-            end
-        end)
     end
 end)
 
