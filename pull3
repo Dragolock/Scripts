@@ -773,7 +773,7 @@ Tabs.Xmas:CreateToggle("AutoBuy", {
         task.spawn(function()
             while Options.AutoBuy.Value do
                 local args = {selectedMaterial}
-                    r:FireServer(material)
+                    r:FireServer(selectedMaterial)
                 task.wait(1)
             end
         end)
