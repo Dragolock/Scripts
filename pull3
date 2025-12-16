@@ -702,6 +702,74 @@ Tabs.Xmas:CreateToggle("GenMaterials", {
     end
 end)
 
+local r = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events")
+
+local selectedIngredient = "RedRibbons"
+
+local xmasDropdown = Tabs.Xmas:CreateDropdown("SelectIngredient", {
+    Title = "Select Ingredient",
+    Values = {"Red Ribbons", "Bell", "Wrapping Paper", "Elfs Clue", "Lump Of Coal", "Paint Bucket"},
+    Default = "Red Ribbons"
+}):OnChanged(function(value)
+    if value == "Red Ribbons" then
+        selectedIngredient = "RedRibbons"
+    elseif value == "Bell" then
+        selectedIngredient = "Bell"
+    elseif value == "Wrapping Paper" then
+        selectedIngredient = "WrappingPaper"
+    elseif value == "Elfs Clue" then
+        selectedIngredient = "ElfsClue"
+    elseif value == "Lump Of Coal" then
+        selectedIngredient = "LumpOfCoal"
+    elseif value == "Paint Bucket" then
+        selectedIngredient = "PaintBucket"
+    end
+end)
+
+-- Single ingredient toggle
+Tabs.Xmas:CreateToggle("AutoBuy", {
+    Title = "Auto Buy",
+    Default = false
+}):OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            while Options.AutoBuy.Value do
+                local args = {selectedIngredient}
+                r.BuyIngredientForXmas:FireServer(unpack(args))
+                task.wait(1)
+            end
+        end)
+    end
+end)
+
+Tabs.Xmas:CreateToggle("AutoBuyAll", {
+    Title = "Auto Buy All",
+    Default = false
+}):OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            while Options.AutoBuyAll.Value do
+                local allIngredients = {"RedRibbons", "Bell", "WrappingPaper", "ElfsClue", "LumpOfCoal", "PaintBucket"}
+                for _, ingredient in ipairs(allIngredients) do
+                    r.BuyIngredientForXmas:FireServer(ingredient)
+                end
+                task.wait(1)
+            end
+        end)
+    end
+end)
+
+Tabs.Xmas:CreateButton({
+    Title = "Claim XMAS Daily",
+    Callback = function()
+        local r = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events")
+        for i = 1, 25 do
+            local args = {i}
+            r.ClaimXmasBlessing:FireServer(unpack(args))
+            task.wait(0.05)
+        end
+    end
+})
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
