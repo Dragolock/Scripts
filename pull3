@@ -718,49 +718,23 @@ Tabs.Xmas:CreateToggle("AutoCraftXmasItem", {
 end)
 
 local rCraft = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("BuyIngredientForXmas")
-local rShop = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Functions"):WaitForChild("Shops"):WaitForChild("OnEventShopRequest")
-
 local selectedItemNumber = 1
-local selectedRemote = rCraft
 
 local xmasItemDropdown = Tabs.Xmas:CreateDropdown("SelectXmasItem", {
     Title = "Select Xmas Item",
-    Values = {
-        "Cookies Book",
-        "Santas Helper",
-        "Santas GreatSword",
-        "Strength Potion",
-        "Mega Potion",
-        "Extalia",
-        "JollyBox",
-        "SuperRebirth"
-    },
+    Values = {"Cookies Book", "Santas Helper", "Santas GreatSword", "Strength Potion", "Mega Potion"},
     Default = "Cookies Book"
 }):OnChanged(function(value)
     if value == "Cookies Book" then
         selectedItemNumber = 1
-        selectedRemote = rCraft
     elseif value == "Santas Helper" then
         selectedItemNumber = 2
-        selectedRemote = rCraft
     elseif value == "Santas GreatSword" then
         selectedItemNumber = 3
-        selectedRemote = rCraft
     elseif value == "Strength Potion" then
-        selectedItemNumber = 11
-        selectedRemote = rCraft
+        selectedItemNumber = 4
     elseif value == "Mega Potion" then
-        selectedItemNumber = 12
-        selectedRemote = rCraft
-    elseif value == "Extalia (700)" then
-        selectedItemNumber = 13
-        selectedRemote = rShop
-    elseif value == "JollyBox (700)" then
-        selectedItemNumber = 14
-        selectedRemote = rShop
-    elseif value == "SuperRebirth (800)" then
-        selectedItemNumber = 15
-        selectedRemote = rShop
+        selectedItemNumber = 5
     end
 end)
 
@@ -771,11 +745,8 @@ Tabs.Xmas:CreateToggle("AutoCraftXmasItem", {
     if state then
         task.spawn(function()
             while Options.AutoCraftXmasItem.Value do
-                if selectedRemote == rCraft then
-                    selectedRemote:FireServer(selectedItemNumber)
-                else
-                    selectedRemote:InvokeServer(selectedItemNumber)
-                end
+                local args = {selectedItemNumber}
+                rCraft:FireServer(unpack(args))
                 task.wait(1)
             end
         end)
