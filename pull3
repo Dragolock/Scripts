@@ -702,31 +702,67 @@ Tabs.Xmas:CreateToggle("GenMaterials", {
     end
 end)
 
+Tabs.Xmas:CreateToggle("AutoCraftXmasItem", {
+    Title = "Auto Craft Xmas Item",
+    Default = false
+}):OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            while Options.AutoCraftXmasItem.Value do
+                local args = {selectedItemNumber}
+                r.BuyIngredientForXmas:FireServer(unpack(args))
+                task.wait(1)
+            end
+        end)
+    end
+end)
+
 local r = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events")
 
-local selectedIngredient = "RedRibbons"
+local selectedItemNumber = 1
 
-local xmasDropdown = Tabs.Xmas:CreateDropdown("SelectIngredient", {
-    Title = "Select Ingredient",
+local xmasItemDropdown = Tabs.Xmas:CreateDropdown("SelectXmasItem", {
+    Title = "Select Xmas Item",
+    Values = {"Cookies Book", "Santas Helper", "Santas GreatSword", "Strength Potion", "Mega Potion"},
+    Default = "Cookies Book"
+}):OnChanged(function(value)
+    if value == "Cookies Book" then
+        selectedItemNumber = 1
+    elseif value == "Santas Helper" then
+        selectedItemNumber = 2
+    elseif value == "Santas GreatSword" then
+        selectedItemNumber = 3
+    elseif value == "Strength Potion" then
+        selectedItemNumber = 4
+    elseif value == "Mega Potion" then
+        selectedItemNumber = 5
+    end
+end)
+
+local r = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events")
+
+local selectedMaterial = "RedRibbons"
+
+local xmasDropdown = Tabs.Xmas:CreateDropdown("SelectMaterial", {
+    Title = "Select Material",
     Values = {"Red Ribbons", "Bell", "Wrapping Paper", "Elfs Clue", "Lump Of Coal", "Paint Bucket"},
     Default = "Red Ribbons"
 }):OnChanged(function(value)
     if value == "Red Ribbons" then
-        selectedIngredient = "RedRibbons"
+        selectedMaterial = "RedRibbons"
     elseif value == "Bell" then
-        selectedIngredient = "Bell"
+        selectedMaterial = "Bell"
     elseif value == "Wrapping Paper" then
-        selectedIngredient = "WrappingPaper"
+        selectedMaterial = "WrappingPaper"
     elseif value == "Elfs Clue" then
-        selectedIngredient = "ElfsClue"
+        selectedMaterial = "ElfsClue"
     elseif value == "Lump Of Coal" then
-        selectedIngredient = "LumpOfCoal"
+        selectedMaterial = "LumpOfCoal"
     elseif value == "Paint Bucket" then
-        selectedIngredient = "PaintBucket"
+        selectedMaterial = "PaintBucket"
     end
 end)
 
--- Single ingredient toggle
 Tabs.Xmas:CreateToggle("AutoBuy", {
     Title = "Auto Buy",
     Default = false
@@ -734,7 +770,7 @@ Tabs.Xmas:CreateToggle("AutoBuy", {
     if state then
         task.spawn(function()
             while Options.AutoBuy.Value do
-                local args = {selectedIngredient}
+                local args = {selectedMaterial}
                 r.BuyIngredientForXmas:FireServer(unpack(args))
                 task.wait(1)
             end
@@ -749,15 +785,16 @@ Tabs.Xmas:CreateToggle("AutoBuyAll", {
     if state then
         task.spawn(function()
             while Options.AutoBuyAll.Value do
-                local allIngredients = {"RedRibbons", "Bell", "WrappingPaper", "ElfsClue", "LumpOfCoal", "PaintBucket"}
-                for _, ingredient in ipairs(allIngredients) do
-                    r.BuyIngredientForXmas:FireServer(ingredient)
+                local allMaterials = {"RedRibbons", "Bell", "WrappingPaper", "ElfsClue", "LumpOfCoal", "PaintBucket"}
+                for _, material in ipairs(allMaterials) do
+                    r.BuyIngredientForXmas:FireServer(material)
                 end
                 task.wait(1)
             end
         end)
     end
 end)
+
 
 Tabs.Xmas:CreateButton({
     Title = "Claim XMAS Daily",
