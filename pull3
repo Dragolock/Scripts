@@ -366,7 +366,7 @@ Tabs.Abyss:CreateToggle("GenCrystals", {
         task.spawn(function()
             while Options.GenCrystals.Value do
                 for i = 1, 20 do
-                    r.WinMegaBossEvent:FireServer("Dragon6", "Chaos")
+                    r.WinMegaBossEvent:FireServer("Dragon6", "Normal")
                 end
                 task.wait()
             end
