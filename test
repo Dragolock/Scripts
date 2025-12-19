@@ -1,0 +1,56 @@
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local LocalPlayer = Players.LocalPlayer
+local WeaponHit = ReplicatedStorage
+    :WaitForChild("WeaponsSystem")
+    :WaitForChild("Network")
+    :WaitForChild("WeaponHit")
+
+local attack = true -- toggle (true = on, false = off)
+local ATTACK_DELAY = 1 -- seconds
+
+local function attackPlayer(targetPlayer)
+    if not attack then return end
+    if not LocalPlayer.Character then return end
+    if not targetPlayer.Character then return end
+
+    local weapon = LocalPlayer.Character:FindFirstChild("AWP")
+    local humanoid = targetPlayer.Character:FindFirstChild("Humanoid")
+    local head = targetPlayer.Character:FindFirstChild("Head")
+    local myHRP = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+
+    if not weapon or not humanoid or not head or not myHRP then return end
+
+    local args = {
+        weapon,
+        {
+            p = head.Position,
+            pid = 1,
+            part = head,
+            d = (head.Position - myHRP.Position).Magnitude,
+            maxDist = 100,
+            h = humanoid,
+            m = Enum.Material.Plastic,
+            n = Vector3.new(0, -1, 0),
+            t = tick(),
+            sid = 3
+        }
+    }
+
+    WeaponHit:FireServer(unpack(args))
+end
+
+task.spawn(function()
+    while task.wait(ATTACK_DELAY) do
+        if not attack then continue end
+
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                pcall(function()
+                    attackPlayer(player)
+                end)
+            end
+        end
+    end
+end)
