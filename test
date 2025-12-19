@@ -1,56 +1,163 @@
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
+local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
+local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
 
-local LocalPlayer = Players.LocalPlayer
-local WeaponHit = ReplicatedStorage
-    :WaitForChild("WeaponsSystem")
-    :WaitForChild("Network")
-    :WaitForChild("WeaponHit")
+local Window = Library:Window{
+    Title = "Noob Invador Script",
+    SubTitle = "By coco",
+    TabWidth = 130,
+    Size =  UDim2.fromOffset(500, 430),
+    Resize = false, 
+    Theme = "Darker",
+    MinimizeKey = Enum.KeyCode.LeftShift
+}
 
-local attack = true -- toggle (true = on, false = off)
-local ATTACK_DELAY = 1 -- seconds
+-- Tabs
+local Tabs = {
+    mainTab = Window:CreateTab{Title = "Main Game", Icon = "phosphor-sword-bold"},
+    Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
+}
 
-local function attackPlayer(targetPlayer)
-    if not attack then return end
-    if not LocalPlayer.Character then return end
-    if not targetPlayer.Character then return end
+local Options = Library.Options
 
-    local weapon = LocalPlayer.Character:FindFirstChild("AWP")
-    local humanoid = targetPlayer.Character:FindFirstChild("Humanoid")
-    local head = targetPlayer.Character:FindFirstChild("Head")
-    local myHRP = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+--------------------------------------------------
+-- ABYSS EVENT TAB
+--------------------------------------------------
 
-    if not weapon or not humanoid or not head or not myHRP then return end
+local P,RS=game:GetService("Players"),game:GetService("ReplicatedStorage")
+local LP=P.LocalPlayer
+local WH=RS:WaitForChild("WeaponsSystem"):WaitForChild("Network"):WaitForChild("WeaponHit")
 
-    local args = {
-        weapon,
-        {
-            p = head.Position,
-            pid = 1,
-            part = head,
-            d = (head.Position - myHRP.Position).Magnitude,
-            maxDist = 100,
-            h = humanoid,
-            m = Enum.Material.Plastic,
-            n = Vector3.new(0, -1, 0),
-            t = tick(),
-            sid = 3
-        }
-    }
+Tabs.mainTab:CreateToggle("AutoAttack",{Title="Auto Attack",Default=false}):OnChanged(function(state)
+	if not state then return end
+	task.spawn(function()
+		while Options.AutoAttack.Value do
+			local char=LP.Character
+			if char then
+				local wep=char:FindFirstChild("M4A1")
+				local hrp=char:FindFirstChild("HumanoidRootPart")
+				if wep and hrp then
+					for _,plr in pairs(P:GetPlayers()) do
+						if not Options.AutoAttack.Value then break end
+						if plr~=LP and plr.Character then
+							local hum=plr.Character:FindFirstChild("Humanoid")
+							local head=plr.Character:FindFirstChild("Head")
+							if hum and head then
+								local args={wep,{p=head.Position,pid=1,part=head,d=(head.Position-hrp.Position).Magnitude,maxDist=100,h=hum,m=Enum.Material.Plastic,n=Vector3.new(0,-1,0),t=tick(),sid=3}}
+								WH:FireServer(unpack(args))
+							end
+						end
+					end
+				end
+			end
+			task.wait(0.1)
+		end
+	end)
+end)
 
-    WeaponHit:FireServer(unpack(args))
-end
+local mainNote = Tabs.mainTab:Paragraph("Note", {
+    Title = "Note",
+    Content = "AutoAttack only works with M4A1",
+    TitleAlignment = "Middle",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
 
-task.spawn(function()
-    while task.wait(ATTACK_DELAY) do
-        if not attack then continue end
+Tabs.mainTab:CreateButton({
+    Title = "Anti AFK",
+    Description = "Helps you to not get kicked.",
+    Callback = function()
+        game:GetService('Players').LocalPlayer.Idled:Connect(function()
+            game:GetService('VirtualUser'):CaptureController()
+            game:GetService('VirtualUser'):ClickButton2(Vector2.new())
+        end)
 
-        for _, player in ipairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer then
-                pcall(function()
-                    attackPlayer(player)
-                end)
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Anti-AFK",
+            Text = "Anti-AFK is now enabled!",
+            Duration = 3
+        })
+    end
+})
+
+Tabs.mainTab:CreateButton({
+    Title = "Anti Lag",
+    Description = "Decrease quality to not lag.",
+    Callback = function()
+        local Lighting = game:GetService("Lighting")
+        local RunService = game:GetService("RunService")
+        local Terrain = workspace:FindFirstChildWhichIsA("Terrain")
+
+        -- Terrain settings
+        if Terrain then
+            Terrain.WaterWaveSize = 0
+            Terrain.WaterWaveSpeed = 0
+            Terrain.WaterReflectance = 0
+            Terrain.WaterTransparency = 1
+        end
+
+        -- Lighting settings
+        Lighting.GlobalShadows = false
+        Lighting.FogStart = 9e9
+        Lighting.FogEnd = 9e9
+        settings().Rendering.QualityLevel = 1
+
+        -- Optimize workspace parts
+        for _, v in pairs(game:GetDescendants()) do
+            if v:IsA("BasePart") then
+                v.CastShadow = false
+                v.Material = "Plastic"
+                v.Reflectance = 0
+                v.BackSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.BottomSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.FrontSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.LeftSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.RightSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.TopSurface = Enum.SurfaceType.SmoothNoOutlines
+            elseif v:IsA("Decal") then
+                v.Transparency = 1
+                v.Texture = ""
+            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                v.Lifetime = NumberRange.new(0)
             end
         end
+
+        -- Disable post effects in Lighting
+        for _, v in pairs(Lighting:GetDescendants()) do
+            if v:IsA("PostEffect") then
+                v.Enabled = false
+            end
+        end
+
+        -- Remove new unwanted objects dynamically
+        workspace.DescendantAdded:Connect(function(child)
+            task.spawn(function()
+                if child:IsA("ForceField") or child:IsA("Sparkles") or child:IsA("Smoke") or child:IsA("Fire") or child:IsA("Beam") then
+                    RunService.Heartbeat:Wait()
+                    child:Destroy()
+                elseif child:IsA("BasePart") then
+                    child.CastShadow = false
+                end
+            end)
+        end)
     end
-end)
+})
+
+--------------------------------------------------
+-- CONFIGURATION / MANAGERS
+--------------------------------------------------
+
+SaveManager:SetLibrary(Library)
+InterfaceManager:SetLibrary(Library)
+
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+
+InterfaceManager:SetFolder("FluentEventsHub")
+SaveManager:SetFolder("FluentEventsHub/SpecificGame")
+
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+
+Window:SelectTab(1)
+Library:Notify{Title = "Fluent", Content = "Script loaded successfully!", Duration = 8}
+SaveManager:LoadAutoloadConfig()
