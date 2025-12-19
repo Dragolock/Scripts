@@ -28,16 +28,16 @@ local P,RS,W=game:GetService("Players"),game:GetService("ReplicatedStorage"),wor
 local LP=P.LocalPlayer
 local WH=RS:WaitForChild("WeaponsSystem"):WaitForChild("Network"):WaitForChild("WeaponHit")
 
-Tabs.mainTab:CreateToggle("AutoAttack",{Title="Auto Attack",Default=false}):OnChanged(function(state)
+-- Attack Players Toggle
+Tabs.mainTab:CreateToggle("AutoAttackPlayers",{Title="Auto Attack Players",Default=false}):OnChanged(function(state)
 	if not state then return end
 	task.spawn(function()
-		while Options.AutoAttack.Value do
+		while Options.AutoAttackPlayers.Value do
 			local char=LP.Character
 			if char then
 				local wep=char:FindFirstChild("M4A1")
 				local hrp=char:FindFirstChild("HumanoidRootPart")
 				if wep and hrp then
-					-- Attack all players section
 					for _,plr in pairs(P:GetPlayers()) do
 						if plr~=LP and plr.Character then
 							local hum=plr.Character:FindFirstChild("Humanoid")
@@ -47,12 +47,31 @@ Tabs.mainTab:CreateToggle("AutoAttack",{Title="Auto Attack",Default=false}):OnCh
 							end
 						end
 					end
-					-- Attack NPCs section
-					for _,npc in pairs(W:GetChildren()) do
-						if npc:IsA("Model") and npc:FindFirstChild("Humanoid") and npc:FindFirstChild("Head") and npc~=char and not P:FindFirstChild(npc.Name) then
-							local hum=headHum=npc.Humanoid
-							local head=npc.Head
-							WH:FireServer(wep,{p=head.Position,pid=1,part=head,d=(head.Position-hrp.Position).Magnitude,maxDist=100,h=hum,m=Enum.Material.Plastic,n=Vector3.new(0,-1,0),t=tick(),sid=3})
+				end
+			end
+			task.wait(0.1)
+		end
+	end)
+end)
+
+-- Attack NPCs Toggle
+Tabs.mainTab:CreateToggle("AutoAttackNPCs",{Title="Auto Attack NPCs",Default=false}):OnChanged(function(state)
+	if not state then return end
+	task.spawn(function()
+		while Options.AutoAttackNPCs.Value do
+			local char=LP.Character
+			if char then
+				local wep=char:FindFirstChild("M4A1")
+				local hrp=char:FindFirstChild("HumanoidRootPart")
+				if wep and hrp then
+					local charFolder=W:FindFirstChild("Character")
+					if charFolder then
+						for _,npc in pairs(charFolder:GetChildren()) do
+							if npc:IsA("Model") and npc:FindFirstChild("Humanoid") and npc:FindFirstChild("Head") and npc~=char and not P:FindFirstChild(npc.Name) then
+								local hum=npc.Humanoid
+								local head=npc.Head
+								WH:FireServer(wep,{p=head.Position,pid=1,part=head,d=(head.Position-hrp.Position).Magnitude,maxDist=100,h=hum,m=Enum.Material.Plastic,n=Vector3.new(0,-1,0),t=tick(),sid=3})
+							end
 						end
 					end
 				end
@@ -61,6 +80,7 @@ Tabs.mainTab:CreateToggle("AutoAttack",{Title="Auto Attack",Default=false}):OnCh
 		end
 	end)
 end)
+
 
 
 local mainNote = Tabs.mainTab:Paragraph("Note", {
