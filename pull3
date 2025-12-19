@@ -705,10 +705,13 @@ Tabs.Xmas:CreateToggle("GenMaterials", {
     end
 end)
 
+local toggleState = false
+
 Tabs.Xmas:CreateToggle("GenMaterialsV2", {
-    Title = "Inf Materials (XMAS)",
+    Title = "Inf Materials (XMASV2)",
     Default = false
 }):OnChanged(function(state)
+    toggleState = state
     local player = game.Players.LocalPlayer
     local character = player.Character or player.CharacterAdded:Wait()
     local hrp = character:WaitForChild("HumanoidRootPart")
@@ -720,7 +723,7 @@ Tabs.Xmas:CreateToggle("GenMaterialsV2", {
         PortalC:FireServer("2", true)
 
         task.spawn(function()
-            while Tabs.Xmas.GenMaterialsV2.Value do
+            while toggleState do
                 for i = 1, 2 do
                     WinBossEvent:FireServer("Boss1")
                 end
@@ -734,6 +737,7 @@ Tabs.Xmas:CreateToggle("GenMaterialsV2", {
         end)
     end
 end)
+
 
 
 local rCraft = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("BuyIngredientForXmas")
