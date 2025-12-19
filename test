@@ -93,6 +93,53 @@ Tabs.mainTab:CreateToggle("AutoAttackNPCs",{Title="Auto Attack NPCs",Default=fal
 	end)
 end)
 
+local P,RS,W=game:GetService("Players"),game:GetService("ReplicatedStorage"),workspace
+local LP=P.LocalPlayer
+local ThrowEvent=RS:WaitForChild("ThrowGrenadeEvent")
+
+Tabs.mainTab:CreateToggle("InfDMG",{Title="Inf DMG",Default=false}):OnChanged(function(state)
+	if not state then return end
+	task.spawn(function()
+		while Options.InfDMG.Value do
+			local char=LP.Character
+			if char then
+				local hrp=char:FindFirstChild("HumanoidRootPart")
+				if hrp then
+					-- Players
+					for _,plr in pairs(P:GetPlayers()) do
+						if plr~=LP and plr.Character then
+							local targetPos=plr.Character:FindFirstChild("HumanoidRootPart") or plr.Character:FindFirstChild("Head")
+							if targetPos then
+								local args={targetPos.Position, targetPos.Position}
+								pcall(function()
+									ThrowEvent:FireServer(unpack(args))
+								end)
+							end
+						end
+					end
+					-- NPCs in workspace.Character
+					local charFolder=W:FindFirstChild("Character")
+					if charFolder then
+						for _,npc in pairs(charFolder:GetChildren()) do
+							if npc:IsA("Model") and npc~=char then
+								local targetPos=npc:FindFirstChild("HumanoidRootPart") or npc:FindFirstChild("Head")
+								if targetPos then
+									local args={targetPos.Position, targetPos.Position}
+									pcall(function()
+										ThrowEvent:FireServer(unpack(args))
+									end)
+								end
+							end
+						end
+					end
+				end
+			end
+			task.wait(0.01) -- execute every 0.01s
+		end
+	end)
+end)
+
+
 local mainNote = Tabs.mainTab:Paragraph("Note", {
     Title = "Note",
     Content = "AutoAttack only works with M4A1",
