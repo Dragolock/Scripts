@@ -43,7 +43,7 @@ Tabs.mainTab:CreateToggle("AutoAttackPlayers",{Title="Auto Attack Players",Defau
 							local hum=plr.Character:FindFirstChild("Humanoid")
 							local head=plr.Character:FindFirstChild("Head")
 							if hum and head then
-								WH:FireServer(wep,{p=head.Position,pid=1,part=head,d=(head.Position-hrp.Position).Magnitude,maxDist=100,h=hum,m=Enum.Material.Plastic,n=Vector3.new(0,-1,0),t=tick(),sid=3})
+								WH:FireServer(wep,{p=head.Position,pid=1,part=head,d=(head.Position-hrp.Position).Magnitude,maxDist=1000,h=hum,m=Enum.Material.Plastic,n=Vector3.new(0,-1,0),t=tick(),sid=3})
 							end
 						end
 					end
@@ -134,7 +134,7 @@ Tabs.mainTab:CreateToggle("InfDMG",{Title="Inf DMG",Default=false}):OnChanged(fu
 					end
 				end
 			end
-			task.wait(0.01) -- execute every 0.01s
+			task.wait(1) -- execute every 0.01s
 		end
 	end)
 end)
@@ -143,7 +143,7 @@ end)
 local mainNote = Tabs.mainTab:Paragraph("Note", {
     Title = "Note",
     Content = "AutoAttack only works with M4A1",
-    TitleAlignment = "Middle",
+    TitleAlignment = "Left",
     ContentAlignment = Enum.TextXAlignment.Left
 })
 
