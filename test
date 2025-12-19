@@ -3,12 +3,12 @@ local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.
 local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
 
 local Window = Library:Window{
-    Title = "Noob Invador Script",
+    Title = "Pull A Sword Events",
     SubTitle = "By coco",
-    TabWidth = 130,
-    Size =  UDim2.fromOffset(500, 430),
+    TabWidth = 100,
+    Size =  UDim2.fromOffset(450, 350),
     Resize = false, 
-    Theme = "Darker",
+    Theme = "United GNOME",
     MinimizeKey = Enum.KeyCode.LeftShift
 }
 
