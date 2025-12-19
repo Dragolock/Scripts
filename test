@@ -54,7 +54,6 @@ Tabs.mainTab:CreateToggle("AutoAttackPlayers",{Title="Auto Attack Players",Defau
 	end)
 end)
 
--- Attack NPCs Toggle
 Tabs.mainTab:CreateToggle("AutoAttackNPCs",{Title="Auto Attack NPCs",Default=false}):OnChanged(function(state)
 	if not state then return end
 	task.spawn(function()
@@ -64,13 +63,26 @@ Tabs.mainTab:CreateToggle("AutoAttackNPCs",{Title="Auto Attack NPCs",Default=fal
 				local wep=char:FindFirstChild("M4A1")
 				local hrp=char:FindFirstChild("HumanoidRootPart")
 				if wep and hrp then
-					local charFolder=W:FindFirstChild("Character")
-					if charFolder then
-						for _,npc in pairs(charFolder:GetChildren()) do
-							if npc:IsA("Model") and npc:FindFirstChild("Humanoid") and npc:FindFirstChild("Head") and npc~=char and not P:FindFirstChild(npc.Name) then
-								local hum=npc.Humanoid
-								local head=npc.Head
-								WH:FireServer(wep,{p=head.Position,pid=1,part=head,d=(head.Position-hrp.Position).Magnitude,maxDist=100,h=hum,m=Enum.Material.Plastic,n=Vector3.new(0,-1,0),t=tick(),sid=3})
+					local folder=W:FindFirstChild("Character")
+					if folder then
+						for _,npc in pairs(folder:GetChildren()) do
+							if npc:IsA("Model") and npc~=char then
+								local hum=npc:FindFirstChild("Humanoid")
+								local head=npc:FindFirstChild("Head")
+								if hum and head then
+									WH:FireServer(wep,{
+										p=head.Position,
+										pid=1,
+										part=head,
+										d=1000, -- forced distance for NPCs
+										maxDist=100,
+										h=hum,
+										m=Enum.Material.Plastic,
+										n=Vector3.new(0,-1,0),
+										t=tick(),
+										sid=3
+									})
+								end
 							end
 						end
 					end
@@ -80,8 +92,6 @@ Tabs.mainTab:CreateToggle("AutoAttackNPCs",{Title="Auto Attack NPCs",Default=fal
 		end
 	end)
 end)
-
-
 
 local mainNote = Tabs.mainTab:Paragraph("Note", {
     Title = "Note",
