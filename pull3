@@ -706,20 +706,22 @@ Tabs.Xmas:CreateToggle("GenMaterials", {
 end)
 
 local toggleState = false
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local rRemoveC = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("RemoveC")
+local WinBossEvent = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("WinBossEvent")
+local PortalC = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("PortalC")
 
 Tabs.Xmas:CreateToggle("GenMaterialsV2", {
-    Title = "Inf Materials (XMASV2)",
+    Title = "Inf Materials (XMAS)",
     Default = false
 }):OnChanged(function(state)
     toggleState = state
     local player = game.Players.LocalPlayer
     local character = player.Character or player.CharacterAdded:Wait()
     local hrp = character:WaitForChild("HumanoidRootPart")
-    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    local WinBossEvent = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("WinBossEvent")
-    local PortalC = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("PortalC")
     
     if state then
+        rRemoveC:FireServer(1)
         PortalC:FireServer("2", true)
 
         task.spawn(function()
@@ -735,9 +737,10 @@ Tabs.Xmas:CreateToggle("GenMaterialsV2", {
                 task.wait()
             end
         end)
+    else
+        rRemoveC:FireServer(0)
     end
 end)
-
 
 
 local rCraft = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("BuyIngredientForXmas")
