@@ -3,7 +3,7 @@ local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.
 local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
 
 local Window = Library:Window{
-    Title = "Pull A Sword Events",
+    Title = "CHub - Pull A Sword",
     SubTitle = "By coco",
     TabWidth = 100,
     Size =  UDim2.fromOffset(450, 350),
@@ -263,5 +263,5 @@ InterfaceManager:BuildInterfaceSection(Tabs.Settings)
 SaveManager:BuildConfigSection(Tabs.Settings)
 
 Window:SelectTab(1)
-Library:Notify{Title = "Fluent", Content = "Script loaded successfully!", Duration = 8}
+Library:Notify{Title = "CHub", Content = "CHub loaded successfully!", Duration = 8}
 SaveManager:LoadAutoloadConfig()
