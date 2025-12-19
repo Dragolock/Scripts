@@ -47,7 +47,7 @@ Tabs.mainTab:CreateToggle("AutoAttackPlayers",{Title="Auto Attack Players",Defau
 									p=head.Position,
 									pid=1,
 									part=head,
-									d=1000,          -- max damage
+									d=1000,
 									maxDist=1000,
 									h=hum,
 									m=Enum.Material.Plastic,
@@ -86,7 +86,7 @@ Tabs.mainTab:CreateToggle("AutoAttackNPCs",{Title="Auto Attack NPCs",Default=fal
 										p=head.Position,
 										pid=1,
 										part=head,
-										d=1000, -- forced distance for NPCs
+										d=1000,
 										maxDist=100,
 										h=hum,
 										m=Enum.Material.Plastic,
@@ -146,7 +146,7 @@ Tabs.mainTab:CreateToggle("InfDMG",{Title="Inf DMG",Default=false}):OnChanged(fu
 					end
 				end
 			end
-			task.wait(3) -- execute every 0.01s
+			task.wait(3)
 		end
 	end)
 end)
