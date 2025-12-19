@@ -134,7 +134,7 @@ Tabs.mainTab:CreateToggle("InfDMG",{Title="Inf DMG",Default=false}):OnChanged(fu
 					end
 				end
 			end
-			task.wait(1) -- execute every 0.01s
+			task.wait(3) -- execute every 0.01s
 		end
 	end)
 end)
