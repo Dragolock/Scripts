@@ -14,7 +14,7 @@ local Window = Library:Window{
 
 -- Tabs
 local Tabs = {
-    mainGame = Window:CreateTab{Title = "Main Game Stuff", Icon = "phosphor-sword-bold"},
+    mainGame = Window:CreateTab{Title = "Main Game", Icon = "phosphor-sword-bold"},
     Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
 }
 
@@ -91,7 +91,7 @@ Tabs.mainGame:CreateToggle("AutoWin", {
                 if selectedWorldPosition then
                     hrp.CFrame = CFrame.new(selectedWorldPosition)
                 end
-                task.wait(1)
+                task.wait(1.5)
             end
         end)
     end
