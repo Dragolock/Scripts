@@ -14,10 +14,10 @@ local Window = Library:Window{
 
 -- Tabs
 local Tabs = {
-    AbyssDungeon = Window:CreateTab{Title = "AbyssD", Icon = "phosphor-sword-bold"},
+    AbyssDungeon = Window:CreateTab{Title = "Abyss", Icon = "phosphor-sword-bold"},
     Fishing = Window:CreateTab{Title = "Fishing", Icon = "phosphor-sword-bold"},
     Halloween = Window:CreateTab{Title = "Halloween", Icon = "phosphor-sword-bold"},
-    Xmas = Window:CreateTab{Title = "Christmas", Icon = "phosphor-sword-bold"},
+    Xmas = Window:CreateTab{Title = "Pre-XMAS", Icon = "phosphor-sword-bold"},
     PvP = Window:CreateTab{Title = "PvP", Icon = "phosphor-sword-bold"},
     Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
 }
