@@ -527,38 +527,6 @@ Tabs.Xmas:CreateToggle("GenMaterials", {
     end
 end)
 
-local RS=game:GetService("RunService")
-local P=game.Players.LocalPlayer
-local R=game:GetService("ReplicatedStorage")
-local rRemoveC=R.Remotes.Events.RemoveC
-local rWinBossEvent=R.Remotes.Events.WinBossEvent
-local tpConn
-
-Tabs.Xmas:CreateToggle("GenMaterialsV2",{Title="Inf Materials (XMAS)",Default=false}):OnChanged(function(s)
-    if s then
-        R.Remotes.Events.PortalC:FireServer("2",true)
-        rRemoveC:FireServer(1)
-        local c=P.Character or P.CharacterAdded:Wait()
-        local h=c:WaitForChild("HumanoidRootPart")
-        tpConn=RS.Heartbeat:Connect(function()
-            if h.Parent then
-                h.CFrame=CFrame.new(-777,12,-194)
-                h.AssemblyLinearVelocity=Vector3.zero
-            end
-        end)
-        task.spawn(function()
-            while Options.GenMaterialsV2.Value do
-                rWinBossEvent:FireServer("Boss1")
-                task.wait()
-            end
-        end)
-    else
-        rRemoveC:FireServer(0)
-        if tpConn then tpConn:Disconnect() tpConn=nil end
-    end
-end)
-
-
 local rCraft = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("BuyIngredientForXmas")
 local selectedItemNumber = 1
 
