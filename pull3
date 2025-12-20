@@ -542,7 +542,7 @@ Tabs.Xmas:CreateToggle("GenMaterialsV2",{Title="Inf Materials (XMAS)",Default=fa
         local h=c:WaitForChild("HumanoidRootPart")
         tpConn=RS.Heartbeat:Connect(function()
             if h.Parent then
-                h.CFrame=CFrame.new(-77,12,-194)
+                h.CFrame=CFrame.new(-777,12,-194)
                 h.AssemblyLinearVelocity=Vector3.zero
             end
         end)
