@@ -1,0 +1,119 @@
+local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
+local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
+local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
+
+local Window = Library:Window{
+    Title = "CHub - Pull A Sword",
+    SubTitle = "By coco",
+    TabWidth = 100,
+    Size =  UDim2.fromOffset(450, 350),
+    Resize = false, 
+    Theme = "United GNOME",
+    MinimizeKey = Enum.KeyCode.LeftShift
+}
+
+-- Tabs
+local Tabs = {
+    mainGame = Window:CreateTab{Title = "Main Game Stuff", Icon = "phosphor-sword-bold"},
+    Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
+}
+
+local Options = Library.Options
+
+--------------------------------------------------
+-- ABYSS EVENT TAB
+--------------------------------------------------
+
+local pos1 = Vector3.new(-1864, -28, 1188)
+local pos2 = Vector3.new(-1865, 9, -70)
+
+local delayTime = 0.2
+
+Tabs.mainGame:CreateToggle("InfiniteMoney", {
+    Title = "Infinite Money",
+    Default = false
+}):OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local hrp = character:WaitForChild("HumanoidRootPart")
+
+            while Options.InfiniteMoney.Value do
+                hrp.CFrame = CFrame.new(pos1)
+                task.wait(delayTime)
+
+                hrp.CFrame = CFrame.new(pos2)
+                task.wait(delayTime)
+            end
+        end)
+    end
+end)
+
+-- Selected world position
+local selectedWorldPosition = nil
+
+local worldDropdown = Tabs.mainGame:CreateDropdown("SelectWorld", {
+    Title = "Select World",
+    Values = {
+        "World 1",
+        "World 2",
+        "World 3",
+        "World 4",
+        "World 5"
+    },
+    Default = "World 1"
+}):OnChanged(function(value)
+    if value == "World 1" then
+        selectedWorldPosition = Vector3.new(-464, 45, 1216)
+    elseif value == "World 2" then
+        selectedWorldPosition = Vector3.new(-814, 48, 1216)
+    elseif value == "World 3" then
+        selectedWorldPosition = Vector3.new(-1164, 48, 1216)
+    elseif value == "World 4" then
+        selectedWorldPosition = Vector3.new(-1514, 48, 1216)
+    elseif value == "World 5" then
+        selectedWorldPosition = Vector3.new(-1864, 48, 1216)
+    end
+end)
+
+Tabs.mainGame:CreateToggle("AutoWin", {
+    Title = "Auto Win",
+    Default = false
+}):OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local hrp = character:WaitForChild("HumanoidRootPart")
+
+            while Options.AutoWin.Value do
+                if selectedWorldPosition then
+                    hrp.CFrame = CFrame.new(selectedWorldPosition)
+                end
+                task.wait(1)
+            end
+        end)
+    end
+end)
+
+
+--------------------------------------------------
+-- CONFIGURATION / MANAGERS
+--------------------------------------------------
+
+SaveManager:SetLibrary(Library)
+InterfaceManager:SetLibrary(Library)
+
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+
+InterfaceManager:SetFolder("FluentEventsHub")
+SaveManager:SetFolder("FluentEventsHub/SpecificGame")
+
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+
+Window:SelectTab(1)
+Library:Notify{Title = "Fluent", Content = "CHub loaded successfully!", Duration = 8}
+SaveManager:LoadAutoloadConfig()
