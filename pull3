@@ -528,6 +528,32 @@ Tabs.preXmas:CreateToggle("GenMaterials", {
     end
 end)
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local rRemoveC = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC")
+local rBossEvent = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("WinBossEvent")
+
+Tabs.preXmas:CreateToggle("GenMaterialsv2", {
+    Title = "Inf Materials (XMAS)",
+    Default = false
+}):OnChanged(function(state)
+    if state then
+        rRemoveC:FireServer(1)
+
+        task.spawn(function()
+            while Options.GenMaterialsv2.Value do
+                for i = 1, 2 do
+                    rBossEvent:FireServer("Boss1")
+                end
+                task.wait()
+            end
+        end)
+    else
+        rRemoveC:FireServer(0)
+    end
+end)
+
+
 local rCraft = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("BuyIngredientForXmas")
 local selectedItemNumber = 1
 
