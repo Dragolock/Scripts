@@ -631,7 +631,7 @@ Tabs.preXmas:CreateButton({
     end
 })
 
-Tabs.XMAS:CreateToggle("TP to Presents", {Title = "TP to Presents", Default = false})
+Tabs.XMAS:CreateToggle("TPToPresents", {Title = "TP to Presents", Default = false})
     :OnChanged(function(state)
         if not state then return end
 
@@ -647,22 +647,21 @@ Tabs.XMAS:CreateToggle("TP to Presents", {Title = "TP to Presents", Default = fa
             }
 
             for _, name in ipairs(presentNames) do
-                if not Options["TP to Presents"].Value then break end
+                if not Options.TPToPresents.Value then break end
 
                 local model = workspace:FindFirstChild(name, true)
                 if model and model:IsA("Model") then
                     local part = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
                     if part then
-                        humanoidRootPart.CFrame = part.CFrame + Vector3.new(0, 5, 0)
+                        humanoidRootPart.CFrame = part.CFrame + Vector3.new(0, 10, 0)
                         task.wait(1)
                     end
                 end
             end
 
-            Options["TP to Presents"]:SetValue(false)
+            Options.TPToPresents:SetValue(false)
         end)
     end)
-
 
 
 local Players = game:GetService("Players")
