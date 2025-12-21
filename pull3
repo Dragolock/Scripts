@@ -276,6 +276,20 @@ Tabs.XMAS:CreateToggle("PresentTeleport", {Title = "Teleport Presents", Default 
         end
     end)
 
+Tabs.XMAS:CreateButton{
+    Title = "Use Christmas Portal",
+    Description = "Teleports you to XMAS World",
+    Callback = function()
+
+        local Players = game:GetService("Players")
+        local player = Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local root = character:WaitForChild("HumanoidRootPart")
+        local targetCFrame = CFrame.new(5716, 324, 10209)
+        root.CFrame = targetCFrame
+    end
+}
+
 
 
 local Players = game:GetService("Players")
