@@ -631,47 +631,38 @@ Tabs.preXmas:CreateButton({
     end
 })
 
-Tabs.XMAS:CreateToggle("PresentTeleport", {Title = "Teleport Presents", Default = false})
+Tabs.XMAS:CreateToggle("TP to Presents", {Title = "TP to Presents", Default = false})
     :OnChanged(function(state)
-        if state then
-            task.spawn(function()
-                local Players = game:GetService("Players")
-                local player = Players.LocalPlayer
-                local presentNames = {
-                    "Present_1",
-                    "Present_2",
-                    "Present_3",
-                    "Present_4",
-                    "Present_5",
-                    "Present_6",
-                    "Present_7",
-                    "Present_8",
-                    "Present_9",
-                    "Present_10",
-                }
+        if not state then return end
 
-                while Options.PresentTeleport.Value do
-                    local character = player.Character or player.CharacterAdded:Wait()
-                    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+        task.spawn(function()
+            local Players = game:GetService("Players")
+            local player = Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
-                    for _, name in ipairs(presentNames) do
-                        if not Options.PresentTeleport.Value then break end
+            local presentNames = {
+                "Present_1","Present_2","Present_3","Present_4","Present_5",
+                "Present_6","Present_7","Present_8","Present_9","Present_10"
+            }
 
-                        local model = workspace:FindFirstChild(name, true)
-                        if model and model:IsA("Model") then
-                            local part = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
-                            if part then
-                                humanoidRootPart.CFrame = part.CFrame + Vector3.new(0, 10, 0)
-                                task.wait(1)
-                            end
-                        end
+            for _, name in ipairs(presentNames) do
+                if not Options["TP to Presents"].Value then break end
+
+                local model = workspace:FindFirstChild(name, true)
+                if model and model:IsA("Model") then
+                    local part = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
+                    if part then
+                        humanoidRootPart.CFrame = part.CFrame + Vector3.new(0, 5, 0)
+                        task.wait(1)
                     end
-
-                    task.wait()
                 end
-            end)
-        end
+            end
+
+            Options["TP to Presents"]:SetValue(false)
+        end)
     end)
+
 
 
 local Players = game:GetService("Players")
