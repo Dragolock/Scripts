@@ -661,8 +661,8 @@ Tabs.XMAS:CreateToggle("PresentTeleport", {Title = "Teleport Presents", Default 
                         if model and model:IsA("Model") then
                             local part = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
                             if part then
-                                humanoidRootPart.CFrame = part.CFrame + Vector3.new(0, 5, 0)
-                                task.wait(0.5)
+                                humanoidRootPart.CFrame = part.CFrame + Vector3.new(0, 15, 0)
+                                task.wait(1)
                             end
                         end
                     end
