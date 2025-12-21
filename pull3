@@ -17,7 +17,8 @@ local Tabs = {
     AbyssDungeon = Window:CreateTab{Title = "Abyss", Icon = "phosphor-sword-bold"},
     Fishing = Window:CreateTab{Title = "Fishing", Icon = "phosphor-sword-bold"},
     Halloween = Window:CreateTab{Title = "Halloween", Icon = "phosphor-sword-bold"},
-    Xmas = Window:CreateTab{Title = "Pre-XMAS", Icon = "phosphor-sword-bold"},
+    XMAS = Window:CreateTab{Title = "XMAS", Icon = "phosphor-sword-bold"},
+    preXmas = Window:CreateTab{Title = "Pre-XMAS", Icon = "phosphor-sword-bold"},
     PvP = Window:CreateTab{Title = "PvP", Icon = "phosphor-sword-bold"},
     Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
 }
@@ -508,7 +509,7 @@ Tabs.Halloween:CreateButton{
 local rRemoveC = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC")
 local rBossEvent = game:GetService("ReplicatedStorage"):WaitForChild("EventFolder"):WaitForChild("WinBossEvent")
 
-Tabs.Xmas:CreateToggle("GenMaterials", {
+Tabs.preXmas:CreateToggle("GenMaterials", {
     Title = "Inf Materials (XMAS)",
     Default = false
 }):OnChanged(function(state)
@@ -530,7 +531,7 @@ end)
 local rCraft = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("BuyIngredientForXmas")
 local selectedItemNumber = 1
 
-local xmasItemDropdown = Tabs.Xmas:CreateDropdown("SelectXmasItem", {
+local preXmasItemDropdown = Tabs.preXmas:CreateDropdown("SelectXmasItem", {
     Title = "Select Xmas Item",
     Values = {"Cookies Book", "Santas Helper", "Santas GreatSword", "Strength Potion", "Mega Potion"},
     Default = "Cookies Book"
@@ -548,7 +549,7 @@ local xmasItemDropdown = Tabs.Xmas:CreateDropdown("SelectXmasItem", {
     end
 end)
 
-Tabs.Xmas:CreateToggle("AutoCraftXmasItem", {
+Tabs.preXmas:CreateToggle("AutoCraftXmasItem", {
     Title = "Auto Craft Xmas Item",
     Default = false
 }):OnChanged(function(state)
@@ -566,7 +567,7 @@ end)
 local rBuy = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("BuyIngredientForXmas")
 local selectedMaterial = "RedRibbons"
 
-local xmasDropdown = Tabs.Xmas:CreateDropdown("SelectMaterial", {
+local preXmasDropdown = Tabs.preXmas:CreateDropdown("SelectMaterial", {
     Title = "Select Material",
     Values = {"Red Ribbons", "Bell", "Wrapping Paper", "Elfs Clue", "Lump Of Coal", "Paint Bucket"},
     Default = "Red Ribbons"
@@ -586,7 +587,7 @@ local xmasDropdown = Tabs.Xmas:CreateDropdown("SelectMaterial", {
     end
 end)
 
-Tabs.Xmas:CreateToggle("AutoBuy", {
+Tabs.preXmas:CreateToggle("AutoBuy", {
     Title = "Auto Buy",
     Default = false
 }):OnChanged(function(state)
@@ -601,7 +602,7 @@ Tabs.Xmas:CreateToggle("AutoBuy", {
 end)
 
 
-Tabs.Xmas:CreateToggle("AutoBuyAll", {
+Tabs.preXmas:CreateToggle("AutoBuyAll", {
     Title = "Auto Buy All",
     Default = false
 }):OnChanged(function(state)
@@ -618,7 +619,7 @@ Tabs.Xmas:CreateToggle("AutoBuyAll", {
     end
 end)
 
-Tabs.Xmas:CreateButton({
+Tabs.preXmas:CreateButton({
     Title = "Claim XMAS Daily",
     Callback = function()
         local r = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events")
@@ -629,6 +630,49 @@ Tabs.Xmas:CreateButton({
         end
     end
 })
+
+Tabs.XMAS:CreateToggle("PresentTeleport", {Title = "Teleport Presents", Default = false})
+    :OnChanged(function(state)
+        if state then
+            task.spawn(function()
+                local Players = game:GetService("Players")
+                local player = Players.LocalPlayer
+                local presentNames = {
+                    "Present_1",
+                    "Present_2",
+                    "Present_3",
+                    "Present_4",
+                    "Present_5",
+                    "Present_6",
+                    "Present_7",
+                    "Present_8",
+                    "Present_9",
+                    "Present_10",
+                }
+
+                while Options.PresentTeleport.Value do
+                    local character = player.Character or player.CharacterAdded:Wait()
+                    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+                    for _, name in ipairs(presentNames) do
+                        if not Options.PresentTeleport.Value then break end
+
+                        local model = workspace:FindFirstChild(name, true)
+                        if model and model:IsA("Model") then
+                            local part = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
+                            if part then
+                                humanoidRootPart.CFrame = part.CFrame + Vector3.new(0, 10, 0)
+                                task.wait(1)
+                            end
+                        end
+                    end
+
+                    task.wait()
+                end
+            end)
+        end
+    end)
+
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
