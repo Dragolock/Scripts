@@ -3,12 +3,12 @@ local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.
 local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
 
 local Window = Library:Window{
-    Title = "+1 Speed A Second",
+    Title = "CHub - Pull A Sword",
     SubTitle = "By coco",
-    TabWidth = 130,
-    Size =  UDim2.fromOffset(500, 430),
+    TabWidth = 100,
+    Size =  UDim2.fromOffset(350, 250),
     Resize = false, 
-    Theme = "Darker",
+    Theme = "United GNOME",
     MinimizeKey = Enum.KeyCode.LeftShift
 }
 
@@ -42,14 +42,13 @@ Tabs.mainTab:CreateToggle("AutoWin", {
 
                 hrp.CFrame = CFrame.new(teleportPosition)
 
-                task.wait(1)
+                task.wait(1.5)
             end
         end)
     end
 end)
 
-
-mainTab:CreateToggle("AutoSpeed", {
+Tabs.mainTab:CreateToggle("AutoSpeed", {
     Title = "Auto Speed",
     Default = false
 }):OnChanged(function(state)
@@ -69,6 +68,7 @@ mainTab:CreateToggle("AutoSpeed", {
             end
         end)
     else
+        -- Teleport once when disabled
         local offPosition = Vector3.new(103, 76, -32)
         local character = player.Character
         if character and character:FindFirstChild("HumanoidRootPart") then
