@@ -57,7 +57,7 @@ Tabs.mainTab:CreateToggle("AutoSpeed", {
 
     if state then
         task.spawn(function()
-            local onPosition = Vector3.new(125, 77, -32)
+            local onPosition = Vector3.new(125, 78, -32)
 
             while Options.AutoSpeed.Value do
                 local character = player.Character or player.CharacterAdded:Wait()
