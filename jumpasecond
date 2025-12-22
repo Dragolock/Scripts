@@ -3,7 +3,7 @@ local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.
 local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
 
 local Window = Library:Window{
-    Title = "CHub - Pull A Sword",
+    Title = "CHub - +1 Jump A Second",
     SubTitle = "By coco",
     TabWidth = 100,
     Size =  UDim2.fromOffset(350, 250),
