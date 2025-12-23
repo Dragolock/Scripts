@@ -33,7 +33,7 @@ Tabs.mainTab:CreateToggle("AutoWin", {
             local Players = game:GetService("Players")
             local player = Players.LocalPlayer
 
-            local basePosition = Vector3.new(-488.076843, 5446.19873, -33.1538239)
+            local basePosition = Vector3.new(-488.076843, 5963.19873, -33.1538239)
             local teleportPosition = basePosition + Vector3.new(0, 5, 0)
 
             while Options.AutoWin.Value do
