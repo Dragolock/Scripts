@@ -234,6 +234,22 @@ Tabs.preXmas:CreateButton({
     end
 })
 
+Tabs.XMAS:CreateToggle("AutoClick", {Title = "Auto Click", Default = false})
+    :OnChanged(function(state)
+        if state then
+            task.spawn(function()
+                local ReplicatedStorage = game:GetService("ReplicatedStorage")
+                local ClickEvent = ReplicatedStorage.Remotes.Events.ClickEvent
+
+                while Options.AutoClick.Value do
+                    ClickEvent:FireServer()
+                    task.wait()
+                end
+            end)
+        end
+    end)
+
+
 Tabs.XMAS:CreateToggle("PresentTeleport", {Title = "Teleport Presents", Default = false})
     :OnChanged(function(state)
         if state then
