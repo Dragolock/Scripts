@@ -290,6 +290,27 @@ Tabs.XMAS:CreateButton{
     end
 }
 
+Tabs.XMAS:CreateButton{
+    Title = "Open Workshop", 
+    Description = "Opens Work Shop", 
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local letter = player.PlayerGui.MainUI.UI_Group.XmasWorkShop
+        letter.Visible = true
+
+    end
+}
+
+Tabs.XMAS:CreateButton{
+    Title = "Open Glove Shop", 
+    Description = "Opens Glove Shop", 
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local letter = player.PlayerGui.MainUI.UI_Group.SantaBossClicks
+        letter.Visible = true
+
+    end
+}
 
 
 local Players = game:GetService("Players")
