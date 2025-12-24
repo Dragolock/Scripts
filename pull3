@@ -295,7 +295,7 @@ Tabs.XMAS:CreateButton{
     Description = "Opens Work Shop", 
     Callback = function()
         local player = game.Players.LocalPlayer
-        local letter = player.PlayerGui.MainUI.UI_Group.XmasWorkShop
+        local letter = player.PlayerGui.MainUI.UI_Group.XmasWorkhop
         letter.Visible = true
 
     end
