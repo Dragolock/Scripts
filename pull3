@@ -275,6 +275,22 @@ Tabs.XMAS:CreateToggle("AutoTower", {
 end)
 
 
+local XMASDropdown = Tabs.XMAS:CreateDropdown("XMASBossSelect", {
+    Title = "Select XMAS Boss",
+    Values = {
+        "Evil Elf",
+        "Gingerbread",
+        "Santa Ravager",
+        "Blizzard Enforcer",
+        "Crimson Claus"
+    },
+    Default = "Evil Elf"
+})
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local event = ReplicatedStorage:WaitForChild("EventFolder"):WaitForChild("WinBossEvent")
+local removeEvent = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC")
+
 Tabs.XMAS:CreateToggle("GenerateSnowflakes", {
     Title = "Generate Snowflakes",
     Default = false
@@ -307,74 +323,6 @@ Tabs.XMAS:CreateToggle("GenerateSnowflakes", {
     end
 end)
 
-local XMASDropdown = Tabs.XMAS:CreateDropdown("XMASBossSelect", {
-    Title = "Select XMAS Boss",
-    Values = {
-        "Evil Elf",
-        "Gingerbread",
-        "Santa Ravager",
-        "Blizzard Enforcer",
-        "Crimson Claus"
-    },
-    Default = "Evil Elf"
-})
-
-Tabs.XMAS:CreateToggle("PresentTeleport", {Title = "Teleport Presents", Default = false})
-    :OnChanged(function(state)
-        if state then
-            task.spawn(function()
-                local Players = game:GetService("Players")
-                local player = Players.LocalPlayer
-                local presentNames = {
-                    "Present_1",
-                    "Present_2",
-                    "Present_3",
-                    "Present_4",
-                    "Present_5",
-                    "Present_6",
-                    "Present_7",
-                    "Present_8",
-                    "Present_9",
-                    "Present_10",
-                }
-
-                while Options.PresentTeleport.Value do
-                    local character = player.Character or player.CharacterAdded:Wait()
-                    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-
-                    for _, name in ipairs(presentNames) do
-                        if not Options.PresentTeleport.Value then break end
-
-                        local model = workspace:FindFirstChild(name, true)
-                        if model and model:IsA("Model") then
-                            local part = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
-                            if part then
-                                humanoidRootPart.CFrame = part.CFrame + Vector3.new(0, 15, 0)
-                                task.wait(1)
-                            end
-                        end
-                    end
-
-                    task.wait()
-                end
-            end)
-        end
-    end)
-
-Tabs.XMAS:CreateButton{
-    Title = "Use Christmas Portal",
-    Description = "Teleports you to XMAS World",
-    Callback = function()
-
-        local Players = game:GetService("Players")
-        local player = Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local root = character:WaitForChild("HumanoidRootPart")
-        local targetCFrame = CFrame.new(5716, 324, 10209)
-        root.CFrame = targetCFrame
-    end
-}
-
 local MenuDropdown = Tabs.XMAS:CreateDropdown("XMASMenuSelect", {
     Title = "Select Menu",
     Values = {
@@ -405,6 +353,19 @@ Tabs.XMAS:CreateButton{
     end
 }
 
+Tabs.XMAS:CreateButton{
+    Title = "Use Christmas Portal",
+    Description = "Teleports you to XMAS World",
+    Callback = function()
+
+        local Players = game:GetService("Players")
+        local player = Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local root = character:WaitForChild("HumanoidRootPart")
+        local targetCFrame = CFrame.new(5716, 324, 10209)
+        root.CFrame = targetCFrame
+    end
+}
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
