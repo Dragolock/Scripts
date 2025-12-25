@@ -2,7 +2,7 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
-local PlayerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
 
 -- PLAYER REFERENCES
 local LocalPlayer = Players.LocalPlayer
@@ -11,108 +11,134 @@ local Camera = Workspace.CurrentCamera
 -- SETTINGS
 local MAX_DISTANCE = 1000
 local LOCK_SMOOTHNESS = 1
-local FOV_RADIUS = 100 -- pixels
+local FOV_RADIUS = 100
+
+-- STATES
 local aimbotEnabled = false
+local fovEnabled = true
 
 -- VISIBILITY CHECK
-local function isVisible(targetPart)
+local function isVisible(part)
 	if not LocalPlayer.Character then return false end
-
-	local origin = Camera.CFrame.Position
-	local direction = targetPart.Position - origin
 
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Blacklist
-	params.FilterDescendantsInstances = {LocalPlayer.Character}
+	params.FilterDescendantsInstances = { LocalPlayer.Character }
 	params.IgnoreWater = true
 
-	local result = Workspace:Raycast(origin, direction, params)
-	return result and result.Instance:IsDescendantOf(targetPart.Parent)
+	local result = Workspace:Raycast(
+		Camera.CFrame.Position,
+		part.Position - Camera.CFrame.Position,
+		params
+	)
+
+	return result and result.Instance:IsDescendantOf(part.Parent)
 end
 
--- GET NEAREST VISIBLE PLAYER WITHIN FOV
-local function getNearestVisibleCharacterInFOV()
-	local closest
+-- TARGET FINDER
+local function getTarget()
+	local best
 	local shortest = MAX_DISTANCE
+	local center = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
 
-	for _, player in ipairs(Players:GetPlayers()) do
-		if player ~= LocalPlayer and player.Character then
-			local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-			local head = player.Character:FindFirstChild("Head")
+	for _, p in ipairs(Players:GetPlayers()) do
+		if p ~= LocalPlayer and p.Character then
+			local hum = p.Character:FindFirstChildOfClass("Humanoid")
+			local head = p.Character:FindFirstChild("Head")
 
-			if humanoid and humanoid.Health > 0 and head and isVisible(head) then
+			if hum and hum.Health > 0 and head and isVisible(head) then
 				local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
 				if onScreen then
-					local viewportCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
-					local distance = (Vector2.new(screenPos.X, screenPos.Y) - viewportCenter).Magnitude
-					if distance <= FOV_RADIUS and distance < shortest then
-						shortest = distance
-						closest = player.Character
+					local dist2D = (Vector2.new(screenPos.X, screenPos.Y) - center).Magnitude
+
+					if (not fovEnabled or dist2D <= FOV_RADIUS) and dist2D < shortest then
+						shortest = dist2D
+						best = head
 					end
 				end
 			end
 		end
 	end
 
-	return closest
+	return best
 end
 
 -- MAIN LOOP
-RunService.RenderStepped:Connect(function()
+local renderConnection
+renderConnection = RunService.RenderStepped:Connect(function()
 	if not aimbotEnabled then return end
 
-	local target = getNearestVisibleCharacterInFOV()
-	if not target then return end
-
-	local head = target:FindFirstChild("Head")
+	local head = getTarget()
 	if not head then return end
 
-	-- Camera lock
-	local targetCFrame = CFrame.new(Camera.CFrame.Position, head.Position)
-	Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, LOCK_SMOOTHNESS)
+	Camera.CFrame = CFrame.new(Camera.CFrame.Position, head.Position)
 end)
 
--- GUI BUTTON (OLD STYLE, moved up 10 studs)
+-- GUI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "AimbotGUI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = PlayerGui
 
+-- AIMBOT BUTTON
 local ToggleButton = Instance.new("TextButton")
 ToggleButton.Size = UDim2.new(0, 100, 0, 50)
-ToggleButton.Position = UDim2.new(0.5, -50, 0.88, 0) -- moved up ~10 studs
+ToggleButton.Position = UDim2.new(0.5, -50, 0.88, 0)
 ToggleButton.Text = "Aimbot OFF"
-ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(255,0,0)
+ToggleButton.TextColor3 = Color3.new(1,1,1)
 ToggleButton.Parent = ScreenGui
 
 ToggleButton.MouseButton1Click:Connect(function()
 	aimbotEnabled = not aimbotEnabled
-	if aimbotEnabled then
-		ToggleButton.Text = "Aimbot ON"
-		ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-	else
-		ToggleButton.Text = "Aimbot OFF"
-		ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-	end
+	ToggleButton.Text = aimbotEnabled and "Aimbot ON" or "Aimbot OFF"
+	ToggleButton.BackgroundColor3 = aimbotEnabled and Color3.fromRGB(0,255,0) or Color3.fromRGB(255,0,0)
 end)
 
--- FOV CIRCLE (fixed)
-local FOVCircle = Instance.new("Frame")
+-- FOV TOGGLE BUTTON (LEFT)
+local FovButton = Instance.new("TextButton")
+FovButton.Size = UDim2.new(0, 40, 0, 50)
+FovButton.Position = UDim2.new(0.5, -95, 0.88, 0)
+FovButton.Text = "FOV"
+FovButton.BackgroundColor3 = Color3.fromRGB(0,150,255)
+FovButton.TextColor3 = Color3.new(1,1,1)
+FovButton.TextScaled = true
+FovButton.Parent = ScreenGui
+
+FovButton.MouseButton1Click:Connect(function()
+	fovEnabled = not fovEnabled
+	FOVCircle.Visible = fovEnabled
+	FovButton.BackgroundColor3 = fovEnabled and Color3.fromRGB(0,150,255) or Color3.fromRGB(60,60,60)
+end)
+
+-- TERMINATE BUTTON (RIGHT)
+local TerminateButton = Instance.new("TextButton")
+TerminateButton.Size = UDim2.new(0, 40, 0, 50)
+TerminateButton.Position = UDim2.new(0.5, 55, 0.88, 0)
+TerminateButton.Text = "X"
+TerminateButton.BackgroundColor3 = Color3.fromRGB(0,0,0)
+TerminateButton.TextColor3 = Color3.new(1,1,1)
+TerminateButton.TextScaled = true
+TerminateButton.Parent = ScreenGui
+
+TerminateButton.MouseButton1Click:Connect(function()
+	aimbotEnabled = false
+	if renderConnection then renderConnection:Disconnect() end
+	ScreenGui:Destroy()
+end)
+
+-- FOV CIRCLE
+FOVCircle = Instance.new("Frame")
 FOVCircle.Size = UDim2.new(0, FOV_RADIUS*2, 0, FOV_RADIUS*2)
-FOVCircle.Position = UDim2.new(0.5, -FOV_RADIUS, 0.5, -FOV_RADIUS) -- perfectly centered
-FOVCircle.BackgroundTransparency = 1 -- transparent inside
+FOVCircle.Position = UDim2.new(0.5, -FOV_RADIUS, 0.5, -FOV_RADIUS)
+FOVCircle.AnchorPoint = Vector2.new(0.5,0.5)
+FOVCircle.BackgroundTransparency = 1
 FOVCircle.BorderSizePixel = 0
-FOVCircle.AnchorPoint = Vector2.new(0.5, 0.5)
 FOVCircle.Parent = ScreenGui
 
--- Make it circular
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(1,0) -- 1 = fully circular
-UICorner.Parent = FOVCircle
+local UICorner = Instance.new("UICorner", FOVCircle)
+UICorner.CornerRadius = UDim.new(1,0)
 
--- Outline
-local UIStroke = Instance.new("UIStroke")
-UIStroke.Color = Color3.fromRGB(0, 255, 0)
-UIStroke.Thickness = 2
-UIStroke.Parent = FOVCircle
+local Stroke = Instance.new("UIStroke", FOVCircle)
+Stroke.Thickness = 2
+Stroke.Color = Color3.fromRGB(0,255,0)
