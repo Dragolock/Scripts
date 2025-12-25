@@ -83,7 +83,7 @@ ScreenGui.Parent = PlayerGui
 -- AIMBOT BUTTON
 local ToggleButton = Instance.new("TextButton")
 ToggleButton.Size = UDim2.new(0, 100, 0, 50)
-ToggleButton.Position = UDim2.new(0.5, -50, 0.88, 0)
+ToggleButton.Position = UDim2.new(0.5, -50, 0.88, -50)
 ToggleButton.Text = "Aimbot OFF"
 ToggleButton.BackgroundColor3 = Color3.fromRGB(255,0,0)
 ToggleButton.TextColor3 = Color3.new(1,1,1)
@@ -98,7 +98,7 @@ end)
 -- FOV TOGGLE BUTTON (LEFT)
 local FovButton = Instance.new("TextButton")
 FovButton.Size = UDim2.new(0, 40, 0, 50)
-FovButton.Position = UDim2.new(0.5, -95, 0.88, 0)
+FovButton.Position = UDim2.new(0.5, -95, 0.88, -50)
 FovButton.Text = "FOV"
 FovButton.BackgroundColor3 = Color3.fromRGB(0,150,255)
 FovButton.TextColor3 = Color3.new(1,1,1)
@@ -114,7 +114,7 @@ end)
 -- TERMINATE BUTTON (RIGHT)
 local TerminateButton = Instance.new("TextButton")
 TerminateButton.Size = UDim2.new(0, 40, 0, 50)
-TerminateButton.Position = UDim2.new(0.5, 55, 0.88, 0)
+TerminateButton.Position = UDim2.new(0.5, 55, 0.88, -50)
 TerminateButton.Text = "X"
 TerminateButton.BackgroundColor3 = Color3.fromRGB(0,0,0)
 TerminateButton.TextColor3 = Color3.new(1,1,1)
