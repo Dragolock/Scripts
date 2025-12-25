@@ -127,18 +127,22 @@ TerminateButton.MouseButton1Click:Connect(function()
 	ScreenGui:Destroy()
 end)
 
--- FOV CIRCLE
+-- FOV CIRCLE (perfectly centered on any device)
 FOVCircle = Instance.new("Frame")
 FOVCircle.Size = UDim2.new(0, FOV_RADIUS*2, 0, FOV_RADIUS*2)
-FOVCircle.Position = UDim2.new(0.5, -FOV_RADIUS, 0.5, -FOV_RADIUS)
-FOVCircle.AnchorPoint = Vector2.new(0.5,0.5)
+FOVCircle.Position = UDim2.fromScale(0.5, 0.5) -- always center
+FOVCircle.AnchorPoint = Vector2.new(0.5, 0.5)   -- center anchor
 FOVCircle.BackgroundTransparency = 1
 FOVCircle.BorderSizePixel = 0
 FOVCircle.Parent = ScreenGui
 
-local UICorner = Instance.new("UICorner", FOVCircle)
+-- Make circular
+local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(1,0)
+UICorner.Parent = FOVCircle
 
-local Stroke = Instance.new("UIStroke", FOVCircle)
+-- Outline
+local Stroke = Instance.new("UIStroke")
 Stroke.Thickness = 2
 Stroke.Color = Color3.fromRGB(0,255,0)
+Stroke.Parent = FOVCircle
