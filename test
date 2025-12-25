@@ -10,9 +10,8 @@ local Camera = Workspace.CurrentCamera
 
 -- SETTINGS
 local MAX_DISTANCE = 1000
-local LOCK_SMOOTHNESS = 0.01
-
--- STATE
+local LOCK_SMOOTHNESS = 1
+local FOV_RADIUS = 100 -- pixels
 local aimbotEnabled = false
 
 -- VISIBILITY CHECK
@@ -31,8 +30,8 @@ local function isVisible(targetPart)
 	return result and result.Instance:IsDescendantOf(targetPart.Parent)
 end
 
--- GET NEAREST VISIBLE PLAYER
-local function getNearestVisibleCharacter()
+-- GET NEAREST VISIBLE PLAYER WITHIN FOV
+local function getNearestVisibleCharacterInFOV()
 	local closest
 	local shortest = MAX_DISTANCE
 
@@ -42,10 +41,14 @@ local function getNearestVisibleCharacter()
 			local head = player.Character:FindFirstChild("Head")
 
 			if humanoid and humanoid.Health > 0 and head and isVisible(head) then
-				local distance = (Camera.CFrame.Position - head.Position).Magnitude
-				if distance < shortest then
-					shortest = distance
-					closest = player.Character
+				local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
+				if onScreen then
+					local viewportCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+					local distance = (Vector2.new(screenPos.X, screenPos.Y) - viewportCenter).Magnitude
+					if distance <= FOV_RADIUS and distance < shortest then
+						shortest = distance
+						closest = player.Character
+					end
 				end
 			end
 		end
@@ -58,7 +61,7 @@ end
 RunService.RenderStepped:Connect(function()
 	if not aimbotEnabled then return end
 
-	local target = getNearestVisibleCharacter()
+	local target = getNearestVisibleCharacterInFOV()
 	if not target then return end
 
 	local head = target:FindFirstChild("Head")
@@ -69,7 +72,7 @@ RunService.RenderStepped:Connect(function()
 	Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, LOCK_SMOOTHNESS)
 end)
 
--- GUI BUTTON
+-- GUI BUTTON (OLD STYLE, moved up 10 studs)
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "AimbotGUI"
 ScreenGui.ResetOnSpawn = false
@@ -77,7 +80,7 @@ ScreenGui.Parent = PlayerGui
 
 local ToggleButton = Instance.new("TextButton")
 ToggleButton.Size = UDim2.new(0, 100, 0, 50)
-ToggleButton.Position = UDim2.new(0.5, -50, 0.9, 0)
+ToggleButton.Position = UDim2.new(0.5, -50, 0.88, 0) -- moved up ~10 studs
 ToggleButton.Text = "Aimbot OFF"
 ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -93,3 +96,19 @@ ToggleButton.MouseButton1Click:Connect(function()
 		ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 	end
 end)
+
+-- FOV CIRCLE
+local FOVCircle = Instance.new("Frame")
+FOVCircle.Size = UDim2.new(0, FOV_RADIUS*2, 0, FOV_RADIUS*2)
+FOVCircle.Position = UDim2.new(0.5, -FOV_RADIUS, 0.5, -FOV_RADIUS)
+FOVCircle.BackgroundTransparency = 0.7
+FOVCircle.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+FOVCircle.BorderSizePixel = 2
+FOVCircle.BorderColor3 = Color3.fromRGB(0, 255, 0)
+FOVCircle.Parent = ScreenGui
+FOVCircle.AnchorPoint = Vector2.new(0.5, 0.5)
+FOVCircle.Rotation = 0
+FOVCircle.ClipsDescendants = true
+FOVCircle.Visible = true
+FOVCircle.BackgroundTransparency = 0.9
+FOVCircle.Shape = Enum.FrameShape.Circle -- only works in newer Roblox updates
