@@ -10,11 +10,11 @@ local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 -- SETTINGS
 local MAX_DISTANCE = 1000
-local LOCK_SMOOTHNESS = 0.001
+local LOCK_SMOOTHNESS = 0.01
 local FIRE_COOLDOWN = 0.5
 
 -- How precise the camera must be (degrees)
-local LOCK_ANGLE_THRESHOLD = 2 -- smaller = stricter
+local LOCK_ANGLE_THRESHOLD = 2
 
 -- UI BUTTON PATH
 local FireButton = PlayerGui
@@ -75,6 +75,16 @@ local function isCameraLockedOn(head)
 	return angle <= LOCK_ANGLE_THRESHOLD
 end
 
+-- FIRE BUTTON (REAL CLICK)
+local function fireButton()
+	if FireButton.MouseButton1Down then
+		firesignal(FireButton.MouseButton1Down)
+	end
+	if FireButton.MouseButton1Click then
+		firesignal(FireButton.MouseButton1Click)
+	end
+end
+
 -- MAIN LOOP
 RunService.RenderStepped:Connect(function()
 	local target = getNearestVisibleCharacter()
@@ -83,15 +93,13 @@ RunService.RenderStepped:Connect(function()
 	local head = target:FindFirstChild("Head")
 	if not head then return end
 
-	-- Smooth camera lock
+	-- Camera lock
 	local targetCFrame = CFrame.new(Camera.CFrame.Position, head.Position)
 	Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, LOCK_SMOOTHNESS)
 
 	-- Fire ONLY when fully locked
 	if isCameraLockedOn(head) and tick() - lastFireTime >= FIRE_COOLDOWN then
-		if FireButton and FireButton.Activate then
-			FireButton:Activate()
-			lastFireTime = tick()
-		end
+		fireButton()
+		lastFireTime = tick()
 	end
 end)
