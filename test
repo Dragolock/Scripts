@@ -2,28 +2,18 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
+local PlayerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
 
 -- PLAYER REFERENCES
 local LocalPlayer = Players.LocalPlayer
 local Camera = Workspace.CurrentCamera
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 -- SETTINGS
 local MAX_DISTANCE = 1000
 local LOCK_SMOOTHNESS = 0.01
-local FIRE_COOLDOWN = 0.5
-
--- How precise the camera must be (degrees)
-local LOCK_ANGLE_THRESHOLD = 2
-
--- UI BUTTON PATH
-local FireButton = PlayerGui
-	:WaitForChild("MobileControls")
-	:WaitForChild("Frame")
-	:WaitForChild("FireButton")
 
 -- STATE
-local lastFireTime = 0
+local aimbotEnabled = false
 
 -- VISIBILITY CHECK
 local function isVisible(targetPart)
@@ -64,29 +54,10 @@ local function getNearestVisibleCharacter()
 	return closest
 end
 
--- CHECK IF CAMERA IS FULLY LOCKED
-local function isCameraLockedOn(head)
-	local camLook = Camera.CFrame.LookVector.Unit
-	local targetDir = (head.Position - Camera.CFrame.Position).Unit
-
-	local dot = camLook:Dot(targetDir)
-	local angle = math.deg(math.acos(math.clamp(dot, -1, 1)))
-
-	return angle <= LOCK_ANGLE_THRESHOLD
-end
-
--- FIRE BUTTON (REAL CLICK)
-local function fireButton()
-	if FireButton.MouseButton1Down then
-		firesignal(FireButton.MouseButton1Down)
-	end
-	if FireButton.MouseButton1Click then
-		firesignal(FireButton.MouseButton1Click)
-	end
-end
-
 -- MAIN LOOP
 RunService.RenderStepped:Connect(function()
+	if not aimbotEnabled then return end
+
 	local target = getNearestVisibleCharacter()
 	if not target then return end
 
@@ -96,10 +67,29 @@ RunService.RenderStepped:Connect(function()
 	-- Camera lock
 	local targetCFrame = CFrame.new(Camera.CFrame.Position, head.Position)
 	Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, LOCK_SMOOTHNESS)
+end)
 
-	-- Fire ONLY when fully locked
-	if isCameraLockedOn(head) and tick() - lastFireTime >= FIRE_COOLDOWN then
-		fireButton()
-		lastFireTime = tick()
+-- GUI BUTTON
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "AimbotGUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = PlayerGui
+
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Size = UDim2.new(0, 100, 0, 50)
+ToggleButton.Position = UDim2.new(0.5, -50, 0.9, 0)
+ToggleButton.Text = "Aimbot OFF"
+ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.Parent = ScreenGui
+
+ToggleButton.MouseButton1Click:Connect(function()
+	aimbotEnabled = not aimbotEnabled
+	if aimbotEnabled then
+		ToggleButton.Text = "Aimbot ON"
+		ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+	else
+		ToggleButton.Text = "Aimbot OFF"
+		ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 	end
 end)
