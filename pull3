@@ -249,6 +249,75 @@ Tabs.XMAS:CreateToggle("AutoClick", {Title = "Auto Click", Default = false})
         end
     end)
 
+Tabs.XMAS:CreateToggle("AutoTower", {
+    Title = "Auto Tower",
+    Default = false
+}):OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            local towerEvent = game:GetService("ReplicatedStorage"):WaitForChild("TowerEventRemotes"):WaitForChild("TowerRewardsEvent")
+
+            local lastFalse = tick()
+
+            while Options.AutoTower.Value do
+                for i = 1, 20 do
+                    if not Options.AutoTower.Value then break end
+                    towerEvent:FireServer("-20", true)
+                    task.wait(1.5 / 20)
+                end
+                if tick() - lastFalse >= 2 then
+                    towerEvent:FireServer("-20", false)
+                    lastFalse = tick()
+                end
+            end
+        end)
+    end
+end)
+
+
+Tabs.XMAS:CreateToggle("GenerateSnowflakes", {
+    Title = "Generate Snowflakes",
+    Default = false
+}):OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            removeEvent:FireServer(1)
+            task.wait(0.1)
+
+            while Options.GenerateSnowflakes.Value do
+                local bossSelection = XMASDropdown.Value
+
+                if bossSelection == "Evil Elf" then
+                    event:FireServer("1")
+                elseif bossSelection == "Gingerbread" then
+                    event:FireServer("2")
+                elseif bossSelection == "Santa Ravager" then
+                    event:FireServer("3")
+                elseif bossSelection == "Blizzard Enforcer" then
+                    event:FireServer("4")
+                elseif bossSelection == "Crimson Claus" then
+                    event:FireServer("5")
+                end
+
+                task.wait()
+            end
+        end)
+    else
+        removeEvent:FireServer(0)
+    end
+end)
+
+local XMASDropdown = Tabs.XMAS:CreateDropdown("XMASBossSelect", {
+    Title = "Select XMAS Boss",
+    Values = {
+        "Evil Elf",
+        "Gingerbread",
+        "Santa Ravager",
+        "Blizzard Enforcer",
+        "Crimson Claus"
+    },
+    Default = "Evil Elf"
+})
 
 Tabs.XMAS:CreateToggle("PresentTeleport", {Title = "Teleport Presents", Default = false})
     :OnChanged(function(state)
@@ -306,35 +375,33 @@ Tabs.XMAS:CreateButton{
     end
 }
 
-Tabs.XMAS:CreateButton{
-    Title = "Open Workshop", 
-    Description = "Opens Work Shop", 
-    Callback = function()
-    local player = game.Players.LocalPlayer
-    local letter = player.PlayerGui.MainUI.UI_Group.XmasWorkshop
-    letter.Visible = true
+local MenuDropdown = Tabs.XMAS:CreateDropdown("XMASMenuSelect", {
+    Title = "Select Menu",
+    Values = {
+        "Workshop",
+        "Glove Shop",
+        "Event Shop"
+    },
+    Default = "Workshop"
+})
 
-    end
-}
-
 Tabs.XMAS:CreateButton{
-    Title = "Open Glove Shop", 
-    Description = "Opens Glove Shop", 
-    Callback = function()
-        local player = game.Players.LocalPlayer
-        local letter = player.PlayerGui.MainUI.UI_Group.SantaBossClicks
-        letter.Visible = true
-
-    end
-}
-Tabs.XMAS:CreateButton{
-    Title = "Open Event Shop", 
-    Description = "Opens Event Shop", 
+    Title = "Open Menu",
+    Description = "Opens selected XMAS menu",
     Callback = function()
         local player = game.Players.LocalPlayer
-        local letter = player.PlayerGui.MainUI.UI_Group.EventShop
-        letter.Visible = true
+        local uiGroup = player.PlayerGui.MainUI.UI_Group
+        local selected = MenuDropdown.Value
 
+        if selected == "Workshop" then
+            uiGroup.XmasWorkshop.Visible = true
+
+        elseif selected == "Glove Shop" then
+            uiGroup.SantaBossClicks.Visible = true
+
+        elseif selected == "Event Shop" then
+            uiGroup.EventShop.Visible = true
+        end
     end
 }
 
