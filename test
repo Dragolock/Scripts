@@ -97,18 +97,22 @@ ToggleButton.MouseButton1Click:Connect(function()
 	end
 end)
 
--- FOV CIRCLE
+-- FOV CIRCLE (fixed)
 local FOVCircle = Instance.new("Frame")
 FOVCircle.Size = UDim2.new(0, FOV_RADIUS*2, 0, FOV_RADIUS*2)
-FOVCircle.Position = UDim2.new(0.5, -FOV_RADIUS, 0.5, -FOV_RADIUS)
-FOVCircle.BackgroundTransparency = 0.7
-FOVCircle.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-FOVCircle.BorderSizePixel = 2
-FOVCircle.BorderColor3 = Color3.fromRGB(0, 255, 0)
-FOVCircle.Parent = ScreenGui
+FOVCircle.Position = UDim2.new(0.5, -FOV_RADIUS, 0.5, -FOV_RADIUS) -- perfectly centered
+FOVCircle.BackgroundTransparency = 1 -- transparent inside
+FOVCircle.BorderSizePixel = 0
 FOVCircle.AnchorPoint = Vector2.new(0.5, 0.5)
-FOVCircle.Rotation = 0
-FOVCircle.ClipsDescendants = true
-FOVCircle.Visible = true
-FOVCircle.BackgroundTransparency = 0.9
-FOVCircle.Shape = Enum.FrameShape.Circle -- only works in newer Roblox updates
+FOVCircle.Parent = ScreenGui
+
+-- Make it circular
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(1,0) -- 1 = fully circular
+UICorner.Parent = FOVCircle
+
+-- Outline
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Color = Color3.fromRGB(0, 255, 0)
+UIStroke.Thickness = 2
+UIStroke.Parent = FOVCircle
