@@ -10,7 +10,7 @@ local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 -- SETTINGS
 local MAX_DISTANCE = 1000
-local LOCK_SMOOTHNESS = 0.15
+local LOCK_SMOOTHNESS = 0.001
 local FIRE_COOLDOWN = 0.5
 
 -- How precise the camera must be (degrees)
