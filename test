@@ -4,9 +4,12 @@ local Workspace=game:GetService("Workspace")
 local PlayerGui=Players.LocalPlayer:WaitForChild("PlayerGui")
 local LocalPlayer=Players.LocalPlayer
 local Camera=Workspace.CurrentCamera
+
 local MAX_DISTANCE=1000
 local LOCK_SMOOTHNESS=1
 local aimbotEnabled=false
+local espEnabled = false
+
 
 local function isVisible(part)
 	if not LocalPlayer.Character then return false end
@@ -77,28 +80,34 @@ Players.PlayerRemoving:Connect(function(plr)
 	espObjects[plr]=nil
 end)
 RunService.RenderStepped:Connect(function()
-	for plr,box in pairs(espObjects)do
-		local char=plr.Character
+	for plr, box in pairs(espObjects) do
+		if not espEnabled then
+			box.Visible = false
+			continue
+		end
+
+		local char = plr.Character
 		if char then
-			local head=char:FindFirstChild("Head")
+			local head = char:FindFirstChild("Head")
 			if head then
-				local pos,onScreen=Camera:WorldToViewportPoint(head.Position)
+				local pos, onScreen = Camera:WorldToViewportPoint(head.Position)
 				if onScreen then
-					local size=30
-					box.Size=Vector2.new(size,size)
-					box.Position=Vector2.new(pos.X-size/2,pos.Y-size/2)
-					box.Visible=true
+					local size = 15
+					box.Size = Vector2.new(size, size)
+					box.Position = Vector2.new(pos.X - size / 2, pos.Y - size / 2)
+					box.Visible = true
 				else
-					box.Visible=false
+					box.Visible = false
 				end
 			else
-				box.Visible=false
+				box.Visible = false
 			end
 		else
-			box.Visible=false
+			box.Visible = false
 		end
 	end
 end)
+
 
 local ScreenGui=Instance.new("ScreenGui")
 ScreenGui.Name="AimbotGUI"
@@ -127,6 +136,23 @@ TerminateButton.TextColor3=Color3.new(1,1,1)
 TerminateButton.TextScaled=true
 TerminateButton.Parent=ScreenGui
 TerminateButton.MouseButton1Click:Connect(function()
-	aimbotEnabled=false
+	aimbotEnabled = false
+	espEnabled = false
 	ScreenGui:Destroy()
+end)
+
+local ESPButton = Instance.new("TextButton")
+ESPButton.Size = UDim2.new(0, 100, 0, 50)
+ESPButton.Position = UDim2.new(0.5, -160, 0.88, -50) -- LEFT of aimbot
+ESPButton.Text = "ESP OFF"
+ESPButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+ESPButton.TextColor3 = Color3.new(1, 1, 1)
+ESPButton.Parent = ScreenGui
+
+ESPButton.MouseButton1Click:Connect(function()
+	espEnabled = not espEnabled
+	ESPButton.Text = espEnabled and "ESP ON" or "ESP OFF"
+	ESPButton.BackgroundColor3 = espEnabled
+		and Color3.fromRGB(0, 255, 0)
+		or Color3.fromRGB(255, 0, 0)
 end)
