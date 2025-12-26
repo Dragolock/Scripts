@@ -35,11 +35,15 @@ local function isVisible(part)
 	return result and result.Instance:IsDescendantOf(part.Parent)
 end
 
--- TARGET FINDER
 local function getTarget()
+	local character = LocalPlayer.Character
+	if not character then return nil end
+
+	local hrp = character:FindFirstChild("HumanoidRootPart")
+	if not hrp then return nil end
+
 	local best
 	local shortest = MAX_DISTANCE
-	local center = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
 
 	for _, p in ipairs(Players:GetPlayers()) do
 		if p ~= LocalPlayer and p.Character then
@@ -47,13 +51,27 @@ local function getTarget()
 			local head = p.Character:FindFirstChild("Head")
 
 			if hum and hum.Health > 0 and head and isVisible(head) then
-				local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
-				if onScreen then
-					local dist2D = (Vector2.new(screenPos.X, screenPos.Y) - center).Magnitude
+				-- 3D distance between you and the enemy
+				local dist3D = (head.Position - hrp.Position).Magnitude
 
-					if (not fovEnabled or dist2D <= FOV_RADIUS) and dist2D < shortest then
-						shortest = dist2D
-						best = head
+				if dist3D < shortest then
+					-- Optional: still require them to be on-screen / in FOV
+					local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
+					if onScreen then
+						if not fovEnabled then
+							shortest = dist3D
+							best = head
+						else
+							local center = Vector2.new(
+								Camera.ViewportSize.X/2,
+								Camera.ViewportSize.Y/2
+							)
+							local dist2D = (Vector2.new(screenPos.X, screenPos.Y) - center).Magnitude
+							if dist2D <= FOV_RADIUS then
+								shortest = dist3D
+								best = head
+							end
+						end
 					end
 				end
 			end
@@ -62,6 +80,7 @@ local function getTarget()
 
 	return best
 end
+
 
 -- MAIN LOOP
 local renderConnection
@@ -78,6 +97,67 @@ renderConnection = RunService.RenderStepped:Connect(function(dt)
 	-- Smoothly rotate toward target
 	Camera.CFrame = current:Lerp(desired, LOCK_SMOOTHNESS)
 end)
+
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+local espObjects = {} -- [Player] = Drawing
+
+local function createESPForPlayer(plr)
+	if plr == LocalPlayer or espObjects[plr] then return end
+
+	local box = Drawing.new("Square")
+	box.Thickness = 1
+	box.Color = Color3.fromRGB(0, 255, 0)
+	box.Filled = false
+	box.Visible = false
+
+	espObjects[plr] = box
+end
+
+local function removeESPForPlayer(plr)
+	local box = espObjects[plr]
+	if box then
+		box:Remove()
+		espObjects[plr] = nil
+	end
+end
+
+-- Create ESP for existing players
+for _, plr in ipairs(Players:GetPlayers()) do
+	createESPForPlayer(plr)
+end
+
+-- Handle joins/leaves
+Players.PlayerAdded:Connect(createESPForPlayer)
+Players.PlayerRemoving:Connect(removeESPForPlayer)
+
+RunService.RenderStepped:Connect(function()
+	for plr, box in pairs(espObjects) do
+		local char = plr.Character
+		if char then
+			local head = char:FindFirstChild("Head")
+			if head then
+				local pos, onScreen = Camera:WorldToViewportPoint(head.Position)
+				if onScreen then
+					local size = 30 -- how big the box looks on screen
+					box.Size = Vector2.new(size, size)
+					box.Position = Vector2.new(pos.X - size/2, pos.Y - size/2)
+					box.Visible = true
+				else
+					box.Visible = false
+				end
+			else
+				box.Visible = false
+			end
+		else
+			box.Visible = false
+		end
+	end
+end)
+
 
 -- GUI
 local ScreenGui = Instance.new("ScreenGui")
