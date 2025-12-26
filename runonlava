@@ -1,185 +1,333 @@
-local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
-local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
-local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
+--------------------------------------------------
+-- FLUENT LIBRARY
+--------------------------------------------------
+
+local Library = loadstring(game:HttpGetAsync(
+	"https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"
+))()
+local SaveManager = loadstring(game:HttpGetAsync(
+	"https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"
+))()
+local InterfaceManager = loadstring(game:HttpGetAsync(
+	"https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"
+))()
+
+--------------------------------------------------
+-- WINDOW / TABS
+--------------------------------------------------
 
 local Window = Library:Window{
-    Title = "CHub - Pull A Sword",
-    SubTitle = "By coco",
-    TabWidth = 100,
-    Size =  UDim2.fromOffset(450, 350),
-    Resize = false, 
-    Theme = "United GNOME",
-    MinimizeKey = Enum.KeyCode.LeftShift
+	Title = "CHub - Pull A Sword",
+	SubTitle = "By coco",
+	TabWidth = 100,
+	Size = UDim2.fromOffset(470, 370),
+	Resize = false,
+	Theme = "United GNOME",
+	MinimizeKey = Enum.KeyCode.LeftShift
 }
 
--- Tabs
 local Tabs = {
-    mainGame = Window:CreateTab{Title = "Main Game", Icon = "phosphor-sword-bold"},
-    Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
+	Main = Window:CreateTab{Title = "Main Game", Icon = "phosphor-sword-bold"},
+	Configuration = Window:CreateTab{Title = "Configuration", Icon = "phosphor-sword-bold"},
+	Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
 }
 
 local Options = Library.Options
 
 --------------------------------------------------
--- ABYSS EVENT TAB
+-- SERVICES
 --------------------------------------------------
 
-local pos1 = Vector3.new(-1864, -28, 1188)
-local pos2 = Vector3.new(-1865, 9, -70)
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local UIS = game:GetService("UserInputService")
 
-local delayTime = 0.2
+local LocalPlayer = Players.LocalPlayer
+local Camera = Workspace.CurrentCamera
 
-Tabs.mainGame:CreateToggle("InfiniteMoney", {
-    Title = "Infinite Money",
-    Default = false
-}):OnChanged(function(state)
-    if state then
-        task.spawn(function()
-            local player = game.Players.LocalPlayer
-            local character = player.Character or player.CharacterAdded:Wait()
-            local hrp = character:WaitForChild("HumanoidRootPart")
+--------------------------------------------------
+-- STATE
+--------------------------------------------------
 
-            while Options.InfiniteMoney.Value do
-                hrp.CFrame = CFrame.new(pos1)
-                task.wait(delayTime)
+local aimbotEnabled = false
+local espEnabled = false
 
-                hrp.CFrame = CFrame.new(pos2)
-                task.wait(delayTime)
-            end
-        end)
-    end
+local teamCheck = true
+local visibilityCheck = true
+
+local aimPart = "Head"
+
+local maxDistance = 1000
+local fovRadius = 200
+
+--------------------------------------------------
+-- TEAM CHECK
+--------------------------------------------------
+
+local function isEnemy(player)
+	if not teamCheck then
+		return true
+	end
+
+	if LocalPlayer.Team and player.Team then
+		return player.Team ~= LocalPlayer.Team
+	end
+
+	if LocalPlayer.TeamColor and player.TeamColor then
+		return player.TeamColor ~= LocalPlayer.TeamColor
+	end
+
+	return true
+end
+
+--------------------------------------------------
+-- VISIBILITY CHECK
+--------------------------------------------------
+
+local function isVisible(part)
+	if not visibilityCheck then
+		return true
+	end
+
+	if not LocalPlayer.Character then return false end
+
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Blacklist
+	params.FilterDescendantsInstances = { LocalPlayer.Character }
+	params.IgnoreWater = true
+
+	local result = Workspace:Raycast(
+		Camera.CFrame.Position,
+		part.Position - Camera.CFrame.Position,
+		params
+	)
+
+	return result and result.Instance:IsDescendantOf(part.Parent)
+end
+
+--------------------------------------------------
+-- AIMBOT TARGETING
+--------------------------------------------------
+
+local function getTarget()
+	local character = LocalPlayer.Character
+	if not character then return nil end
+
+	local hrp = character:FindFirstChild("HumanoidRootPart")
+	if not hrp then return nil end
+
+	local mousePos = UIS:GetMouseLocation()
+	local best
+	local shortest = math.huge
+
+	for _, p in ipairs(Players:GetPlayers()) do
+		if p ~= LocalPlayer and p.Character and isEnemy(p) then
+			local hum = p.Character:FindFirstChildOfClass("Humanoid")
+			local part = p.Character:FindFirstChild(aimPart)
+
+			if hum and hum.Health > 0 and part then
+				local dist3D = (part.Position - hrp.Position).Magnitude
+				if dist3D > maxDistance then continue end
+				if not isVisible(part) then continue end
+
+				local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
+				if not onScreen then continue end
+
+				local dist2D = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
+				if dist2D <= fovRadius and dist2D < shortest then
+					shortest = dist2D
+					best = part
+				end
+			end
+		end
+	end
+
+	return best
+end
+
+--------------------------------------------------
+-- AIMBOT LOOP
+--------------------------------------------------
+
+RunService.RenderStepped:Connect(function()
+	if not aimbotEnabled then return end
+
+	local target = getTarget()
+	if not target then return end
+
+	local current = Camera.CFrame
+	local desired = CFrame.new(current.Position, target.Position)
+	Camera.CFrame = current:Lerp(desired, 1)
 end)
 
--- Selected world position
-local selectedWorldPosition = nil
+--------------------------------------------------
+-- FOV CIRCLE
+--------------------------------------------------
 
-local worldDropdown = Tabs.mainGame:CreateDropdown("SelectWorld", {
-    Title = "Select World",
-    Values = {
-        "World 1",
-        "World 2",
-        "World 3",
-        "World 4",
-        "World 5"
-    },
-    Default = "World 1"
-}):OnChanged(function(value)
-    if value == "World 1" then
-        selectedWorldPosition = Vector3.new(-464, 45, 1216)
-    elseif value == "World 2" then
-        selectedWorldPosition = Vector3.new(-814, 48, 1216)
-    elseif value == "World 3" then
-        selectedWorldPosition = Vector3.new(-1164, 48, 1216)
-    elseif value == "World 4" then
-        selectedWorldPosition = Vector3.new(-1514, 48, 1216)
-    elseif value == "World 5" then
-        selectedWorldPosition = Vector3.new(-1864, 48, 1216)
-    end
+local FOVCircle = Drawing.new("Circle")
+FOVCircle.Filled = false
+FOVCircle.Thickness = 1
+FOVCircle.Color = Color3.fromRGB(255, 255, 255)
+FOVCircle.Visible = false
+
+RunService.RenderStepped:Connect(function()
+	FOVCircle.Visible = aimbotEnabled
+	FOVCircle.Radius = fovRadius
+	FOVCircle.Position = UIS:GetMouseLocation()
 end)
 
-Tabs.mainGame:CreateToggle("AutoWin", {
-    Title = "Auto Win",
-    Default = false
-}):OnChanged(function(state)
-    if state then
-        task.spawn(function()
-            local player = game.Players.LocalPlayer
-            local character = player.Character or player.CharacterAdded:Wait()
-            local hrp = character:WaitForChild("HumanoidRootPart")
+--------------------------------------------------
+-- ESP
+--------------------------------------------------
 
-            while Options.AutoWin.Value do
-                if selectedWorldPosition then
-                    hrp.CFrame = CFrame.new(selectedWorldPosition)
-                end
-                task.wait(1.5)
-            end
-        end)
-    end
+local espObjects = {}
+
+local function createESP(plr)
+	if plr == LocalPlayer then return end
+
+	local box = Drawing.new("Square")
+	box.Thickness = 1
+	box.Color = Color3.fromRGB(0, 255, 0)
+	box.Filled = false
+	box.Visible = false
+	espObjects[plr] = box
+end
+
+for _, plr in ipairs(Players:GetPlayers()) do
+	createESP(plr)
+end
+
+Players.PlayerAdded:Connect(createESP)
+
+Players.PlayerRemoving:Connect(function(plr)
+	if espObjects[plr] then
+		espObjects[plr]:Remove()
+		espObjects[plr] = nil
+	end
 end)
 
+RunService.RenderStepped:Connect(function()
+	for plr, box in pairs(espObjects) do
+		if not espEnabled or not isEnemy(plr) then
+			box.Visible = false
+			continue
+		end
 
-Tabs.mainGame:CreateButton({
-    Title = "Anti AFK",
-    Description = "Helps you to not get kicked.",
-    Callback = function()
-        game:GetService('Players').LocalPlayer.Idled:Connect(function()
-            game:GetService('VirtualUser'):CaptureController()
-            game:GetService('VirtualUser'):ClickButton2(Vector2.new())
-        end)
+		local char = plr.Character
+		local part = char and char:FindFirstChild(aimPart)
+		local hum = char and char:FindFirstChildOfClass("Humanoid")
 
-        game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "Anti-AFK",
-            Text = "Anti-AFK is now enabled!",
-            Duration = 3
-        })
-    end
-})
+		if hum and hum.Health > 0 and part then
+			local dist = (part.Position - Camera.CFrame.Position).Magnitude
+			if dist > maxDistance then
+				box.Visible = false
+				continue
+			end
 
-Tabs.mainGame:CreateButton({
-    Title = "Anti Lag",
-    Description = "Decrease quality to not lag.",
-    Callback = function()
-        local Lighting = game:GetService("Lighting")
-        local RunService = game:GetService("RunService")
-        local Terrain = workspace:FindFirstChildWhichIsA("Terrain")
+			if not isVisible(part) then
+				box.Visible = false
+				continue
+			end
 
-        -- Terrain settings
-        if Terrain then
-            Terrain.WaterWaveSize = 0
-            Terrain.WaterWaveSpeed = 0
-            Terrain.WaterReflectance = 0
-            Terrain.WaterTransparency = 1
-        end
+			local pos, onScreen = Camera:WorldToViewportPoint(part.Position)
+			if onScreen then
+				local size = math.clamp(300 / dist, 15, 40)
+				box.Size = Vector2.new(size, size)
+				box.Position = Vector2.new(pos.X - size / 2, pos.Y - size / 2)
+				box.Visible = true
+			else
+				box.Visible = false
+			end
+		else
+			box.Visible = false
+		end
+	end
+end)
 
-        -- Lighting settings
-        Lighting.GlobalShadows = false
-        Lighting.FogStart = 9e9
-        Lighting.FogEnd = 9e9
-        settings().Rendering.QualityLevel = 1
+--------------------------------------------------
+-- UI CONTROLS
+--------------------------------------------------
 
-        -- Optimize workspace parts
-        for _, v in pairs(game:GetDescendants()) do
-            if v:IsA("BasePart") then
-                v.CastShadow = false
-                v.Material = "Plastic"
-                v.Reflectance = 0
-                v.BackSurface = Enum.SurfaceType.SmoothNoOutlines
-                v.BottomSurface = Enum.SurfaceType.SmoothNoOutlines
-                v.FrontSurface = Enum.SurfaceType.SmoothNoOutlines
-                v.LeftSurface = Enum.SurfaceType.SmoothNoOutlines
-                v.RightSurface = Enum.SurfaceType.SmoothNoOutlines
-                v.TopSurface = Enum.SurfaceType.SmoothNoOutlines
-            elseif v:IsA("Decal") then
-                v.Transparency = 1
-                v.Texture = ""
-            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
-                v.Lifetime = NumberRange.new(0)
-            end
-        end
+Tabs.Main:CreateToggle("AimbotToggle", {
+	Title = "Aimbot",
+	Default = false
+}):OnChanged(function(v)
+	aimbotEnabled = v
+end)
 
-        -- Disable post effects in Lighting
-        for _, v in pairs(Lighting:GetDescendants()) do
-            if v:IsA("PostEffect") then
-                v.Enabled = false
-            end
-        end
+Tabs.Main:CreateToggle("ESPToggle", {
+	Title = "ESP",
+	Default = false
+}):OnChanged(function(v)
+	espEnabled = v
+end)
 
-        -- Remove new unwanted objects dynamically
-        workspace.DescendantAdded:Connect(function(child)
-            task.spawn(function()
-                if child:IsA("ForceField") or child:IsA("Sparkles") or child:IsA("Smoke") or child:IsA("Fire") or child:IsA("Beam") then
-                    RunService.Heartbeat:Wait()
-                    child:Destroy()
-                elseif child:IsA("BasePart") then
-                    child.CastShadow = false
-                end
-            end)
-        end)
-    end
+Tabs.Main:CreateToggle("TeamCheckToggle", {
+	Title = "Team Check",
+	Default = true
+}):OnChanged(function(v)
+	teamCheck = v
+end)
+
+Tabs.Configuration:CreateToggle("VisibilityToggle", {
+	Title = "Visibility Check",
+	Default = true
+}):OnChanged(function(v)
+	visibilityCheck = v
+end)
+
+Tabs.Configuration:CreateDropdown("AimPartDropdown", {
+	Title = "Aim Part",
+	Values = { "Head", "HumanoidRootPart" },
+	Default = "Head"
+}):OnChanged(function(v)
+	aimPart = v
+end)
+
+Tabs.Configuration:CreateSlider("FOVSlider", {
+	Title = "FOV Radius",
+	Min = 50,
+	Max = 400,
+	Default = 200,
+	Rounding = 0
+}):OnChanged(function(v)
+	fovRadius = v
+end)
+
+Tabs.Configuration:CreateSlider("DistanceSlider", {
+	Title = "Max Distance",
+	Min = 100,
+	Max = 3000,
+	Default = 1000,
+	Rounding = 0
+}):OnChanged(function(v)
+	maxDistance = v
+end)
+
+Tabs.Configuration:CreateButton({
+	Title = "Terminate Aimbot / ESP",
+	Description = "Disables and cleans everything",
+	Callback = function()
+		aimbotEnabled = false
+		espEnabled = false
+		FOVCircle.Visible = false
+
+		for _, box in pairs(espObjects) do
+			box:Remove()
+		end
+		table.clear(espObjects)
+
+		Library:Notify{
+			Title = "Terminated",
+			Content = "All combat features disabled",
+			Duration = 3
+		}
+	end
 })
 
 --------------------------------------------------
--- CONFIGURATION / MANAGERS
+-- SAVE / SETTINGS
 --------------------------------------------------
 
 SaveManager:SetLibrary(Library)
@@ -195,5 +343,10 @@ InterfaceManager:BuildInterfaceSection(Tabs.Settings)
 SaveManager:BuildConfigSection(Tabs.Settings)
 
 Window:SelectTab(1)
-Library:Notify{Title = "Fluent", Content = "CHub loaded successfully!", Duration = 8}
+Library:Notify{
+	Title = "Fluent",
+	Content = "CHub loaded successfully!",
+	Duration = 8
+}
+
 SaveManager:LoadAutoloadConfig()
