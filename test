@@ -5,7 +5,7 @@ local PlayerGui=Players.LocalPlayer:WaitForChild("PlayerGui")
 local LocalPlayer=Players.LocalPlayer
 local Camera=Workspace.CurrentCamera
 local MAX_DISTANCE=1000
-local LOCK_SMOOTHNESS=0.15
+local LOCK_SMOOTHNESS=0.1
 local aimbotEnabled=false
 
 local function isVisible(part)
@@ -52,20 +52,24 @@ end)
 
 local espObjects={}
 for _,plr in ipairs(Players:GetPlayers())do
-	local box=Drawing.new("Square")
-	box.Thickness=1
-	box.Color=Color3.fromRGB(0,255,0)
-	box.Filled=false
-	box.Visible=false
-	espObjects[plr]=box
+	if plr~=LocalPlayer then
+		local box=Drawing.new("Square")
+		box.Thickness=1
+		box.Color=Color3.fromRGB(0,255,0)
+		box.Filled=false
+		box.Visible=false
+		espObjects[plr]=box
+	end
 end
 Players.PlayerAdded:Connect(function(plr)
-	local box=Drawing.new("Square")
-	box.Thickness=1
-	box.Color=Color3.fromRGB(0,255,0)
-	box.Filled=false
-	box.Visible=false
-	espObjects[plr]=box
+	if plr~=LocalPlayer then
+		local box=Drawing.new("Square")
+		box.Thickness=1
+		box.Color=Color3.fromRGB(0,255,0)
+		box.Filled=false
+		box.Visible=false
+		espObjects[plr]=box
+	end
 end)
 Players.PlayerRemoving:Connect(function(plr)
 	local box=espObjects[plr]
