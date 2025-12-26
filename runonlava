@@ -52,11 +52,12 @@ local Camera = Workspace.CurrentCamera
 
 local aimbotEnabled = false
 local espEnabled = false
+local fovEnabled = true
 
 local teamCheck = true
-local visibilityCheck = true
+local visibilityCheck = true -- AIMBOT ONLY
 
-local aimPart = "Head"
+local aimPart = "Head" -- Head | Torso
 
 local maxDistance = 1000
 local fovRadius = 200
@@ -82,7 +83,7 @@ local function isEnemy(player)
 end
 
 --------------------------------------------------
--- VISIBILITY CHECK
+-- VISIBILITY CHECK (AIMBOT ONLY)
 --------------------------------------------------
 
 local function isVisible(part)
@@ -110,6 +111,13 @@ end
 -- AIMBOT TARGETING
 --------------------------------------------------
 
+local function getAimPart(character)
+	if aimPart == "Torso" then
+		return character:FindFirstChild("HumanoidRootPart")
+	end
+	return character:FindFirstChild("Head")
+end
+
 local function getTarget()
 	local character = LocalPlayer.Character
 	if not character then return nil end
@@ -124,7 +132,7 @@ local function getTarget()
 	for _, p in ipairs(Players:GetPlayers()) do
 		if p ~= LocalPlayer and p.Character and isEnemy(p) then
 			local hum = p.Character:FindFirstChildOfClass("Humanoid")
-			local part = p.Character:FindFirstChild(aimPart)
+			local part = getAimPart(p.Character)
 
 			if hum and hum.Health > 0 and part then
 				local dist3D = (part.Position - hrp.Position).Magnitude
@@ -172,13 +180,13 @@ FOVCircle.Color = Color3.fromRGB(255, 255, 255)
 FOVCircle.Visible = false
 
 RunService.RenderStepped:Connect(function()
-	FOVCircle.Visible = aimbotEnabled
+	FOVCircle.Visible = aimbotEnabled and fovEnabled
 	FOVCircle.Radius = fovRadius
 	FOVCircle.Position = UIS:GetMouseLocation()
 end)
 
 --------------------------------------------------
--- ESP
+-- ESP (THROUGH WALLS)
 --------------------------------------------------
 
 local espObjects = {}
@@ -215,17 +223,12 @@ RunService.RenderStepped:Connect(function()
 		end
 
 		local char = plr.Character
-		local part = char and char:FindFirstChild(aimPart)
+		local part = char and getAimPart(char)
 		local hum = char and char:FindFirstChildOfClass("Humanoid")
 
 		if hum and hum.Health > 0 and part then
 			local dist = (part.Position - Camera.CFrame.Position).Magnitude
 			if dist > maxDistance then
-				box.Visible = false
-				continue
-			end
-
-			if not isVisible(part) then
 				box.Visible = false
 				continue
 			end
@@ -246,7 +249,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 --------------------------------------------------
--- UI CONTROLS
+-- UI CONTROLS (ORDERED)
 --------------------------------------------------
 
 Tabs.Main:CreateToggle("AimbotToggle", {
@@ -254,6 +257,22 @@ Tabs.Main:CreateToggle("AimbotToggle", {
 	Default = false
 }):OnChanged(function(v)
 	aimbotEnabled = v
+end)
+
+-- Aim Part DIRECTLY UNDER AIMBOT
+Tabs.Main:CreateDropdown("AimPartDropdown", {
+	Title = "Aim Part",
+	Values = { "Head", "Torso" },
+	Default = "Head"
+}):OnChanged(function(v)
+	aimPart = v
+end)
+
+Tabs.Main:CreateToggle("EnableFOVToggle", {
+	Title = "Enable FOV",
+	Default = true
+}):OnChanged(function(v)
+	fovEnabled = v
 end)
 
 Tabs.Main:CreateToggle("ESPToggle", {
@@ -271,18 +290,10 @@ Tabs.Main:CreateToggle("TeamCheckToggle", {
 end)
 
 Tabs.Configuration:CreateToggle("VisibilityToggle", {
-	Title = "Visibility Check",
+	Title = "Visibility Check (Aimbot)",
 	Default = true
 }):OnChanged(function(v)
 	visibilityCheck = v
-end)
-
-Tabs.Configuration:CreateDropdown("AimPartDropdown", {
-	Title = "Aim Part",
-	Values = { "Head", "HumanoidRootPart" },
-	Default = "Head"
-}):OnChanged(function(v)
-	aimPart = v
 end)
 
 Tabs.Configuration:CreateSlider("FOVSlider", {
