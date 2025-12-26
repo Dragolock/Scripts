@@ -65,13 +65,18 @@ end
 
 -- MAIN LOOP
 local renderConnection
-renderConnection = RunService.RenderStepped:Connect(function()
+renderConnection = RunService.RenderStepped:Connect(function(dt)
 	if not aimbotEnabled then return end
 
 	local head = getTarget()
 	if not head then return end
 
-	Camera.CFrame = CFrame.new(Camera.CFrame.Position, head.Position)
+	-- Current and desired camera CFrames
+	local current = Camera.CFrame
+	local desired = CFrame.new(current.Position, head.Position)
+
+	-- Smoothly rotate toward target
+	Camera.CFrame = current:Lerp(desired, LOCK_SMOOTHNESS)
 end)
 
 -- GUI
