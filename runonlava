@@ -170,7 +170,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 --------------------------------------------------
--- FOV CIRCLE
+-- FOV CIRCLE (CENTERED ON SCREEN)
 --------------------------------------------------
 
 local FOVCircle = Drawing.new("Circle")
@@ -182,8 +182,12 @@ FOVCircle.Visible = false
 RunService.RenderStepped:Connect(function()
 	FOVCircle.Visible = aimbotEnabled and fovEnabled
 	FOVCircle.Radius = fovRadius
-	FOVCircle.Position = UIS:GetMouseLocation()
+
+	-- Center of the screen
+	local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+	FOVCircle.Position = screenCenter
 end)
+
 
 --------------------------------------------------
 -- ESP (THROUGH WALLS)
