@@ -1,233 +1,128 @@
--- SERVICES
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
-local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
+local Players=game:GetService("Players")
+local RunService=game:GetService("RunService")
+local Workspace=game:GetService("Workspace")
+local PlayerGui=Players.LocalPlayer:WaitForChild("PlayerGui")
+local LocalPlayer=Players.LocalPlayer
+local Camera=Workspace.CurrentCamera
+local MAX_DISTANCE=1000
+local LOCK_SMOOTHNESS=0.15
+local aimbotEnabled=false
 
--- PLAYER REFERENCES
-local LocalPlayer = Players.LocalPlayer
-local Camera = Workspace.CurrentCamera
-
--- SETTINGS
-local MAX_DISTANCE = 1000
-local LOCK_SMOOTHNESS = 1
-local FOV_RADIUS = 100
-
--- STATES
-local aimbotEnabled = false
-local fovEnabled = true
-
--- VISIBILITY CHECK
 local function isVisible(part)
 	if not LocalPlayer.Character then return false end
-
-	local params = RaycastParams.new()
-	params.FilterType = Enum.RaycastFilterType.Blacklist
-	params.FilterDescendantsInstances = { LocalPlayer.Character }
-	params.IgnoreWater = true
-
-	local result = Workspace:Raycast(
-		Camera.CFrame.Position,
-		part.Position - Camera.CFrame.Position,
-		params
-	)
-
+	local params=RaycastParams.new()
+	params.FilterType=Enum.RaycastFilterType.Blacklist
+	params.FilterDescendantsInstances={LocalPlayer.Character}
+	params.IgnoreWater=true
+	local result=Workspace:Raycast(Camera.CFrame.Position,part.Position-Camera.CFrame.Position,params)
 	return result and result.Instance:IsDescendantOf(part.Parent)
 end
 
 local function getTarget()
-	local character = LocalPlayer.Character
+	local character=LocalPlayer.Character
 	if not character then return nil end
-
-	local hrp = character:FindFirstChild("HumanoidRootPart")
+	local hrp=character:FindFirstChild("HumanoidRootPart")
 	if not hrp then return nil end
-
 	local best
-	local shortest = MAX_DISTANCE
-
-	for _, p in ipairs(Players:GetPlayers()) do
-		if p ~= LocalPlayer and p.Character then
-			local hum = p.Character:FindFirstChildOfClass("Humanoid")
-			local head = p.Character:FindFirstChild("Head")
-
-			if hum and hum.Health > 0 and head and isVisible(head) then
-				-- 3D distance between you and the enemy
-				local dist3D = (head.Position - hrp.Position).Magnitude
-
-				if dist3D < shortest then
-					-- Optional: still require them to be on-screen / in FOV
-					local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
-					if onScreen then
-						if not fovEnabled then
-							shortest = dist3D
-							best = head
-						else
-							local center = Vector2.new(
-								Camera.ViewportSize.X/2,
-								Camera.ViewportSize.Y/2
-							)
-							local dist2D = (Vector2.new(screenPos.X, screenPos.Y) - center).Magnitude
-							if dist2D <= FOV_RADIUS then
-								shortest = dist3D
-								best = head
-							end
-						end
-					end
+	local shortest=MAX_DISTANCE
+	for _,p in ipairs(Players:GetPlayers())do
+		if p~=LocalPlayer and p.Character then
+			local hum=p.Character:FindFirstChildOfClass("Humanoid")
+			local head=p.Character:FindFirstChild("Head")
+			if hum and hum.Health>0 and head and isVisible(head)then
+				local dist3D=(head.Position-hrp.Position).Magnitude
+				if dist3D<shortest then
+					shortest=dist3D
+					best=head
 				end
 			end
 		end
 	end
-
 	return best
 end
 
-
--- MAIN LOOP
-local renderConnection
-renderConnection = RunService.RenderStepped:Connect(function(dt)
+RunService.RenderStepped:Connect(function()
 	if not aimbotEnabled then return end
-
-	local head = getTarget()
+	local head=getTarget()
 	if not head then return end
-
-	-- Current and desired camera CFrames
-	local current = Camera.CFrame
-	local desired = CFrame.new(current.Position, head.Position)
-
-	-- Smoothly rotate toward target
-	Camera.CFrame = current:Lerp(desired, LOCK_SMOOTHNESS)
+	local current=Camera.CFrame
+	local desired=CFrame.new(current.Position,head.Position)
+	Camera.CFrame=current:Lerp(desired,LOCK_SMOOTHNESS)
 end)
 
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
-
-local espObjects = {} -- [Player] = Drawing
-
-local function createESPForPlayer(plr)
-	if plr == LocalPlayer or espObjects[plr] then return end
-
-	local box = Drawing.new("Square")
-	box.Thickness = 1
-	box.Color = Color3.fromRGB(0, 255, 0)
-	box.Filled = false
-	box.Visible = false
-
-	espObjects[plr] = box
+local espObjects={}
+for _,plr in ipairs(Players:GetPlayers())do
+	local box=Drawing.new("Square")
+	box.Thickness=1
+	box.Color=Color3.fromRGB(0,255,0)
+	box.Filled=false
+	box.Visible=false
+	espObjects[plr]=box
 end
-
-local function removeESPForPlayer(plr)
-	local box = espObjects[plr]
-	if box then
-		box:Remove()
-		espObjects[plr] = nil
-	end
-end
-
--- Create ESP for existing players
-for _, plr in ipairs(Players:GetPlayers()) do
-	createESPForPlayer(plr)
-end
-
--- Handle joins/leaves
-Players.PlayerAdded:Connect(createESPForPlayer)
-Players.PlayerRemoving:Connect(removeESPForPlayer)
-
+Players.PlayerAdded:Connect(function(plr)
+	local box=Drawing.new("Square")
+	box.Thickness=1
+	box.Color=Color3.fromRGB(0,255,0)
+	box.Filled=false
+	box.Visible=false
+	espObjects[plr]=box
+end)
+Players.PlayerRemoving:Connect(function(plr)
+	local box=espObjects[plr]
+	if box then box:Remove()end
+	espObjects[plr]=nil
+end)
 RunService.RenderStepped:Connect(function()
-	for plr, box in pairs(espObjects) do
-		local char = plr.Character
+	for plr,box in pairs(espObjects)do
+		local char=plr.Character
 		if char then
-			local head = char:FindFirstChild("Head")
+			local head=char:FindFirstChild("Head")
 			if head then
-				local pos, onScreen = Camera:WorldToViewportPoint(head.Position)
+				local pos,onScreen=Camera:WorldToViewportPoint(head.Position)
 				if onScreen then
-					local size = 30 -- how big the box looks on screen
-					box.Size = Vector2.new(size, size)
-					box.Position = Vector2.new(pos.X - size/2, pos.Y - size/2)
-					box.Visible = true
+					local size=30
+					box.Size=Vector2.new(size,size)
+					box.Position=Vector2.new(pos.X-size/2,pos.Y-size/2)
+					box.Visible=true
 				else
-					box.Visible = false
+					box.Visible=false
 				end
 			else
-				box.Visible = false
+				box.Visible=false
 			end
 		else
-			box.Visible = false
+			box.Visible=false
 		end
 	end
 end)
 
+local ScreenGui=Instance.new("ScreenGui")
+ScreenGui.Name="AimbotGUI"
+ScreenGui.ResetOnSpawn=false
+ScreenGui.Parent=PlayerGui
 
--- GUI
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AimbotGUI"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = PlayerGui
-
--- AIMBOT BUTTON
-local ToggleButton = Instance.new("TextButton")
-ToggleButton.Size = UDim2.new(0, 100, 0, 50)
-ToggleButton.Position = UDim2.new(0.5, -50, 0.88, -50)
-ToggleButton.Text = "Aimbot OFF"
-ToggleButton.BackgroundColor3 = Color3.fromRGB(255,0,0)
-ToggleButton.TextColor3 = Color3.new(1,1,1)
-ToggleButton.Parent = ScreenGui
-
+local ToggleButton=Instance.new("TextButton")
+ToggleButton.Size=UDim2.new(0,100,0,50)
+ToggleButton.Position=UDim2.new(0.5,-50,0.88,-50)
+ToggleButton.Text="Aimbot OFF"
+ToggleButton.BackgroundColor3=Color3.fromRGB(255,0,0)
+ToggleButton.TextColor3=Color3.new(1,1,1)
+ToggleButton.Parent=ScreenGui
 ToggleButton.MouseButton1Click:Connect(function()
-	aimbotEnabled = not aimbotEnabled
-	ToggleButton.Text = aimbotEnabled and "Aimbot ON" or "Aimbot OFF"
-	ToggleButton.BackgroundColor3 = aimbotEnabled and Color3.fromRGB(0,255,0) or Color3.fromRGB(255,0,0)
+	aimbotEnabled=not aimbotEnabled
+	ToggleButton.Text=aimbotEnabled and "Aimbot ON"or"Aimbot OFF"
+	ToggleButton.BackgroundColor3=aimbotEnabled and Color3.fromRGB(0,255,0)or Color3.fromRGB(255,0,0)
 end)
 
--- FOV TOGGLE BUTTON (LEFT)
-local FovButton = Instance.new("TextButton")
-FovButton.Size = UDim2.new(0, 40, 0, 50)
-FovButton.Position = UDim2.new(0.5, -95, 0.88, -50)
-FovButton.Text = "FOV"
-FovButton.BackgroundColor3 = Color3.fromRGB(0,150,255)
-FovButton.TextColor3 = Color3.new(1,1,1)
-FovButton.TextScaled = true
-FovButton.Parent = ScreenGui
-
-FovButton.MouseButton1Click:Connect(function()
-	fovEnabled = not fovEnabled
-	FOVCircle.Visible = fovEnabled
-	FovButton.BackgroundColor3 = fovEnabled and Color3.fromRGB(0,150,255) or Color3.fromRGB(60,60,60)
-end)
-
--- TERMINATE BUTTON (RIGHT)
-local TerminateButton = Instance.new("TextButton")
-TerminateButton.Size = UDim2.new(0, 40, 0, 50)
-TerminateButton.Position = UDim2.new(0.5, 55, 0.88, -50)
-TerminateButton.Text = "X"
-TerminateButton.BackgroundColor3 = Color3.fromRGB(0,0,0)
-TerminateButton.TextColor3 = Color3.new(1,1,1)
-TerminateButton.TextScaled = true
-TerminateButton.Parent = ScreenGui
-
+local TerminateButton=Instance.new("TextButton")
+TerminateButton.Size=UDim2.new(0,40,0,50)
+TerminateButton.Position=UDim2.new(0.5,55,0.88,-50)
+TerminateButton.Text="X"
+TerminateButton.BackgroundColor3=Color3.fromRGB(0,0,0)
+TerminateButton.TextColor3=Color3.new(1,1,1)
+TerminateButton.TextScaled=true
+TerminateButton.Parent=ScreenGui
 TerminateButton.MouseButton1Click:Connect(function()
-	aimbotEnabled = false
-	if renderConnection then renderConnection:Disconnect() end
+	aimbotEnabled=false
 	ScreenGui:Destroy()
 end)
-
--- FOV CIRCLE (perfectly centered on any device)
-FOVCircle = Instance.new("Frame")
-FOVCircle.Size = UDim2.new(0, FOV_RADIUS*2, 0, FOV_RADIUS*2)
-FOVCircle.Position = UDim2.fromScale(0.5, 0.5) -- always center
-FOVCircle.AnchorPoint = Vector2.new(0.5, 0.5)   -- center anchor
-FOVCircle.BackgroundTransparency = 1
-FOVCircle.BorderSizePixel = 0
-FOVCircle.Parent = ScreenGui
-
--- Make circular
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(1,0)
-UICorner.Parent = FOVCircle
-
--- Outline
-local Stroke = Instance.new("UIStroke")
-Stroke.Thickness = 2
-Stroke.Color = Color3.fromRGB(0,255,0)
-Stroke.Parent = FOVCircle
