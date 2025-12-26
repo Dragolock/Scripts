@@ -5,7 +5,7 @@ local PlayerGui=Players.LocalPlayer:WaitForChild("PlayerGui")
 local LocalPlayer=Players.LocalPlayer
 local Camera=Workspace.CurrentCamera
 local MAX_DISTANCE=1000
-local LOCK_SMOOTHNESS=0.1
+local LOCK_SMOOTHNESS=1
 local aimbotEnabled=false
 
 local function isVisible(part)
