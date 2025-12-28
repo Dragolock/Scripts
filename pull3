@@ -118,38 +118,6 @@ Tabs.XMAS:CreateToggle("AutoClick", {Title = "Auto Click", Default = false})
         end
     end)
 
-Tabs.XMAS:CreateToggle("AutoHallEgg", {
-    Title = "Auto Hall Egg",
-    Default = false
-}):OnChanged(function(state)
-    if state then
-        task.spawn(function()
-            local Players = game:GetService("Players")
-            local ReplicatedStorage = game:GetService("ReplicatedStorage")
-            local player = Players.LocalPlayer
-            local BuyEgg = ReplicatedStorage
-                :WaitForChild("GameClient")
-                :WaitForChild("Events")
-                :WaitForChild("RemoteFunction")
-                :WaitForChild("BuyEgg")
-
-            local TELEPORT_CFRAME = CFrame.new(5543, 325, 9834)
-
-            local function teleport()
-                local character = player.Character or player.CharacterAdded:Wait()
-                local hrp = character:WaitForChild("HumanoidRootPart")
-                hrp.CFrame = TELEPORT_CFRAME
-            end
-            teleport()
-            while Options.AutoHallEgg.Value do
-                BuyEgg:InvokeServer("Hall Egg2", "Buy1")
-                task.wait(0.1)
-            end
-        end)
-    end
-end)
-
-
 Tabs.XMAS:CreateToggle("AutoTower", {
     Title = "Auto Tower",
     Default = false
