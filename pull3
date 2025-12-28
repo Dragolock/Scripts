@@ -6,7 +6,7 @@ local Window = Library:Window{
     Title = "CHub - Pull A Sword",
     SubTitle = "By coco",
     TabWidth = 100,
-    Size =  UDim2.fromOffset(420, 350),
+    Size =  UDim2.fromOffset(390, 350),
     Resize = false, 
     Theme = "United GNOME",
     MinimizeKey = Enum.KeyCode.LeftShift
@@ -15,7 +15,6 @@ local Window = Library:Window{
 -- Tabs
 local Tabs = {
     XMAS = Window:CreateTab{Title = "XMAS", Icon = "phosphor-sword-bold"},
-    preXmas = Window:CreateTab{Title = "Pre-XMAS", Icon = "phosphor-sword-bold"},
     Fishing = Window:CreateTab{Title = "Fishing", Icon = "phosphor-sword-bold"},
     PvP = Window:CreateTab{Title = "PvP", Icon = "phosphor-sword-bold"},
     Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
@@ -104,136 +103,6 @@ Tabs.Fishing:CreateButton{
     end
 }
 
-local rRemoveC = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("RemoveC")
-local rBossEvent = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("WinBossEvent")
-local rPortalC = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("PortalC")
-
-Tabs.preXmas:CreateToggle("GenMaterials", {
-    Title = "Inf Materials (XMAS)",
-    Default = false
-}):OnChanged(function(state)
-    if state then
-        rPortalC:FireServer("2", true)
-
-        rRemoveC:FireServer(1)
-
-        task.spawn(function()
-            while Options.GenMaterials.Value do
-                for i = 1, 2 do
-                    rBossEvent:FireServer("Boss1")
-                end
-                task.wait()
-            end
-        end)
-    else
-        rRemoveC:FireServer(0)
-    end
-end)
-
-
-local rCraft = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("BuyIngredientForXmas")
-local selectedItemNumber = 1
-
-local preXmasItemDropdown = Tabs.preXmas:CreateDropdown("SelectXmasItem", {
-    Title = "Select Xmas Item",
-    Values = {"Cookies Book", "Santas Helper", "Santas GreatSword", "Strength Potion", "Mega Potion"},
-    Default = "Cookies Book"
-}):OnChanged(function(value)
-    if value == "Cookies Book" then
-        selectedItemNumber = 1
-    elseif value == "Santas Helper" then
-        selectedItemNumber = 2
-    elseif value == "Santas GreatSword" then
-        selectedItemNumber = 3
-    elseif value == "Strength Potion" then
-        selectedItemNumber = 11
-    elseif value == "Mega Potion" then
-        selectedItemNumber = 12
-    end
-end)
-
-Tabs.preXmas:CreateToggle("AutoCraftXmasItem", {
-    Title = "Auto Craft Xmas Item",
-    Default = false
-}):OnChanged(function(state)
-    if state then
-        task.spawn(function()
-            while Options.AutoCraftXmasItem.Value do
-                local args = {selectedItemNumber}
-                rCraft:FireServer(unpack(args))
-                task.wait(1)
-            end
-        end)
-    end
-end)
-
-local rBuy = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("BuyIngredientForXmas")
-local selectedMaterial = "RedRibbons"
-
-local preXmasDropdown = Tabs.preXmas:CreateDropdown("SelectMaterial", {
-    Title = "Select Material",
-    Values = {"Red Ribbons", "Bell", "Wrapping Paper", "Elfs Clue", "Lump Of Coal", "Paint Bucket"},
-    Default = "Red Ribbons"
-}):OnChanged(function(value)
-    if value == "Red Ribbons" then
-        selectedMaterial = "RedRibbons"
-    elseif value == "Bell" then
-        selectedMaterial = "Bell"
-    elseif value == "Wrapping Paper" then
-        selectedMaterial = "WrappingPaper"
-    elseif value == "Elfs Clue" then
-        selectedMaterial = "ElfsClue"
-    elseif value == "Lump Of Coal" then
-        selectedMaterial = "LumpOfCoal"
-    elseif value == "Paint Bucket" then
-        selectedMaterial = "PaintBucket"
-    end
-end)
-
-Tabs.preXmas:CreateToggle("AutoBuy", {
-    Title = "Auto Buy",
-    Default = false
-}):OnChanged(function(state)
-    if state then
-        task.spawn(function()
-            while Options.AutoBuy.Value do
-                rBuy:FireServer(selectedMaterial)
-                task.wait(1)
-            end
-        end)
-    end
-end)
-
-
-Tabs.preXmas:CreateToggle("AutoBuyAll", {
-    Title = "Auto Buy All",
-    Default = false
-}):OnChanged(function(state)
-    if state then
-        task.spawn(function()
-            while Options.AutoBuyAll.Value do
-                local allMaterials = {"RedRibbons", "Bell", "WrappingPaper", "ElfsClue", "LumpOfCoal", "PaintBucket"}
-                for _, material in ipairs(allMaterials) do
-                    rBuy:FireServer(material)
-                end
-                task.wait(1)
-            end
-        end)
-    end
-end)
-
-Tabs.preXmas:CreateButton({
-    Title = "Claim XMAS Daily",
-    Callback = function()
-        local r = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events")
-        for i = 1, 25 do
-            local args = {i}
-            r.ClaimXmasBlessing:FireServer(unpack(args))
-            task.wait(0.05)
-        end
-    end
-})
-
 Tabs.XMAS:CreateToggle("AutoClick", {Title = "Auto Click", Default = false})
     :OnChanged(function(state)
         if state then
@@ -265,7 +134,7 @@ Tabs.XMAS:CreateToggle("AutoTower", {
                     towerEvent:FireServer("-20", true)
                     task.wait(1.5 / 20)
                 end
-                if tick() - lastFalse >= 2 then
+                if tick() - lastFalse >= 1.5 then
                     towerEvent:FireServer("-20", false)
                     lastFalse = tick()
                 end
@@ -357,13 +226,7 @@ Tabs.XMAS:CreateButton{
     Title = "Use Christmas Portal",
     Description = "Teleports you to XMAS World",
     Callback = function()
-
-        local Players = game:GetService("Players")
-        local player = Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local root = character:WaitForChild("HumanoidRootPart")
-        local targetCFrame = CFrame.new(5716, 324, 10209)
-        root.CFrame = targetCFrame
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("PortalC"):FireServer(-50, false)
     end
 }
 
