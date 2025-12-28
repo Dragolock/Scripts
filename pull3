@@ -118,6 +118,39 @@ Tabs.XMAS:CreateToggle("AutoClick", {Title = "Auto Click", Default = false})
         end
     end)
 
+Tabs.XMAS:CreateToggle("FastHatchEventEgg", {
+    Title = "FAST Hatch Event Egg",
+    Default = false
+}):OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            local player = game.Players.LocalPlayer
+            local char = player.Character or player.CharacterAdded:Wait()
+            local hrp = char:WaitForChild("HumanoidRootPart")
+
+            local remote = game:GetService("ReplicatedStorage")
+                :WaitForChild("GameClient")
+                :WaitForChild("Events")
+                :WaitForChild("RemoteFunction")
+                :WaitForChild("BuyEgg")
+
+            local args = {"Hall Egg2", "Buy1"}
+
+            task.spawn(function()
+                while Options.FastHatchEventEgg.Value do
+                    hrp.CFrame = CFrame.new(5539, 324, 9841)
+                    task.wait()
+                end
+            end)
+
+            while Options.FastHatchEventEgg.Value do
+                remote:InvokeServer(unpack(args))
+                task.wait(0.2)
+            end
+        end)
+    end
+end)
+
 Tabs.XMAS:CreateToggle("AutoTower", {
     Title = "Auto Tower",
     Default = false
@@ -142,7 +175,6 @@ Tabs.XMAS:CreateToggle("AutoTower", {
         end)
     end
 end)
-
 
 local XMASDropdown = Tabs.XMAS:CreateDropdown("XMASBossSelect", {
     Title = "Select XMAS Boss",
@@ -226,7 +258,12 @@ Tabs.XMAS:CreateButton{
     Title = "Use Christmas Portal",
     Description = "Teleports you to XMAS World",
     Callback = function()
-        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("PortalC"):FireServer(-50, false)
+        local args = {"-50", false}
+        local portalRemote = game:GetService("ReplicatedStorage")
+            :WaitForChild("Remotes")
+            :WaitForChild("Events")
+            :WaitForChild("PortalC")
+        portalRemote:FireServer(unpack(args))
     end
 }
 
