@@ -145,7 +145,7 @@ Tabs.XMAS:CreateToggle("FastHatchEventEgg", {
 
             while Options.FastHatchEventEgg.Value do
                 remote:InvokeServer(unpack(args))
-                task.wait(0.2)
+                task.wait(0.05)
             end
         end)
     end
