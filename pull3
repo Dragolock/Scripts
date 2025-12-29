@@ -224,30 +224,18 @@ Tabs.XMAS:CreateToggle("GenerateSnowflakes", {
     end
 end)
 
-Tabs.XMAS:CreateToggle("RemoveDropPopups", {
-    Title = "Remove Drop Popups (Less lag)",
-    Default = false
-}):OnChanged(function(state)
-    local workspace = game:GetService("Workspace")
+Tabs.XMAS:CreateButton({
+    Title = "Remove Drop Popups",
+    Description = "Deletes Drop Popups (Less lag)",
+    Callback = function()
+        local Workspace = game:GetService("Workspace")
+        local folder = Workspace:FindFirstChild("RewardAnimationFolder")
 
-    if state then
-        getgenv().RemoveDropPopups = true
-
-        task.spawn(function()
-            while Options.RemoveDropPopups.Value and getgenv().RemoveDropPopups do
-                local folder = workspace:FindFirstChild("RewardAnimationFolder")
-                if folder then
-                    folder:Destroy()
-                end
-                task.wait(0.2)
-            end
-        end)
-    else
-        -- Stop deleting; game will recreate it when needed
-        getgenv().RemoveDropPopups = false
+        if folder then
+            folder:Destroy()
+        end
     end
-end)
-
+})
 
 local MenuDropdown = Tabs.XMAS:CreateDropdown("XMASMenuSelect", {
     Title = "Select Menu",
