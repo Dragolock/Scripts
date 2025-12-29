@@ -226,13 +226,16 @@ end)
 
 Tabs.XMAS:CreateButton({
     Title = "Remove Drop Popups",
-    Description = "Deletes Drop Popups (Less lag)",
+    Description = "Deletes Drop Popups (rejoin to see again)",
     Callback = function()
-        local Workspace = game:GetService("Workspace")
-        local folder = Workspace:FindFirstChild("RewardAnimationFolder")
+        local Players = game:GetService("Players")
+        local LocalPlayer = Players.LocalPlayer
 
-        if folder then
-            folder:Destroy()
+        if LocalPlayer then
+            local folder = LocalPlayer:FindFirstChild("RewardAnimationFolder")
+            if folder then
+                folder:Destroy()
+            end
         end
     end
 })
