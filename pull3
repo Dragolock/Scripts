@@ -4,7 +4,7 @@ local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercon
 
 local Window = Library:Window{
     Title = "CHub - Pull A Sword",
-    SubTitle = "By coco",
+    SubTitle = "By secret",
     TabWidth = 100,
     Size =  UDim2.fromOffset(430, 320),
     Resize = false, 
