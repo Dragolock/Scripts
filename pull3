@@ -204,16 +204,18 @@ Tabs.XMAS:CreateToggle("GenerateSnowflakes", {
             while Options.GenerateSnowflakes.Value do
                 local bossSelection = XMASDropdown.Value
 
-                if bossSelection == "Evil Elf" then
-                    event:FireServer("1")
-                elseif bossSelection == "Gingerbread" then
-                    event:FireServer("2")
-                elseif bossSelection == "Santa Ravager" then
-                    event:FireServer("3")
-                elseif bossSelection == "Blizzard Enforcer" then
-                    event:FireServer("4")
-                elseif bossSelection == "Crimson Claus" then
-                    event:FireServer("5")
+                for i = 1, 20 do
+                    if bossSelection == "Evil Elf" then
+                        event:FireServer("1")
+                    elseif bossSelection == "Gingerbread" then
+                        event:FireServer("2")
+                    elseif bossSelection == "Santa Ravager" then
+                        event:FireServer("3")
+                    elseif bossSelection == "Blizzard Enforcer" then
+                        event:FireServer("4")
+                    elseif bossSelection == "Crimson Claus" then
+                        event:FireServer("5")
+                    end
                 end
 
                 task.wait()
@@ -223,6 +225,7 @@ Tabs.XMAS:CreateToggle("GenerateSnowflakes", {
         removeEvent:FireServer(0)
     end
 end)
+
 
 Tabs.XMAS:CreateButton({
     Title = "Remove Drop Popups",
