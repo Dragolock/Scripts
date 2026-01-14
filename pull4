@@ -22,26 +22,21 @@ local Tabs = {
 
 local Options = Library.Options
 
-Tabs.Fishing:CreateToggle("AutoFish", {
-    Title = "Auto Fish",
-    Default = false
-}):OnChanged(function(state)
-    local Players = game:GetService("Players")
-    local Workspace = game:GetService("Workspace")
-    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
-    local player = Players.LocalPlayer
-    local character = player.Character or player.CharacterAdded:Wait()
-    local hrp = character:WaitForChild("HumanoidRootPart")
-    local Fishing = ReplicatedStorage.Remotes.Fishing
-
-    local FISH_POS = CFrame.new(-890, 10, -246)
-    local fishingThread
-
+Tabs.Fishing:CreateToggle("AutoFish", {Title = "Auto Fish", Default = false})
+:OnChanged(function(state)
     if state then
-        fishingThread = task.spawn(function()
-            local stopLoop = false
-            while state and character.Parent and not stopLoop do
+        task.spawn(function()
+            local Players = game:GetService("Players")
+            local Workspace = game:GetService("Workspace")
+            local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+            local player = Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local hrp = character:WaitForChild("HumanoidRootPart")
+            local Fishing = ReplicatedStorage.Remotes.Fishing
+            local FISH_POS = CFrame.new(-890, 10, -246)
+
+            while Options.AutoFish.Value and character.Parent do
                 hrp.CFrame = FISH_POS
                 task.wait(2)
 
@@ -49,21 +44,20 @@ Tabs.Fishing:CreateToggle("AutoFish", {
                 Fishing.CastRod:InvokeServer()
 
                 local fishDetected = false
-                local fishConnection
-                fishConnection = Workspace.DescendantAdded:Connect(function(obj)
+                local fishConnection = Workspace.DescendantAdded:Connect(function(obj)
                     if obj:IsA("Model") and obj.Name == "Fish" then
                         fishDetected = true
                     end
                 end)
 
-                while not fishDetected and character.Parent and state do
+                while not fishDetected and character.Parent and Options.AutoFish.Value do
                     Fishing.PlayerReaction:FireServer()
                     task.wait(0.05)
                 end
 
-                if fishConnection then fishConnection:Disconnect() end
+                fishConnection:Disconnect()
 
-                if fishDetected and state then
+                if fishDetected and Options.AutoFish.Value then
                     Fishing.ReelIn:FireServer()
                     task.wait(0.05)
                     Fishing.Stop:FireServer()
@@ -71,15 +65,12 @@ Tabs.Fishing:CreateToggle("AutoFish", {
 
                 task.wait(2)
             end
+
             hrp.Anchored = false
         end)
-    else
-        if fishingThread then
-            fishingThread = nil
-        end
-        hrp.Anchored = false
     end
 end)
+
 
 Tabs.Fishing:CreateToggle("GenCrystals", {
     Title = "Generate Crystals",
