@@ -22,56 +22,45 @@ local Tabs = {
 
 local Options = Library.Options
 
+local player = game:GetService("Players").LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local hrp = character:WaitForChild("HumanoidRootPart")
+local Fishing = game:GetService("ReplicatedStorage").Remotes.Fishing
+
+local autoFishing = false
+
 Tabs.Fishing:CreateToggle("AutoFish", {Title = "Auto Fish", Default = false})
     :OnChanged(function(state)
-        local Players = game:GetService("Players")
-        local Workspace = game:GetService("Workspace")
-        local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
-        local player = Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local hrp = character:WaitForChild("HumanoidRootPart")
-
-        local Fishing = ReplicatedStorage.Remotes.Fishing
-        local FISHING_POSITION = CFrame.new(-890, 10, -246)
-
-        if state then
+        autoFishing = state
+        if autoFishing then
             task.spawn(function()
-                while Tabs.Fishing.AutoFish.Value and character.Parent do
+                while autoFishing and character.Parent do
                     hrp.CFrame = FISHING_POSITION
-                    task.wait(2)
-
                     hrp.Anchored = true
+                    task.wait(2)
 
                     Fishing.CastRod:InvokeServer()
 
                     local fishDetected = false
-                    local fishConnection
-
-                    fishConnection = Workspace.DescendantAdded:Connect(function(obj)
+                    local fishConnection = Workspace.DescendantAdded:Connect(function(obj)
                         if obj:IsA("Model") and obj.Name == "Fish" then
                             fishDetected = true
                         end
                     end)
 
-                    while not fishDetected and Tabs.Fishing.AutoFish.Value and character.Parent do
+                    while not fishDetected and autoFishing and character.Parent do
                         Fishing.PlayerReaction:FireServer()
                         task.wait(0.05)
                     end
 
-                    if fishConnection then
-                        fishConnection:Disconnect()
-                    end
+                    fishConnection:Disconnect()
 
-                    if fishDetected and Tabs.Fishing.AutoFish.Value then
-                        Fishing.ReelIn:FireServer()
-                        task.wait(0.05)
-                        Fishing.Stop:FireServer()
-                    end
+                    Fishing.ReelIn:FireServer()
+                    task.wait(0.05)
+                    Fishing.Stop:FireServer()
 
                     task.wait(2)
                 end
-
                 hrp.Anchored = false
             end)
         else
