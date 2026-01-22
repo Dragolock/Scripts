@@ -74,12 +74,12 @@ Tabs.mainTab:CreateToggle("InfiniteHeight", {Title = "Infinite Height", Default 
     end)
 
 Tabs.mainTab:CreateButton({
-    Title = "Infinite Distance (9QQ)",
+    Title = "Infinite Distance (99QQ)",
     Callback = function()
 
         local args = {
             workspace:WaitForChild("Plots"):WaitForChild("2"),
-            999999999999999.17974853515625,
+            99999999999999999999.17974853515625,
             CFrame.new(
                 103, 3.2383222579956055, 274.1617736816406,
                 1, 0, 0,
