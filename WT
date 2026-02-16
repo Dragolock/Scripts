@@ -36,8 +36,8 @@ Tabs.mainTab:CreateButton{
     end
 }
 
-Tabs.mainTab:CreateToggle("Auto Click", {
-    Title = "Click Buttons Anywhere",
+Tabs.mainTab:CreateToggle("ClickAnywhere", {
+    Title = "Click Button Anywhere",
     Default = false
 })
 :OnChanged(function(state)
