@@ -36,6 +36,38 @@ Tabs.mainTab:CreateButton{
     end
 }
 
+Tabs.mainTab:CreateToggle("Auto Click", {
+    Title = "Click Buttons Anywhere",
+    Default = false
+})
+:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+
+            local CLICK_DELAY = 0.05
+            local TARGET_NAMES = {
+                ["n"] = true,
+                ["Clicks"] = true
+            }
+
+            while Options.ClickAnywhere.Value do
+                for _, obj in ipairs(workspace:GetDescendants()) do
+                    if obj:IsA("ClickDetector") then
+                        local parent = obj.Parent
+                        if parent and TARGET_NAMES[parent.Name] then
+                            pcall(function()
+                                fireclickdetector(obj)
+                            end)
+                        end
+                    end
+                end
+                task.wait(CLICK_DELAY)
+            end
+
+        end)
+    end
+end)
+
 Tabs.mainTab:CreateButton({
     Title = "Anti AFK",
     Description = "Helps you to not get kicked.",
