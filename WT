@@ -3,12 +3,12 @@ local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.
 local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
 
 local Window = Library:Window{
-    Title = "+1 Speed A Second",
-    SubTitle = "By coco",
-    TabWidth = 130,
-    Size =  UDim2.fromOffset(500, 430),
+    Title = "CHub - Pull A Sword",
+    SubTitle = "By secret",
+    TabWidth = 100,
+    Size =  UDim2.fromOffset(430, 320),
     Resize = false, 
-    Theme = "Darker",
+    Theme = "United GNOME",
     MinimizeKey = Enum.KeyCode.LeftShift
 }
 
@@ -24,7 +24,7 @@ local Options = Library.Options
 -- ABYSS EVENT TAB
 --------------------------------------------------
 
-Tabs.Fishing:CreateButton{
+Tabs.mainTab:CreateButton{
     Title = "x67 Boost Anywhere",
     Description = "Teleports aurorazone into your hitbox",
     Callback = function()
