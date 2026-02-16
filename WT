@@ -24,18 +24,6 @@ local Options = Library.Options
 -- ABYSS EVENT TAB
 --------------------------------------------------
 
-Tabs.mainTab:CreateButton{
-    Title = "x67 Boost Anywhere",
-    Description = "Teleports aurorazone into your hitbox",
-    Callback = function()
-
-        local p = workspace:FindFirstChild("aurorazone", true)
-        local r = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if p and r then p.CFrame = r.CFrame end
-
-    end
-}
-
 Tabs.mainTab:CreateToggle("ClickAnywhere", {
     Title = "Click Button Anywhere",
     Default = false
@@ -67,6 +55,18 @@ Tabs.mainTab:CreateToggle("ClickAnywhere", {
         end)
     end
 end)
+
+Tabs.mainTab:CreateButton{
+    Title = "x67 Boost Anywhere",
+    Description = "Teleports aurorazone into your hitbox",
+    Callback = function()
+
+        local p = workspace:FindFirstChild("aurorazone", true)
+        local r = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if p and r then p.CFrame = r.CFrame end
+
+    end
+}
 
 Tabs.mainTab:CreateButton({
     Title = "Anti AFK",
