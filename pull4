@@ -138,38 +138,54 @@ Tabs.XMAS:CreateToggle("AutoClick", {Title = "Auto Click", Default = false})
         end
     end)
 
-Tabs.XMAS:CreateToggle("FastHatchEventEgg", {
-    Title = "FAST Hatch Event Egg",
-    Default = false
-}):OnChanged(function(state)
+Tabs.XMAS:CreateToggle("Generate Dusk", {Title = "Fast Event", Default = false})
+:OnChanged(function(state)
     if state then
         task.spawn(function()
-            local player = game.Players.LocalPlayer
-            local char = player.Character or player.CharacterAdded:Wait()
-            local hrp = char:WaitForChild("HumanoidRootPart")
+            local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-            local remote = game:GetService("ReplicatedStorage")
+            local removeCRemote = ReplicatedStorage
+                :WaitForChild("Remotes")
+                :WaitForChild("Events")
+                :WaitForChild("RemoveC")
+
+            local winBossRemote = ReplicatedStorage
+                :WaitForChild("Remotes")
+                :WaitForChild("Events")
+                :WaitForChild("WinBossEvent")
+
+            while state do
+                removeCRemote:FireServer(1)
+
+                for i = 1, 10 do
+                    winBossRemote:FireServer("Boss11")
+                end
+
+                task.wait()
+            end
+        end)
+    end
+end)
+
+Tabs.MainGame:CreateToggle("Auto W11 Egg", {Title = "Auto Buy Egg", Default = false})
+:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            local ReplicatedStorage = game:GetService("ReplicatedStorage")
+            local buyEggRemote = ReplicatedStorage
                 :WaitForChild("GameClient")
                 :WaitForChild("Events")
                 :WaitForChild("RemoteFunction")
                 :WaitForChild("BuyEgg")
 
-            local args = {"Hall Egg2", "Buy1"}
-
-            task.spawn(function()
-                while Options.FastHatchEventEgg.Value do
-                    hrp.CFrame = CFrame.new(5539, 324, 9841)
-                    task.wait()
-                end
-            end)
-
-            while Options.FastHatchEventEgg.Value do
-                remote:InvokeServer(unpack(args))
-                task.wait(0.05)
+            while state do
+                buyEggRemote:InvokeServer("W36E1", "Buy1")
+                task.wait(0.01)
             end
         end)
     end
 end)
+
 
 Tabs.XMAS:CreateToggle("AutoTower", {
     Title = "Auto Tower",
