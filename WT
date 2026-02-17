@@ -151,42 +151,6 @@ Tabs.mainTab:CreateToggle("TPConverter", {
     end
 end)
 
-Tabs.mainTab:CreateToggle("InvisiblePlayers", {
-    Title = "Make Players Invisible",
-    Default = false
-})
-:OnChanged(function(state)
-
-    local Players = game:GetService("Players")
-    local LocalPlayer = Players.LocalPlayer
-
-    local function setInvisible(char, invis)
-        for _, v in ipairs(char:GetDescendants()) do
-            if v:IsA("BasePart") then
-                v.LocalTransparencyModifier = invis and 1 or 0
-            elseif v:IsA("Decal") then
-                v.Transparency = invis and 1 or 0
-            end
-        end
-    end
-
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character then
-            setInvisible(player.Character, state)
-        end
-    end
-
-    Players.PlayerAdded:Connect(function(player)
-        player.CharacterAdded:Connect(function(char)
-            if Options.InvisiblePlayers.Value and player ~= LocalPlayer then
-                task.wait(1)
-                setInvisible(char, true)
-            end
-        end)
-    end)
-
-end)
-
 Tabs.mainTab:CreateButton{
     Title = "x67 Boost Anywhere",
     Description = "Teleports aurorazone into your hitbox",
