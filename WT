@@ -78,6 +78,13 @@ Tabs.mainTab:CreateToggle("AutomateEverything", {
 
 end)
 
+local noteAutoAll = Tabs.mainTab:Paragraph("AutoAllNote", {
+    Title = "Note",
+    Content = "Automate Everything = TP Converter / Autoclick Buttons & Upgrade Cube / Get x67 boost anywhere.",
+    TitleAlignment = "Middle",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
+
 Tabs.mainTab:CreateToggle("ClickAnywhere", {
     Title = "Click Button Anywhere",
     Default = false
