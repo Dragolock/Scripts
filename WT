@@ -3,7 +3,7 @@ local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.
 local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
 
 local Window = Library:Window{
-    Title = "CHub - Pull A Sword",
+    Title = "CHub - Waste Time",
     SubTitle = "By secret",
     TabWidth = 100,
     Size =  UDim2.fromOffset(370, 280),
@@ -12,17 +12,12 @@ local Window = Library:Window{
     MinimizeKey = Enum.KeyCode.LeftShift
 }
 
--- Tabs
 local Tabs = {
     mainTab = Window:CreateTab{Title = "Main Game", Icon = "phosphor-sword-bold"},
     Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
 }
 
 local Options = Library.Options
-
---------------------------------------------------
--- ABYSS EVENT TAB
---------------------------------------------------
 
 Tabs.mainTab:CreateToggle("AutomateEverything", {
     Title = "Automate Everything",
@@ -44,7 +39,6 @@ Tabs.mainTab:CreateToggle("AutomateEverything", {
         hrp = c:WaitForChild("HumanoidRootPart")
     end)
 
-    -- TP (Heartbeat)
     local hb
     hb = RunService.Heartbeat:Connect(function()
         if not Options.AutomateEverything.Value then
@@ -54,7 +48,6 @@ Tabs.mainTab:CreateToggle("AutomateEverything", {
         if hrp then hrp.CFrame = target end
     end)
 
-    -- Click loop
     task.spawn(function()
         local targets = { n = true, Clicks = true }
         while Options.AutomateEverything.Value do
@@ -67,7 +60,6 @@ Tabs.mainTab:CreateToggle("AutomateEverything", {
         end
     end)
 
-    -- x67 zone loop
     task.spawn(function()
         while Options.AutomateEverything.Value do
             local zone = workspace:FindFirstChild("aurorazone", true)
@@ -134,7 +126,6 @@ Tabs.mainTab:CreateToggle("TPConverter", {
 
             local targetCFrame = CFrame.new(16, 4, 1)
 
-            -- Handle respawn
             player.CharacterAdded:Connect(function(char)
                 character = char
                 hrp = character:WaitForChild("HumanoidRootPart")
@@ -195,7 +186,6 @@ Tabs.mainTab:CreateButton({
         local RunService = game:GetService("RunService")
         local Terrain = workspace:FindFirstChildWhichIsA("Terrain")
 
-        -- Terrain settings
         if Terrain then
             Terrain.WaterWaveSize = 0
             Terrain.WaterWaveSpeed = 0
@@ -203,13 +193,11 @@ Tabs.mainTab:CreateButton({
             Terrain.WaterTransparency = 1
         end
 
-        -- Lighting settings
         Lighting.GlobalShadows = false
         Lighting.FogStart = 9e9
         Lighting.FogEnd = 9e9
         settings().Rendering.QualityLevel = 1
 
-        -- Optimize workspace parts
         for _, v in pairs(game:GetDescendants()) do
             if v:IsA("BasePart") then
                 v.CastShadow = false
@@ -229,14 +217,12 @@ Tabs.mainTab:CreateButton({
             end
         end
 
-        -- Disable post effects in Lighting
         for _, v in pairs(Lighting:GetDescendants()) do
             if v:IsA("PostEffect") then
                 v.Enabled = false
             end
         end
 
-        -- Remove new unwanted objects dynamically
         workspace.DescendantAdded:Connect(function(child)
             task.spawn(function()
                 if child:IsA("ForceField") or child:IsA("Sparkles") or child:IsA("Smoke") or child:IsA("Fire") or child:IsA("Beam") then
@@ -251,7 +237,7 @@ Tabs.mainTab:CreateButton({
 })
 
 --------------------------------------------------
--- CONFIGURATION / MANAGERS
+-- important stuff
 --------------------------------------------------
 
 SaveManager:SetLibrary(Library)
