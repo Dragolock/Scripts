@@ -6,7 +6,7 @@ local Window = Library:Window{
     Title = "CHub - Waste Time",
     SubTitle = "By secret",
     TabWidth = 100,
-    Size =  UDim2.fromOffset(370, 280),
+    Size =  UDim2.fromOffset(430, 380),
     Resize = false, 
     Theme = "United GNOME",
     MinimizeKey = Enum.KeyCode.LeftShift
@@ -14,6 +14,7 @@ local Window = Library:Window{
 
 local Tabs = {
     mainTab = Window:CreateTab{Title = "Main Game", Icon = "phosphor-sword-bold"},
+    zones = Window:CreateTab{Title = "Zones", Icon = "phosphor-sword-bold"},
     Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
 }
 
@@ -70,12 +71,6 @@ Tabs.mainTab:CreateToggle("AutomateEverything", {
 
 end)
 
-local noteAutoAll = Tabs.mainTab:Paragraph("AutoAllNote", {
-    Title = "Note",
-    Content = "Automate Everything = TP Converter / Autoclick Buttons & Upgrade Cube / Get x67 boost anywhere.",
-    TitleAlignment = "Middle",
-    ContentAlignment = Enum.TextXAlignment.Left
-})
 
 Tabs.mainTab:CreateToggle("ClickAnywhere", {
     Title = "Click Button Anywhere",
@@ -149,14 +144,98 @@ Tabs.mainTab:CreateToggle("TPConverter", {
     end
 end)
 
-Tabs.mainTab:CreateButton{
-    Title = "x67 Boost Anywhere",
-    Description = "Teleports aurorazone into your hitbox",
+
+local noteAutoAll = Tabs.mainTab:Paragraph("AutoAllNote", {
+    Title = "Note",
+    Content = "Automate Everything = TP Converter / Autoclick Buttons & Upgrade Cube / Get x67 boost anywhere.",
+    TitleAlignment = "Middle",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
+
+local TPZoneDropdown = Tabs.zones:CreateDropdown("TPZoneSelect", {
+    Title = "Select TP Zone",
+    Values = {
+        "Aero",
+        "Aqua",
+        "Metro",
+        "Dorfic",
+        "Aurora"
+    },
+    Default = "Aero"
+})
+
+Tabs.zones:CreateButton({
+    Title = "TP Zone",
     Callback = function()
 
-        local p = workspace:FindFirstChild("aurorazone", true)
-        local r = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if p and r then p.CFrame = r.CFrame end
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+        local selectedZone = TPZoneDropdown.Value
+        local targetPosition
+
+        if selectedZone == "Aero" then
+            targetPosition = Vector3.new(79, 8, 13)
+
+        elseif selectedZone == "Aqua" then
+            targetPosition = Vector3.new(-902, 9, -1)
+
+        elseif selectedZone == "Metro" then
+            targetPosition = Vector3.new(129, 17, 855)
+
+        elseif selectedZone == "Dorfic" then
+            targetPosition = Vector3.new(-1112, 475, 903)
+
+        elseif selectedZone == "Aurora" then
+            targetPosition = Vector3.new(115, 475, 2482)
+        end
+
+        if targetPosition then
+            humanoidRootPart.CFrame = CFrame.new(targetPosition)
+        end
+    end
+})
+
+local GiveBoostDropdown = Tabs.zones:CreateDropdown("GiveBoostSelect", {
+    Title = "Give Boost",
+    Values = {
+        "Aqua Zone",
+        "Metro Zone",
+        "Dorfic Zone",
+        "Aurora Zone"
+    },
+    Default = "Aqua Zone"
+})
+
+Tabs.zones:CreateButton{
+    Title = "Give Boost",
+    Description = "Gives you the selected Zone's boost anywhere.",
+    Callback = function()
+
+        local selectedZone = GiveBoostDropdown.Value
+        local zoneName = "aurorazone" -- default
+
+        if selectedZone == "Aqua Zone" then
+            zoneName = "aquazone"
+
+        elseif selectedZone == "Metro Zone" then
+            zoneName = "metrozone"
+
+        elseif selectedZone == "Dorfic Zone" then
+            zoneName = "dorficzone"
+
+        elseif selectedZone == "Aurora Zone" then
+            zoneName = "aurorazone"
+        end
+
+        local zonePart = workspace:FindFirstChild(zoneName, true)
+        local root = game.Players.LocalPlayer.Character 
+            and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+
+        if zonePart and root then
+            zonePart.CFrame = root.CFrame
+        end
 
     end
 }
