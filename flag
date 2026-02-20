@@ -1,212 +1,68 @@
-local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
-local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
-local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
+local Players = game:GetService("Players")
 
-local Window = Library:Window{
-    Title = "CHub - +1 Jump A Second",
-    SubTitle = "By coco",
-    TabWidth = 100,
-    Size =  UDim2.fromOffset(350, 250),
-    Resize = false, 
-    Theme = "United GNOME",
-    MinimizeKey = Enum.KeyCode.LeftShift
+local targetName = "cocojale"
+local playerFolder = workspace:FindFirstChild(targetName)
+
+if not playerFolder then
+    warn("cocojale not found in workspace.")
+    return
+end
+
+local mainStats = {
+    "Cubes","Generations","GrandTime","LocksLeft","Rank","RerollsLeft",
+    "Clicks","ServerClicks","Stars","Title","Eons","Time","Universes"
 }
 
--- Tabs
-local Tabs = {
-    mainTab = Window:CreateTab{Title = "Main Game", Icon = "phosphor-sword-bold"},
-    Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
+local secondLeaderStats = {
+    "Earons","Quantum"
 }
 
-local Options = Library.Options
+local lockedStats = {
+    "Eons","Generations","GrandTime","Stars","Time","Universes"
+}
 
---------------------------------------------------
--- ABYSS EVENT TAB
---------------------------------------------------
-
-Tabs.mainTab:CreateToggle("KillAll", {
-    Title = "Kill All",
-    Default = false
-}):OnChanged(function(state)
-    if not state then return end
-
-    task.spawn(function()
-        local Players = game:GetService("Players")
-        local RS = game:GetService("ReplicatedStorage")
-        local LP = Players.LocalPlayer
-        local Remote = RS.Remotes.InflictTarget
-
-        local HitData = {{
-            ChargeLevel = 0,
-            ClientHitSize = Vector3.new(2,1,1),
-            Distance = 8.07,
-            ModuleName = "1",
-            BulletId = "39,5|Bullet_{e97bddbb-7e03-4a98-bac7-30ce1e5!C b 0 a }"
-        },{
-            ChargeLevel = false,
-            ClientHitSize = false,
-            Distance = false,
-            ModuleName = false,
-            BulletId = true
-        }}
-
-        while Options.KillAll.Value do
-            local char = LP.Character
-            local gun = char and char:FindFirstChild("Glock")
-            local team = LP.Team
-            if gun then
-                for _,p in ipairs(Players:GetPlayers()) do
-                    if p ~= LP and p.Team ~= team then
-                        local head = p.Character and p.Character:FindFirstChild("Head")
-                        if head then
-                            Remote:FireServer("Gun", gun, head, HitData)
-                        end
-                    end
-                end
-            end
-            task.wait(0.1)
+local function getValue(folder, statName)
+    if folder then
+        local stat = folder:FindFirstChild(statName)
+        if stat and stat:IsA("ValueBase") then
+            return tostring(stat.Value)
         end
-    end)
+    end
+    return "N/A"
+end
+
+local result = "===== " .. targetName .. " =====\n"
+
+local otherData = playerFolder:FindFirstChild("OtherData")
+local secondStats = playerFolder:FindFirstChild("SecondStats")
+local leaderstats = secondStats and secondStats:FindFirstChild("leaderstats")
+local locked = playerFolder:FindFirstChild("Locked")
+
+for _, statName in ipairs(mainStats) do
+    result = result .. statName .. ": " .. getValue(otherData, statName) .. "\n"
+end
+
+for _, statName in ipairs(secondLeaderStats) do
+    result = result .. statName .. ": " .. getValue(leaderstats, statName) .. "\n"
+end
+
+for _, statName in ipairs(lockedStats) do
+    result = result .. "Locked_" .. statName .. ": " .. getValue(locked, statName) .. "\n"
+end
+
+if setclipboard then
+    setclipboard(result)
+    print("Stats copied to clipboard.")
+else
+    warn("Executor does not support clipboard.")
+end
+
+print(result)
+
+pcall(function()
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Stats Copied",
+        Text = "Copied stats for cocojale",
+        Duration = 3
+    })
 end)
-
-Tabs.mainTab:CreateToggle("CaptureFollow",{
-    Title="Capture Follow",
-    Default=false
-}):OnChanged(function(state)
-    local P=game:GetService("Players")
-    local R=game:GetService("RunService")
-    local s=P.LocalPlayer
-    local c,con
-
-    for _,v in ipairs(workspace:GetDescendants()) do
-        if v:IsA("BasePart") and v.Name=="CapturePart" then
-            c=v
-            break
-        end
-    end
-
-    if not c then return end
-
-    c.Anchored=true
-    c.CanCollide=false
-    c.Massless=true
-
-    local function start(char)
-        local r=char:WaitForChild("HumanoidRootPart")
-        con=R.Heartbeat:Connect(function()
-            if not Options.CaptureFollow.Value then
-                con:Disconnect()
-                return
-            end
-            c.CFrame=r.CFrame
-        end)
-    end
-
-    if state then
-        if s.Character then start(s.Character) end
-        s.CharacterAdded:Connect(start)
-    elseif con then
-        con:Disconnect()
-    end
-end)
-
-
-Tabs.mainTab:CreateButton({
-    Title = "Anti AFK",
-    Description = "Helps you to not get kicked.",
-    Callback = function()
-        game:GetService('Players').LocalPlayer.Idled:Connect(function()
-            game:GetService('VirtualUser'):CaptureController()
-            game:GetService('VirtualUser'):ClickButton2(Vector2.new())
-        end)
-
-        game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "Anti-AFK",
-            Text = "Anti-AFK is now enabled!",
-            Duration = 3
-        })
-    end
-})
-
-Tabs.mainTab:CreateButton({
-    Title = "Anti Lag",
-    Description = "Decrease quality to not lag.",
-    Callback = function()
-        local Lighting = game:GetService("Lighting")
-        local RunService = game:GetService("RunService")
-        local Terrain = workspace:FindFirstChildWhichIsA("Terrain")
-
-        -- Terrain settings
-        if Terrain then
-            Terrain.WaterWaveSize = 0
-            Terrain.WaterWaveSpeed = 0
-            Terrain.WaterReflectance = 0
-            Terrain.WaterTransparency = 1
-        end
-
-        -- Lighting settings
-        Lighting.GlobalShadows = false
-        Lighting.FogStart = 9e9
-        Lighting.FogEnd = 9e9
-        settings().Rendering.QualityLevel = 1
-
-        -- Optimize workspace parts
-        for _, v in pairs(game:GetDescendants()) do
-            if v:IsA("BasePart") then
-                v.CastShadow = false
-                v.Material = "Plastic"
-                v.Reflectance = 0
-                v.BackSurface = Enum.SurfaceType.SmoothNoOutlines
-                v.BottomSurface = Enum.SurfaceType.SmoothNoOutlines
-                v.FrontSurface = Enum.SurfaceType.SmoothNoOutlines
-                v.LeftSurface = Enum.SurfaceType.SmoothNoOutlines
-                v.RightSurface = Enum.SurfaceType.SmoothNoOutlines
-                v.TopSurface = Enum.SurfaceType.SmoothNoOutlines
-            elseif v:IsA("Decal") then
-                v.Transparency = 1
-                v.Texture = ""
-            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
-                v.Lifetime = NumberRange.new(0)
-            end
-        end
-
-        -- Disable post effects in Lighting
-        for _, v in pairs(Lighting:GetDescendants()) do
-            if v:IsA("PostEffect") then
-                v.Enabled = false
-            end
-        end
-
-        -- Remove new unwanted objects dynamically
-        workspace.DescendantAdded:Connect(function(child)
-            task.spawn(function()
-                if child:IsA("ForceField") or child:IsA("Sparkles") or child:IsA("Smoke") or child:IsA("Fire") or child:IsA("Beam") then
-                    RunService.Heartbeat:Wait()
-                    child:Destroy()
-                elseif child:IsA("BasePart") then
-                    child.CastShadow = false
-                end
-            end)
-        end)
-    end
-})
-
---------------------------------------------------
--- CONFIGURATION / MANAGERS
---------------------------------------------------
-
-SaveManager:SetLibrary(Library)
-InterfaceManager:SetLibrary(Library)
-
-SaveManager:IgnoreThemeSettings()
-SaveManager:SetIgnoreIndexes({})
-
-InterfaceManager:SetFolder("FluentEventsHub")
-SaveManager:SetFolder("FluentEventsHub/SpecificGame")
-
-InterfaceManager:BuildInterfaceSection(Tabs.Settings)
-SaveManager:BuildConfigSection(Tabs.Settings)
-
-Window:SelectTab(1)
-Library:Notify{Title = "Fluent", Content = "Script loaded successfully!", Duration = 8}
-SaveManager:LoadAutoloadConfig()
