@@ -24,84 +24,116 @@ local Options = Library.Options
 -- ABYSS EVENT TAB
 --------------------------------------------------
 
-Tabs.mainTab:CreateToggle("AutoWin", {
-    Title = "Auto Win",
-    Default = false
-}):OnChanged(function(state)
-    if state then
-        task.spawn(function()
-            local Players = game:GetService("Players")
-            local player = Players.LocalPlayer
 
-            local basePosition = Vector3.new(-488.076843, 5963.19873, -33.1538239)
-            local teleportPosition = basePosition + Vector3.new(0, 5, 0)
 
-            while Options.AutoWin.Value do
-                local character = player.Character or player.CharacterAdded:Wait()
-                local hrp = character:WaitForChild("HumanoidRootPart")
+--// Services
+local Players = game:GetService("Players")
 
-                hrp.CFrame = CFrame.new(teleportPosition)
-
-                task.wait(1.5)
-            end
-        end)
+--// Get Player Names
+local function getPlayerNames()
+    local names = {}
+    for _, player in ipairs(Players:GetPlayers()) do
+        table.insert(names, player.Name)
     end
-end)
+    return names
+end
 
-Tabs.mainTab:CreateToggle("AutoSpeed", {
-    Title = "Auto Speed",
-    Default = false
-}):OnChanged(function(state)
-    local Players = game:GetService("Players")
-    local player = Players.LocalPlayer
+--// Stat lists
+local mainStats = {
+    "Cubes","Generations","GrandTime","LocksLeft","Rank","RerollsLeft",
+    "Clicks","ServerClicks","Stars","Title","Eons","Time","Universes"
+}
 
-    if state then
-        task.spawn(function()
-            local onPosition = Vector3.new(125, 77.5, -32)
+local secondLeaderStats = {
+    "Earons","Quantum"
+}
 
-            while Options.AutoSpeed.Value do
-                local character = player.Character or player.CharacterAdded:Wait()
-                local hrp = character:WaitForChild("HumanoidRootPart")
+local lockedStats = {
+    "Eons","Generations","GrandTime","Stars","Time","Universes"
+}
 
-                hrp.CFrame = CFrame.new(onPosition)
-                task.wait(2)
-            end
-        end)
-    else
-        -- Teleport once when disabled
-        local offPosition = Vector3.new(103, 76, -32)
-        local character = player.Character
-        if character and character:FindFirstChild("HumanoidRootPart") then
-            character.HumanoidRootPart.CFrame = CFrame.new(offPosition)
+--// Safe stat getter
+local function getValue(folder, statName)
+    if folder then
+        local stat = folder:FindFirstChild(statName)
+        if stat and stat:IsA("ValueBase") then
+            return tostring(stat.Value)
         end
     end
-end)
+    return "N/A"
+end
 
+--// Selected Player
+local selectedPlayerName = nil
+local playerNames = getPlayerNames()
 
-Tabs.mainTab:CreateToggle("AutoRebirth", {Title = "Auto Rebirth", Default = false})
-    :OnChanged(function(state)
-        if state then
-            task.spawn(function()
-                while Options.AutoRebirth.Value do
-                     game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Networking"):WaitForChild("Remotes"):WaitForChild("Rebirth"):FireServer()
-                    task.wait(2)
-                end
-            end)
-        end
-    end)
+--// Dropdown
+local dropdownRef = Tabs.mainTab:CreateDropdown({
+    Title = "Select Player",
+    Values = playerNames,
+    Multi = false,
+    Default = 1,
+    Callback = function(value)
+        selectedPlayerName = value
+    end
+})
 
+-- Set default
+dropdownRef:SetValues(playerNames)
+dropdownRef:SetValue(playerNames[1] or "")
+selectedPlayerName = playerNames[1]
+
+--// Refresh Button (like your PvP example)
 Tabs.mainTab:CreateButton({
-    Title = "Anti AFK",
-    Description = "Helps you to not get kicked.",
+    Title = "Refresh Players",
     Callback = function()
-        game:GetService('Players').LocalPlayer.Idled:Connect(function()
-            game:GetService('VirtualUser'):CaptureController()
-            game:GetService('VirtualUser'):ClickButton2(Vector2.new())
-        end)
+        playerNames = getPlayerNames()
+        dropdownRef:SetValues(playerNames)
+        dropdownRef:SetValue(playerNames[1] or "")
+        selectedPlayerName = playerNames[1]
+    end
+})
+
+--// Copy Stats Button (formatted like your Anti AFK)
+Tabs.mainTab:CreateButton({
+    Title = "Copy Player Stats",
+    Description = "Copies all selected player's stats to clipboard.",
+    Callback = function()
+
+        if not selectedPlayerName then return end
+
+        local playerFolder = workspace:FindFirstChild(selectedPlayerName)
+        if not playerFolder then return end
+
+        local result = "===== " .. selectedPlayerName .. " =====\n"
+
+        local otherData = playerFolder:FindFirstChild("OtherData")
+        local secondStats = playerFolder:FindFirstChild("SecondStats")
+        local leaderstats = secondStats and secondStats:FindFirstChild("leaderstats")
+        local locked = playerFolder:FindFirstChild("Locked")
+
+        -- Main Stats
+        for _, statName in ipairs(mainStats) do
+            result = result .. statName .. ": " .. getValue(otherData, statName) .. "\n"
+        end
+
+        -- SecondStats → leaderstats
+        for _, statName in ipairs(secondLeaderStats) do
+            result = result .. statName .. ": " .. getValue(leaderstats, statName) .. "\n"
+        end
+
+        -- Locked
+        for _, statName in ipairs(lockedStats) do
+            result = result .. "Locked_" .. statName .. ": " .. getValue(locked, statName) .. "\n"
+        end
+
+        if setclipboard then
+            setclipboard(result)
+        end
 
         game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "Anti-AFK",
-            Text = "Anti-AFK is now enabled!",
+            Title = "Stats Copied",
+            Text = "Copied stats for " .. selectedPlayerName,
             Duration = 3
         })
     end
