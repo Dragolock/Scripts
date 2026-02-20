@@ -240,6 +240,29 @@ Tabs.zones:CreateButton{
     end
 }
 
+Tabs.zones:CreateButton({
+    Title = "TP Chapter 2",
+    Callback = function()
+
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+        local targetPosition = Vector3.new(-408.781677, 17.1923866, -1.96728301)
+
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            if obj:IsA("BasePart") and obj.Name == "Part" then
+                if (obj.Position - targetPosition).Magnitude < 5 then
+                    firetouchinterest(humanoidRootPart, obj, 0)
+                    firetouchinterest(humanoidRootPart, obj, 1)
+                    break
+                end
+            end
+        end
+
+    end
+})
+
 Tabs.mainTab:CreateButton({
     Title = "Anti AFK",
     Description = "Helps you to not get kicked.",
