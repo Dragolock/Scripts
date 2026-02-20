@@ -1,58 +1,7 @@
-local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
-local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
-local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
-
-local Window = Library:Window{
-    Title = "CHub - +1 Jump A Second",
-    SubTitle = "By coco",
-    TabWidth = 100,
-    Size =  UDim2.fromOffset(350, 250),
-    Resize = false, 
-    Theme = "United GNOME",
-    MinimizeKey = Enum.KeyCode.LeftShift
-}
-
--- Tabs
-local Tabs = {
-    mainTab = Window:CreateTab{Title = "Main Game", Icon = "phosphor-sword-bold"},
-    Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
-}
-
-local Options = Library.Options
-
---------------------------------------------------
--- ABYSS EVENT TAB
---------------------------------------------------
-
-
-
---// Services
 local Players = game:GetService("Players")
 
---// Get Player Names
-local function getPlayerNames()
-    local names = {}
-    for _, player in ipairs(Players:GetPlayers()) do
-        table.insert(names, player.Name)
-    end
-    return names
-end
+task.wait(2) -- allow data to load
 
---// Stat lists
-local mainStats = {
-    "Cubes","Generations","GrandTime","LocksLeft","Rank","RerollsLeft",
-    "Clicks","ServerClicks","Stars","Title","Eons","Time","Universes"
-}
-
-local secondLeaderStats = {
-    "Earons","Quantum"
-}
-
-local lockedStats = {
-    "Eons","Generations","GrandTime","Stars","Time","Universes"
-}
-
---// Safe stat getter
 local function getValue(folder, statName)
     if folder then
         local stat = folder:FindFirstChild(statName)
@@ -63,98 +12,58 @@ local function getValue(folder, statName)
     return "N/A"
 end
 
---// Selected Player
-local selectedPlayerName = nil
-local playerNames = getPlayerNames()
+local otherDataStats = {
+    "Cubes","Generations","GrandTime","LocksLeft","Rank","RerollsLeft",
+    "Clicks","ServerClicks","Stars","Title"
+}
 
---// Dropdown
-local dropdownRef = Tabs.mainTab:CreateDropdown({
-    Title = "Select Player",
-    Values = playerNames,
-    Multi = false,
-    Default = 1,
-    Callback = function(value)
-        selectedPlayerName = value
+local secondLeaderStats = {"Earons","Quantum"}
+local mainLeaderstats = {"Eons","Time","Universes"}
+local lockedStats = {"Eons","Generations","GrandTime","Stars","Time","Universes"}
+
+local result = ""
+
+for _, player in ipairs(Players:GetPlayers()) do
+    
+    result = result .. "===== " .. player.Name .. " =====\n"
+
+    local otherData = player:FindFirstChild("OtherData")
+    local secondStats = player:FindFirstChild("SecondStats")
+    local secondLeader = secondStats and secondStats:FindFirstChild("leaderstats")
+    local mainLeader = player:FindFirstChild("leaderstats")
+    local classesFolder = otherData and otherData:FindFirstChild("Classes")
+
+    -- OtherData stats
+    for _, stat in ipairs(otherDataStats) do
+        result = result .. stat .. ": " .. getValue(otherData, stat) .. "\n"
     end
-})
 
--- Set default
-dropdownRef:SetValues(playerNames)
-dropdownRef:SetValue(playerNames[1] or "")
-selectedPlayerName = playerNames[1]
-
---// Refresh Button (like your PvP example)
-Tabs.mainTab:CreateButton({
-    Title = "Refresh Players",
-    Callback = function()
-        playerNames = getPlayerNames()
-        dropdownRef:SetValues(playerNames)
-        dropdownRef:SetValue(playerNames[1] or "")
-        selectedPlayerName = playerNames[1]
+    -- SecondStats → leaderstats (Earons / Quantum)
+    for _, stat in ipairs(secondLeaderStats) do
+        result = result .. stat .. ": " .. getValue(secondLeader, stat) .. "\n"
     end
-})
 
---// Copy Stats Button (formatted like your Anti AFK)
-Tabs.mainTab:CreateButton({
-    Title = "Copy Player Stats",
-    Description = "Copies all selected player's stats to clipboard.",
-    Callback = function()
-
-        if not selectedPlayerName then return end
-
-        local playerFolder = workspace:FindFirstChild(selectedPlayerName)
-        if not playerFolder then return end
-
-        local result = "===== " .. selectedPlayerName .. " =====\n"
-
-        local otherData = playerFolder:FindFirstChild("OtherData")
-        local secondStats = playerFolder:FindFirstChild("SecondStats")
-        local leaderstats = secondStats and secondStats:FindFirstChild("leaderstats")
-        local locked = playerFolder:FindFirstChild("Locked")
-
-        -- Main Stats
-        for _, statName in ipairs(mainStats) do
-            result = result .. statName .. ": " .. getValue(otherData, statName) .. "\n"
-        end
-
-        -- SecondStats → leaderstats
-        for _, statName in ipairs(secondLeaderStats) do
-            result = result .. statName .. ": " .. getValue(leaderstats, statName) .. "\n"
-        end
-
-        -- Locked
-        for _, statName in ipairs(lockedStats) do
-            result = result .. "Locked_" .. statName .. ": " .. getValue(locked, statName) .. "\n"
-        end
-
-        if setclipboard then
-            setclipboard(result)
-        end
-
-        game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "Stats Copied",
-            Text = "Copied stats for " .. selectedPlayerName,
-            Duration = 3
-        })
+    -- Separate leaderstats (Eons / Time / Universes)
+    for _, stat in ipairs(mainLeaderstats) do
+        result = result .. stat .. ": " .. getValue(mainLeader, stat) .. "\n"
     end
-})
 
---------------------------------------------------
--- CONFIGURATION / MANAGERS
---------------------------------------------------
+    -- Locked stats (OtherData → Classes)
+    for _, stat in ipairs(lockedStats) do
+        result = result .. "Locked_" .. stat .. ": " .. getValue(classesFolder, stat) .. "\n"
+    end
 
-SaveManager:SetLibrary(Library)
-InterfaceManager:SetLibrary(Library)
+    result = result .. "\n"
+end
 
-SaveManager:IgnoreThemeSettings()
-SaveManager:SetIgnoreIndexes({})
+if setclipboard then
+    setclipboard(result)
+elseif toclipboard then
+    toclipboard(result)
+elseif syn and syn.write_clipboard then
+    syn.write_clipboard(result)
+else
+    warn("Clipboard not supported.")
+end
 
-InterfaceManager:SetFolder("FluentEventsHub")
-SaveManager:SetFolder("FluentEventsHub/SpecificGame")
-
-InterfaceManager:BuildInterfaceSection(Tabs.Settings)
-SaveManager:BuildConfigSection(Tabs.Settings)
-
-Window:SelectTab(1)
-Library:Notify{Title = "Fluent", Content = "Script loaded successfully!", Duration = 8}
-SaveManager:LoadAutoloadConfig()
+print(result)
