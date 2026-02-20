@@ -6,7 +6,7 @@ local Window = Library:Window{
     Title = "CHub - Waste Time",
     SubTitle = "By secret",
     TabWidth = 100,
-    Size =  UDim2.fromOffset(430, 340),
+    Size =  UDim2.fromOffset(400, 300),
     Resize = false, 
     Theme = "United GNOME",
     MinimizeKey = Enum.KeyCode.LeftShift
@@ -153,7 +153,7 @@ local noteAutoAll = Tabs.mainTab:Paragraph("AutoAllNote", {
 })
 
 local TPZoneDropdown = Tabs.zones:CreateDropdown("TPZoneSelect", {
-    Title = "Select TP Zone",
+    Title = "Select Zone",
     Values = {
         "Aero",
         "Aqua",
@@ -165,7 +165,7 @@ local TPZoneDropdown = Tabs.zones:CreateDropdown("TPZoneSelect", {
 })
 
 Tabs.zones:CreateButton({
-    Title = "TP Zone",
+    Title = "TP to Zone",
     Callback = function()
 
         local player = game.Players.LocalPlayer
