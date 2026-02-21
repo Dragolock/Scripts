@@ -1,0 +1,274 @@
+local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
+local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
+local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
+
+local Window = Library:Window{
+    Title = "CHub - Waste Time",
+    SubTitle = "By secret",
+    TabWidth = 100,
+    Size =  UDim2.fromOffset(400, 300),
+    Resize = false, 
+    Theme = "United GNOME",
+    MinimizeKey = Enum.KeyCode.LeftShift
+}
+
+local Tabs = {
+    mainTab = Window:CreateTab{Title = "Main Game", Icon = "phosphor-sword-bold"},
+    TpStuff = Window:CreateTab{Title = "TpStuff", Icon = "phosphor-sword-bold"},
+    Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
+}
+
+local Options = Library.Options
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local combatRemote = ReplicatedStorage.Net.Events.Combat
+local enemiesFolder = workspace:WaitForChild("Enemies")
+
+local ATTACK_RANGE = 50
+local MAX_TARGETS = 100
+local SCAN_EVERY_X_FRAMES = 3
+
+local cachedEnemies = {}
+local targets = {}
+local frameCounter = 0
+local attackConnection
+
+local function refreshCache()
+    table.clear(cachedEnemies)
+    for _, enemy in ipairs(enemiesFolder:GetChildren()) do
+        if enemy:IsA("Model") and enemy:FindFirstChild("HumanoidRootPart") then
+            table.insert(cachedEnemies, enemy)
+        end
+    end
+end
+
+refreshCache()
+enemiesFolder.ChildAdded:Connect(refreshCache)
+enemiesFolder.ChildRemoved:Connect(refreshCache)
+
+Tabs.Main:CreateToggle("AttackNearest", {
+    Title = "Attack Nearest",
+    Default = false
+}):OnChanged(function(state)
+
+    if state then
+        attackConnection = RunService.Heartbeat:Connect(function()
+
+            frameCounter += 1
+            if frameCounter < SCAN_EVERY_X_FRAMES then
+                return
+            end
+            frameCounter = 0
+
+            local character = player.Character
+            if not character then return end
+
+            local root = character:FindFirstChild("HumanoidRootPart")
+            if not root then return end
+
+            local rootPos = root.Position
+            table.clear(targets)
+
+            for _, enemy in ipairs(cachedEnemies) do
+                local enemyRoot = enemy:FindFirstChild("HumanoidRootPart")
+                if enemyRoot then
+                    local distance = (rootPos - enemyRoot.Position).Magnitude
+                    if distance <= ATTACK_RANGE then
+                        table.insert(targets, {enemy = enemy, distance = distance})
+                    end
+                end
+            end
+
+            if #targets == 0 then return end
+
+            table.sort(targets, function(a, b)
+                return a.distance < b.distance
+            end)
+
+            local finalTargets = {}
+            local limit = math.min(MAX_TARGETS, #targets)
+
+            for i = 1, limit do
+                finalTargets[i] = targets[i].enemy
+            end
+
+            combatRemote:FireServer("s", "Attack", 2)
+            combatRemote:FireServer("h", 2, finalTargets)
+
+        end)
+
+    else
+        if attackConnection then
+            attackConnection:Disconnect()
+            attackConnection = nil
+        end
+    end
+
+end)
+
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+
+local LocalPlayer = Players.LocalPlayer
+local EnemiesFolder = workspace:WaitForChild("Enemies")
+
+local TPConnection
+
+Tabs.Main:CreateToggle("TPEnemy", {
+    Title = "TP To Selected Enemy",
+    Default = false
+}):OnChanged(function(state)
+
+    if state then
+        TPConnection = RunService.Heartbeat:Connect(function()
+
+            local character = LocalPlayer.Character
+            if not character then return end
+
+            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+            if not humanoidRootPart then return end
+
+            local selectedEnemy = EnemyDropdown.Value
+            if not selectedEnemy then return end
+
+            local enemyModel = EnemiesFolder:FindFirstChild(selectedEnemy)
+            if not enemyModel then return end
+
+            local enemyHRP = enemyModel:FindFirstChild("HumanoidRootPart")
+            if not enemyHRP then return end
+
+            humanoidRootPart.CFrame =
+                enemyHRP.CFrame * CFrame.new(0, 10, 0)
+
+        end)
+
+    else
+        if TPConnection then
+            TPConnection:Disconnect()
+            TPConnection = nil
+        end
+    end
+
+end)
+
+local EnemyDropdown = Tabs.mainTab:CreateDropdown("Select Enemy", {
+    Title = "Select Enemy",
+    Values = {
+        "Bandit",
+        "Boar",
+        "Brambleback",
+        "Chicken",
+        "Dark Elf",
+        "Druid",
+        "Eldershroom",
+        "Funglet",
+        "Giant Snail",
+        "Husk",
+        "Mushroom Lancer",
+        "Skeleton",
+        "Slime",
+        "Snow Goblin",
+        "Thief",
+        "Twigling"
+    },
+    Default = "Bandit"
+})
+
+Tabs.mainTab:CreateButton({
+    Title = "Anti AFK",
+    Description = "Helps you to not get kicked.",
+    Callback = function()
+        game:GetService('Players').LocalPlayer.Idled:Connect(function()
+            game:GetService('VirtualUser'):CaptureController()
+            game:GetService('VirtualUser'):ClickButton2(Vector2.new())
+        end)
+
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Anti-AFK",
+            Text = "Anti-AFK is now enabled!",
+            Duration = 3
+        })
+    end
+})
+
+Tabs.mainTab:CreateButton({
+    Title = "Anti Lag",
+    Description = "Decrease quality to not lag.",
+    Callback = function()
+        local Lighting = game:GetService("Lighting")
+        local RunService = game:GetService("RunService")
+        local Terrain = workspace:FindFirstChildWhichIsA("Terrain")
+
+        if Terrain then
+            Terrain.WaterWaveSize = 0
+            Terrain.WaterWaveSpeed = 0
+            Terrain.WaterReflectance = 0
+            Terrain.WaterTransparency = 1
+        end
+
+        Lighting.GlobalShadows = false
+        Lighting.FogStart = 9e9
+        Lighting.FogEnd = 9e9
+        settings().Rendering.QualityLevel = 1
+
+        for _, v in pairs(game:GetDescendants()) do
+            if v:IsA("BasePart") then
+                v.CastShadow = false
+                v.Material = "Plastic"
+                v.Reflectance = 0
+                v.BackSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.BottomSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.FrontSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.LeftSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.RightSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.TopSurface = Enum.SurfaceType.SmoothNoOutlines
+            elseif v:IsA("Decal") then
+                v.Transparency = 1
+                v.Texture = ""
+            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                v.Lifetime = NumberRange.new(0)
+            end
+        end
+
+        for _, v in pairs(Lighting:GetDescendants()) do
+            if v:IsA("PostEffect") then
+                v.Enabled = false
+            end
+        end
+
+        workspace.DescendantAdded:Connect(function(child)
+            task.spawn(function()
+                if child:IsA("ForceField") or child:IsA("Sparkles") or child:IsA("Smoke") or child:IsA("Fire") or child:IsA("Beam") then
+                    RunService.Heartbeat:Wait()
+                    child:Destroy()
+                elseif child:IsA("BasePart") then
+                    child.CastShadow = false
+                end
+            end)
+        end)
+    end
+})
+
+--------------------------------------------------
+-- important stuff
+--------------------------------------------------
+
+SaveManager:SetLibrary(Library)
+InterfaceManager:SetLibrary(Library)
+
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+
+InterfaceManager:SetFolder("FluentEventsHub")
+SaveManager:SetFolder("FluentEventsHub/SpecificGame")
+
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+
+Window:SelectTab(1)
+Library:Notify{Title = "Fluent", Content = "Script loaded successfully!", Duration = 8}
+SaveManager:LoadAutoloadConfig()
