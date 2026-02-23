@@ -1,0 +1,14 @@
+local a=Vector3.new(129,12,855)local b=Vector3.new(115,470,2482)local d=100
+local n={"Union","wall","base","Fake Skybox","particles_DORfic","Model","Futuristic Desk","Futuristic Rounded Fish Tank","MovingSeaweed","SeaStuffs","Waterfall","C Sofa","Hill","Meshes/potbubbles","Meshes/slime (2)","Meshes/t-Water aura","Meshes/vaizel"}
+local c={UnionOperation=true,MeshPart=true}
+local function p(x)if not x:IsA("BasePart")then return false end return(x.Position-a).Magnitude<=d or(x.Position-b).Magnitude<=d end
+local function f(x)local o=workspace:FindFirstChild(x)if o then for _,v in ipairs(o:GetDescendants())do v:Destroy()end o:Destroy()end end
+f("Folder")f(" ")
+for _,v in ipairs(workspace:GetDescendants())do
+if v and v.Parent then
+if table.find(n,v.Name)or c[v.ClassName]then v:Destroy()
+elseif v:IsA("Part")and not p(v)then v:Destroy()
+elseif v:IsA("BasePart")and not p(v)then v:Destroy()
+end
+end
+end
