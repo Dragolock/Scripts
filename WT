@@ -4,7 +4,7 @@ local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercon
 
 local Window = Library:Window{
     Title = "CHub - Waste Time",
-    SubTitle = "By secret",
+    SubTitle = "By ??? :)",
     TabWidth = 100,
     Size =  UDim2.fromOffset(400, 300),
     Resize = false, 
@@ -14,82 +14,293 @@ local Window = Library:Window{
 
 local Tabs = {
     mainTab = Window:CreateTab{Title = "Main Game", Icon = "phosphor-sword-bold"},
+    zones = Window:CreateTab{Title = "Zones", Icon = "phosphor-sword-bold"},
+    performance = Window:CreateTab{Title = "Performance", Icon = "phosphor-sword-bold"},
     Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
 }
 
 local Options = Library.Options
 
-Tabs.mainTab:CreateToggle("BestAreaBrainrot", {
-    Title = "Best Area Brainrot",
+Tabs.mainTab:CreateToggle("AutomateEverything", {
+    Title = "Automate Everything",
     Default = false
-})
-:OnChanged(function(state)
+}):OnChanged(function(state)
     if not state then return end
 
-    local Players = game:GetService("Players")
-    local player = Players.LocalPlayer
-
-    local TELEPORT_POSITION = Vector3.new(39, 7, 57)
-    local ZONE_FOLDER_NAME = "Zone13"
-    local WAIT_TIME = 0.2
-
-    local zoneFolder = workspace:WaitForChild(ZONE_FOLDER_NAME)
-
-    local character = player.Character or player.CharacterAdded:Wait()
-    local hrp = character:WaitForChild("HumanoidRootPart")
-
-    player.CharacterAdded:Connect(function(c)
-        character = c
-        hrp = c:WaitForChild("HumanoidRootPart")
-    end)
-
-    local function teleportTo(position)
-        if hrp then
-            hrp.CFrame = CFrame.new(position)
-        end
-    end
-
-    local function firePromptsInPart(part)
-        for _, descendant in ipairs(part:GetDescendants()) do
-            if descendant:IsA("ProximityPrompt") then
-                fireproximityprompt(descendant)
-            end
-        end
-    end
-
-    local function getRandomPart()
-        local parts = {}
-        for _, obj in ipairs(zoneFolder:GetChildren()) do
-            if obj:IsA("BasePart") then
-                table.insert(parts, obj)
-            end
-        end
-        if #parts == 0 then
-            return nil
-        end
-        return parts[math.random(1, #parts)]
-    end
-
     task.spawn(function()
-        while Options.BestAreaBrainrot.Value do
-            local randomPart = getRandomPart()
+        local Players = game:GetService("Players")
+        local RunService = game:GetService("RunService")
+        local player = Players.LocalPlayer
+        local target = CFrame.new(16, 4, 1)
+        local hrp
 
-            if randomPart then
-                teleportTo(randomPart.Position)
-                task.wait(WAIT_TIME)
-
-                firePromptsInPart(randomPart)
-
-                teleportTo(TELEPORT_POSITION)
-                task.wait(WAIT_TIME)
-            else
-                task.wait(1)
-            end
+        local function setChar(char)
+            hrp = char:WaitForChild("HumanoidRootPart")
         end
+
+        setChar(player.Character or player.CharacterAdded:Wait())
+        player.CharacterAdded:Connect(setChar)
+
+        local hb
+        hb = RunService.Heartbeat:Connect(function()
+            if not Options.AutomateEverything.Value then
+                hb:Disconnect()
+                return
+            end
+            if hrp then
+                hrp.CFrame = target
+            end
+        end)
+
+        task.spawn(function()
+            local delayTime = 0.05
+            local targets = { n = true, Clicks = true }
+
+            while Options.AutomateEverything.Value do
+                for _, v in ipairs(workspace:GetDescendants()) do
+                    if v:IsA("ClickDetector") and targets[v.Parent and v.Parent.Name] then
+                        pcall(fireclickdetector, v)
+                    end
+                end
+                task.wait(delayTime)
+            end
+        end)
+
+        task.spawn(function()
+            while Options.AutomateEverything.Value do
+                local zone = workspace:FindFirstChild("aurorazone", true)
+                if zone and hrp then
+                    zone.CFrame = hrp.CFrame
+                end
+                task.wait(5)
+            end
+        end)
     end)
 end)
 
-Tabs.mainTab:CreateButton({
+Tabs.mainTab:CreateToggle("ClickAnywhere", {
+    Title = "Click Both Buttons Anywhere",
+    Default = false
+})
+:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+
+            local CLICK_DELAY = 0.05
+            local TARGET_NAMES = {
+                ["n"] = true,
+                ["Clicks"] = true
+            }
+
+            while Options.ClickAnywhere.Value do
+                for _, obj in ipairs(workspace:GetDescendants()) do
+                    if obj:IsA("ClickDetector") then
+                        local parent = obj.Parent
+                        if parent and TARGET_NAMES[parent.Name] then
+                            pcall(function()
+                                fireclickdetector(obj)
+                            end)
+                        end
+                    end
+                end
+                task.wait(CLICK_DELAY)
+            end
+
+        end)
+    end
+end)
+
+Tabs.mainTab:CreateToggle("TPConverter", {
+    Title = "TP Converter",
+    Default = false
+}):OnChanged(function(state)
+    if not state then return end
+
+    task.spawn(function()
+        local Players = game:GetService("Players")
+        local RunService = game:GetService("RunService")
+        local player = Players.LocalPlayer
+        local target = CFrame.new(16, 4, 1)
+        local hrp
+
+        local function setCharacter(char)
+            hrp = char:WaitForChild("HumanoidRootPart")
+        end
+
+        setCharacter(player.Character or player.CharacterAdded:Wait())
+        player.CharacterAdded:Connect(setCharacter)
+
+        local connection
+        connection = RunService.Heartbeat:Connect(function()
+            if not Options.TPConverter.Value then
+                connection:Disconnect()
+                return
+            end
+            if hrp then
+                hrp.CFrame = target
+            end
+        end)
+    end)
+end)
+
+local noteAutoAll = Tabs.mainTab:Paragraph("AutoAllNote", {
+    Title = "Note",
+    Content = "Automate Everything TP's to converter / Clicks both buttons every 0.05s / TP's x67 zone into your hitbox.",
+    TitleAlignment = "Middle",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
+
+local TPZoneDropdown = Tabs.zones:CreateDropdown("TPZoneSelect", {
+    Title = "Select Zone",
+    Values = {
+        "Aero",
+        "Aqua",
+        "Metro",
+        "Dorfic",
+        "Aurora"
+    },
+    Default = "Aero"
+})
+
+Tabs.zones:CreateButton({
+    Title = "TP Zone",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+        local selectedZone = TPZoneDropdown.Value
+        local targetPosition
+
+        if selectedZone == "Aero" then
+            targetPosition = Vector3.new(79, 8, 13)
+        elseif selectedZone == "Aqua" then
+            targetPosition = Vector3.new(-902, 9, -1)
+        elseif selectedZone == "Metro" then
+            targetPosition = Vector3.new(129, 17, 855)
+        elseif selectedZone == "Dorfic" then
+            targetPosition = Vector3.new(-1112, 475, 903)
+        elseif selectedZone == "Aurora" then
+            targetPosition = Vector3.new(115, 475, 2482)
+        end
+
+        if targetPosition then
+            humanoidRootPart.CFrame = CFrame.new(targetPosition)
+        end
+    end
+})
+
+local GiveBoostDropdown = Tabs.zones:CreateDropdown("GiveBoostSelect", {
+    Title = "Give Boost",
+    Values = {
+        "Aqua Zone",
+        "Metro Zone",
+        "Dorfic Zone",
+        "Aurora Zone"
+    },
+    Default = "Aqua Zone"
+})
+
+Tabs.zones:CreateButton{
+    Title = "Give Boost",
+    Description = "Teleports selected zone into your hitbox",
+    Callback = function()
+
+        local selectedZone = GiveBoostDropdown.Value
+        local zoneName = "aurorazone" -- default
+
+        if selectedZone == "Aqua Zone" then
+            zoneName = "aquazone"
+
+        elseif selectedZone == "Metro Zone" then
+            zoneName = "metrozone"
+
+        elseif selectedZone == "Dorfic Zone" then
+            zoneName = "dorficzone"
+
+        elseif selectedZone == "Aurora Zone" then
+            zoneName = "aurorazone"
+        end
+
+        local zonePart = workspace:FindFirstChild(zoneName, true)
+        local root = game.Players.LocalPlayer.Character 
+            and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+
+        if zonePart and root then
+            zonePart.CFrame = root.CFrame
+        end
+
+    end
+}
+
+Tabs.zones:CreateButton({
+    Title = "TP Chapter 2",
+    Callback = function()
+
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+        local targetPosition = Vector3.new(-408.781677, 17.1923866, -1.96728301)
+
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            if obj:IsA("BasePart") and obj.Name == "Part" then
+                if (obj.Position - targetPosition).Magnitude < 5 then
+                    firetouchinterest(humanoidRootPart, obj, 0)
+                    firetouchinterest(humanoidRootPart, obj, 1)
+                    break
+                end
+            end
+        end
+
+    end
+})
+
+Tabs.performance:CreateButton{
+    Title = "Hide Other Players",
+    Description = "Makes all other players invisible + removes NameplateGui",
+    Callback = function()
+
+        local Players = game:GetService("Players")
+        local LocalPlayer = Players.LocalPlayer
+
+        -- Hide players
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character then
+                local character = player.Character
+
+                for _, part in pairs(character:GetChildren()) do
+                    if part:IsA("BasePart") then
+                        part.Transparency = 1
+                        part.CanCollide = false
+                    end
+                end
+
+                for _, accessory in pairs(character:GetChildren()) do
+                    if accessory:IsA("Accessory") then
+                        local handle = accessory:FindFirstChild("Handle")
+                        if handle then
+                            handle.Transparency = 1
+                        end
+                    end
+                end
+
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+                end
+            end
+        end
+        for _, obj in ipairs(game:GetDescendants()) do
+            if obj.Name == "NameplateGui" then
+                obj:Destroy()
+            end
+        end
+
+    end
+}
+
+Tabs.performance:CreateButton({
     Title = "Anti AFK",
     Description = "Helps you to not get kicked.",
     Callback = function()
@@ -106,7 +317,7 @@ Tabs.mainTab:CreateButton({
     end
 })
 
-Tabs.mainTab:CreateButton({
+Tabs.performance:CreateButton({
     Title = "Anti Lag",
     Description = "Decrease quality to not lag.",
     Callback = function()
