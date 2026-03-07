@@ -373,68 +373,58 @@ Tabs.fruits:CreateButton{
     end
 }
 
-local Players = game:GetService("Players")
-local localPlayer = Players.LocalPlayer
+local player = game.Players.LocalPlayer
+local otherData = player:WaitForChild("OtherData")
+local fruitsFolder = otherData:WaitForChild("Fruits")
 
--- Wait for OtherData and Fruits folders to exist
-local function waitForFruitsFolder(player)
-    local otherData = player:WaitForChild("OtherData", 5)
-    if not otherData then return nil end
-    local fruitsFolder = otherData:WaitForChild("Fruits", 5)
-    return fruitsFolder
+-- one paragraph per fruit
+local lemonPara = Tabs.stats:AddParagraph({
+    Title = "Lemons",
+    Content = "Loading..."
+})
+
+local limePara = Tabs.stats:AddParagraph({
+    Title = "Limes",
+    Content = "Loading..."
+})
+
+local orangePara = Tabs.stats:AddParagraph({
+    Title = "Oranges",
+    Content = "Loading..."
+})
+
+local tangerinePara = Tabs.stats:AddParagraph({
+    Title = "Tangerines",
+    Content = "Loading..."
+})
+
+-- helper: safe get IntValue
+local function getFruitValue(name)
+    local fruit = fruitsFolder:FindFirstChild(name)
+    return (fruit and fruit.Value) or 0
 end
 
--- Create paragraphs under Stats tab
-local LemonsParagraph = Tabs.stats:Paragraph("LemonsCount", {Title = "Lemons", Content = "", TitleAlignment = "Middle", ContentAlignment = Enum.TextXAlignment.Left})
-local LimesParagraph = Tabs.stats:Paragraph("LimesCount", {Title = "Limes", Content = "", TitleAlignment = "Middle", ContentAlignment = Enum.TextXAlignment.Left})
-local OrangesParagraph = Tabs.stats:Paragraph("OrangesCount", {Title = "Oranges", Content = "", TitleAlignment = "Middle", ContentAlignment = Enum.TextXAlignment.Left})
-local TangerinesParagraph = Tabs.stats:Paragraph("TangerinesCount", {Title = "Tangerines", Content = "", TitleAlignment = "Middle", ContentAlignment = Enum.TextXAlignment.Left})
-
-local fruitMap = {
-    Lemons = LemonsParagraph,
-    Limes = LimesParagraph,
-    Oranges = OrangesParagraph,
-    Tangerines = TangerinesParagraph
-}
-
--- Helper to get ValueBase safely
-local function getValue(folder, name)
-    local stat = folder:FindFirstChild(name)
-    if stat and stat:IsA("ValueBase") then
-        return stat.Value
-    end
-    return 0
-end
-
--- Update all paragraphs
 local function updateFruitParagraphs()
-    local fruitsFolder = waitForFruitsFolder(localPlayer)
-    if not fruitsFolder then
-        for _, p in pairs(fruitMap) do
-            if p.Update then p:Update({Content = "N/A"}) 
-            elseif p.SetText then p:SetText("N/A") end
-        end
-        return
-    end
+    local lemons     = getFruitValue("Lemons")
+    local limes      = getFruitValue("Limes")
+    local oranges    = getFruitValue("Oranges")
+    local tangerines = getFruitValue("Tangerines")
 
-    for fruitName, paragraph in pairs(fruitMap) do
-        local value = getValue(fruitsFolder, fruitName)
-        if paragraph.Update then
-            paragraph:Update({Content = tostring(value)})
-        elseif paragraph.SetText then
-            paragraph:SetText(tostring(value))
-        end
-    end
+    -- in Fluent, Paragraph objects have a SetContent method
+    lemonPara:SetContent("Amount: " .. lemons)
+    limePara:SetContent("Amount: " .. limes)
+    orangePara:SetContent("Amount: " .. oranges)
+    tangerinePara:SetContent("Amount: " .. tangerines)
 end
 
--- Manual refresh button
-Tabs.stats:CreateButton({
+-- manual refresh button
+Tabs.stats:AddButton({
     Title = "Refresh Fruits",
     Description = "Manually refresh fruit amounts",
     Callback = updateFruitParagraphs
 })
 
--- Auto-refresh every 3 seconds
+-- auto-refresh every 3 seconds
 task.spawn(function()
     while true do
         updateFruitParagraphs()
@@ -442,49 +432,8 @@ task.spawn(function()
     end
 end)
 
-Tabs.performance:CreateButton{
-    Title = "Hide Other Players",
-    Description = "Makes all other players invisible + removes NameplateGui",
-    Callback = function()
+updateFruitParagraphs()
 
-        local Players = game:GetService("Players")
-        local LocalPlayer = Players.LocalPlayer
-
-        -- Hide players
-        for _, player in pairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character then
-                local character = player.Character
-
-                for _, part in pairs(character:GetChildren()) do
-                    if part:IsA("BasePart") then
-                        part.Transparency = 1
-                        part.CanCollide = false
-                    end
-                end
-
-                for _, accessory in pairs(character:GetChildren()) do
-                    if accessory:IsA("Accessory") then
-                        local handle = accessory:FindFirstChild("Handle")
-                        if handle then
-                            handle.Transparency = 1
-                        end
-                    end
-                end
-
-                local humanoid = character:FindFirstChildOfClass("Humanoid")
-                if humanoid then
-                    humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
-                end
-            end
-        end
-        for _, obj in ipairs(game:GetDescendants()) do
-            if obj.Name == "NameplateGui" then
-                obj:Destroy()
-            end
-        end
-
-    end
-}
 
 Tabs.performance:CreateButton({
     Title = "Anti AFK",
