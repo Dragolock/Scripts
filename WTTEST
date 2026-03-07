@@ -375,44 +375,40 @@ Tabs.fruits:CreateButton{
 
 local Players = game:GetService("Players")
 local localPlayer = Players.LocalPlayer
-local playerFolder = workspace:FindFirstChild(localPlayer.Name)
-
-if not playerFolder then
-    warn(localPlayer.Name .. " not found in workspace.")
-    return
-end
+local playerFolder = localPlayer
+task.wait(5)
 
 local LemonsParagraph = Tabs.stats:Paragraph("LemonsCount", {
     Title = "Lemons",
-    Content = "Loading...",
+    Content = "",
     TitleAlignment = "Middle",
     ContentAlignment = Enum.TextXAlignment.Left
 })
 
 local LimesParagraph = Tabs.stats:Paragraph("LimesCount", {
     Title = "Limes",
-    Content = "Loading...",
+    Content = "",
     TitleAlignment = "Middle",
     ContentAlignment = Enum.TextXAlignment.Left
 })
 
 local OrangesParagraph = Tabs.stats:Paragraph("OrangesCount", {
     Title = "Oranges",
-    Content = "Loading...",
+    Content = "",
     TitleAlignment = "Middle",
     ContentAlignment = Enum.TextXAlignment.Left
 })
 
 local TangerinesParagraph = Tabs.stats:Paragraph("TangerinesCount", {
     Title = "Tangerines",
-    Content = "Loading...",
+    Content = "",
     TitleAlignment = "Middle",
     ContentAlignment = Enum.TextXAlignment.Left
 })
 
-local function getValue(folder, name)
+local function getValue(folder, statName)
     if folder then
-        local stat = folder:FindFirstChild(name)
+        local stat = folder:FindFirstChild(statName)
         if stat and stat:IsA("ValueBase") then
             return stat.Value
         end
@@ -423,16 +419,6 @@ end
 local function updateFruitParagraphs()
     local otherData = playerFolder:FindFirstChild("OtherData")
     local fruitsFolder = otherData and otherData:FindFirstChild("Fruits")
-    if not fruitsFolder then
-        for _, p in pairs({LemonsParagraph, LimesParagraph, OrangesParagraph, TangerinesParagraph}) do
-            if p.Update then
-                p:Update({Content = "N/A"})
-            elseif p.SetText then
-                p:SetText("N/A")
-            end
-        end
-        return
-    end
 
     local fruitMap = {
         Lemons = LemonsParagraph,
@@ -442,7 +428,7 @@ local function updateFruitParagraphs()
     }
 
     for fruitName, paragraph in pairs(fruitMap) do
-        local value = getValue(fruitsFolder, fruitName)
+        local value = fruitsFolder and getValue(fruitsFolder, fruitName) or "N/A"
         if paragraph.Update then
             paragraph:Update({Content = tostring(value)})
         elseif paragraph.SetText then
@@ -452,10 +438,17 @@ local function updateFruitParagraphs()
 end
 
 Tabs.stats:CreateButton({
-    Title = "Refresh Stats",
+    Title = "Refresh Fruits",
     Description = "Manually refresh fruit amounts",
     Callback = updateFruitParagraphs
 })
+
+task.spawn(function()
+    while true do
+        updateFruitParagraphs()
+        task.wait(3)
+    end
+end)
 
 task.spawn(function()
     while true do
