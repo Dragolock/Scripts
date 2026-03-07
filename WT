@@ -170,7 +170,7 @@ local ZonePositions = {
     ["Metro"] = Vector3.new(129, 17, 855),
     ["Dorfic"] = Vector3.new(-1112, 475, 903),
     ["Aurora"] = Vector3.new(115, 475, 2482),
-    ["Central"] = Vector3.new(1599, 496, 2530)
+    ["Central"] = Vector3.new(1599, 400, 2530)
 }
 
 Tabs.zones:CreateButton({
