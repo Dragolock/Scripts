@@ -15,6 +15,7 @@ local Window = Library:Window{
 local Tabs = {
     mainTab = Window:CreateTab{Title = "Main Game", Icon = "phosphor-sword-bold"},
     zones = Window:CreateTab{Title = "Zones", Icon = "phosphor-sword-bold"},
+    fruits = Window:CreateTab{Title = "Fruits", Icon = "phosphor-sword-bold"},
     performance = Window:CreateTab{Title = "Performance", Icon = "phosphor-sword-bold"},
     Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
 }
@@ -157,10 +158,20 @@ local TPZoneDropdown = Tabs.zones:CreateDropdown("TPZoneSelect", {
         "Aqua",
         "Metro",
         "Dorfic",
-        "Aurora"
+        "Aurora",
+        "Central"
     },
     Default = "Aero"
 })
+
+local ZonePositions = {
+    ["Aero"] = Vector3.new(79, 8, 13),
+    ["Aqua"] = Vector3.new(-902, 9, -1),
+    ["Metro"] = Vector3.new(129, 17, 855),
+    ["Dorfic"] = Vector3.new(-1112, 475, 903),
+    ["Aurora"] = Vector3.new(115, 475, 2482),
+    ["Central"] = Vector3.new(1599, 496, 2530)
+}
 
 Tabs.zones:CreateButton({
     Title = "TP Zone",
@@ -169,20 +180,7 @@ Tabs.zones:CreateButton({
         local character = player.Character or player.CharacterAdded:Wait()
         local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
-        local selectedZone = TPZoneDropdown.Value
-        local targetPosition
-
-        if selectedZone == "Aero" then
-            targetPosition = Vector3.new(79, 8, 13)
-        elseif selectedZone == "Aqua" then
-            targetPosition = Vector3.new(-902, 9, -1)
-        elseif selectedZone == "Metro" then
-            targetPosition = Vector3.new(129, 17, 855)
-        elseif selectedZone == "Dorfic" then
-            targetPosition = Vector3.new(-1112, 475, 903)
-        elseif selectedZone == "Aurora" then
-            targetPosition = Vector3.new(115, 475, 2482)
-        end
+        local targetPosition = ZonePositions[TPZoneDropdown.Value]
 
         if targetPosition then
             humanoidRootPart.CFrame = CFrame.new(targetPosition)
@@ -196,31 +194,26 @@ local GiveBoostDropdown = Tabs.zones:CreateDropdown("GiveBoostSelect", {
         "Aqua Zone",
         "Metro Zone",
         "Dorfic Zone",
-        "Aurora Zone"
+        "Aurora Zone",
+        "Central Zone"
     },
     Default = "Aqua Zone"
 })
+
+local ZoneParts = {
+    ["Aqua Zone"] = "aquazone",
+    ["Metro Zone"] = "metrozone",
+    ["Dorfic Zone"] = "dorficzone",
+    ["Aurora Zone"] = "aurorazone",
+    ["Central Zone"] = "centralzone"
+}
 
 Tabs.zones:CreateButton{
     Title = "Give Boost",
     Description = "Teleports selected zone into your hitbox",
     Callback = function()
-
         local selectedZone = GiveBoostDropdown.Value
-        local zoneName = "aurorazone" -- default
-
-        if selectedZone == "Aqua Zone" then
-            zoneName = "aquazone"
-
-        elseif selectedZone == "Metro Zone" then
-            zoneName = "metrozone"
-
-        elseif selectedZone == "Dorfic Zone" then
-            zoneName = "dorficzone"
-
-        elseif selectedZone == "Aurora Zone" then
-            zoneName = "aurorazone"
-        end
+        local zoneName = ZoneParts[selectedZone] or "centralzone"
 
         local zonePart = workspace:FindFirstChild(zoneName, true)
         local root = game.Players.LocalPlayer.Character 
@@ -229,7 +222,6 @@ Tabs.zones:CreateButton{
         if zonePart and root then
             zonePart.CFrame = root.CFrame
         end
-
     end
 }
 
@@ -255,6 +247,123 @@ Tabs.zones:CreateButton({
 
     end
 })
+
+Tabs.fruits:CreateToggle("UpgradeOranges", {
+    Title = "Upgrade Oranges",
+    Default = false
+})
+:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            while Options.UpgradeOranges.Value do
+                pcall(function()
+                    game:GetService("ReplicatedStorage"):WaitForChild("FruitEvents"):WaitForChild("Oranges"):FireServer()
+                end)
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+Tabs.fruits:CreateToggle("UpgradeTangerines", {
+    Title = "Upgrade Tangerines",
+    Default = false
+})
+:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            while Options.UpgradeTangerines.Value do
+                pcall(function()
+                    game:GetService("ReplicatedStorage"):WaitForChild("FruitEvents"):WaitForChild("Tangerines"):FireServer()
+                end)
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+Tabs.fruits:CreateToggle("UpgradeLemons", {
+    Title = "Upgrade Lemons",
+    Default = false
+})
+:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            while Options.UpgradeLemons.Value do
+                pcall(function()
+                    game:GetService("ReplicatedStorage"):WaitForChild("FruitEvents"):WaitForChild("Lemons"):FireServer()
+                end)
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+Tabs.fruits:CreateToggle("UpgradeLimes", {
+    Title = "Upgrade Limes",
+    Default = false
+})
+:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            while Options.UpgradeLimes.Value do
+                pcall(function()
+                    game:GetService("ReplicatedStorage"):WaitForChild("FruitEvents"):WaitForChild("Limes"):FireServer()
+                end)
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+Tabs.fruits:CreateToggle("UpgradeEverything", {
+    Title = "Upgrade Everything",
+    Default = false
+})
+:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            while Options.UpgradeEverything.Value do
+                pcall(function()
+                    local FruitEvents = game:GetService("ReplicatedStorage"):WaitForChild("FruitEvents")
+
+                    FruitEvents:WaitForChild("Oranges"):FireServer()
+                    FruitEvents:WaitForChild("Tangerines"):FireServer()
+                    FruitEvents:WaitForChild("Lemons"):FireServer()
+                    FruitEvents:WaitForChild("Limes"):FireServer()
+                end)
+
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+Tabs.fruits:CreateButton{
+    Title = "TP Fruit Upgraders",
+    Description = "Teleport to Fruit Upgraders",
+    Callback = function()
+        local root = game.Players.LocalPlayer.Character 
+            and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+
+        if root then
+            root.CFrame = CFrame.new(-1152, 514, 849)
+        end
+    end
+}
+
+Tabs.fruits:CreateButton{
+    Title = "TP Lime Upgrader",
+    Description = "Teleport to Lime Upgrader",
+    Callback = function()
+        local root = game.Players.LocalPlayer.Character 
+            and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+
+        if root then
+            root.CFrame = CFrame.new(1542, 400, 2525)
+        end
+    end
+}
 
 Tabs.performance:CreateButton{
     Title = "Hide Other Players",
