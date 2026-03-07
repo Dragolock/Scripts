@@ -8,6 +8,7 @@ local Window = Library:Window{
     TabWidth = 100,
     Size =  UDim2.fromOffset(400, 300),
     Resize = false, 
+    Acrylic = true,
     Theme = "United GNOME",
     MinimizeKey = Enum.KeyCode.LeftShift
 }
@@ -373,67 +374,57 @@ Tabs.fruits:CreateButton{
     end
 }
 
-local player = game.Players.LocalPlayer
-local otherData = player:WaitForChild("OtherData")
-local fruitsFolder = otherData:WaitForChild("Fruits")
+local Players = game:GetService("Players")
+local localPlayer = Players.LocalPlayer
+task.wait(2)
 
--- one paragraph per fruit
-local lemonPara = Tabs.stats:AddParagraph({
-    Title = "Lemons",
-    Content = "Loading..."
-})
-
-local limePara = Tabs.stats:AddParagraph({
-    Title = "Limes",
-    Content = "Loading..."
-})
-
-local orangePara = Tabs.stats:AddParagraph({
-    Title = "Oranges",
-    Content = "Loading..."
-})
-
-local tangerinePara = Tabs.stats:AddParagraph({
-    Title = "Tangerines",
-    Content = "Loading..."
-})
-
--- helper: safe get IntValue
-local function getFruitValue(name)
-    local fruit = fruitsFolder:FindFirstChild(name)
-    return (fruit and fruit.Value) or 0
+local function getValue(folder, name)
+    local stat = folder:FindFirstChild(name)
+    if stat and stat:IsA("ValueBase") then
+        return stat.Value
+    end
+    return 0
 end
 
-local function updateFruitParagraphs()
-    local lemons     = getFruitValue("Lemons")
-    local limes      = getFruitValue("Limes")
-    local oranges    = getFruitValue("Oranges")
-    local tangerines = getFruitValue("Tangerines")
-
-    -- in Fluent, Paragraph objects have a SetContent method
-    lemonPara:SetContent("Amount: " .. lemons)
-    limePara:SetContent("Amount: " .. limes)
-    orangePara:SetContent("Amount: " .. oranges)
-    tangerinePara:SetContent("Amount: " .. tangerines)
+local function waitForFruitsFolder(player)
+    local otherData = player:WaitForChild("OtherData", 5)
+    if not otherData then return nil end
+    local fruitsFolder = otherData:WaitForChild("Fruits", 5)
+    return fruitsFolder
 end
 
--- manual refresh button
-Tabs.stats:AddButton({
+local fruitNames = {"Lemons", "Limes", "Oranges", "Tangerines"}
+local fruitButtons = {}
+
+for _, fruit in ipairs(fruitNames) do
+    local btn = Tabs.stats:CreateButton({
+        Title = fruit .. " = 0", -- initial text
+        Description = "Amount of " .. fruit,
+        Callback = function() end -- no action on click
+    })
+    fruitButtons[fruit] = btn
+end
+
+local function updateFruitButtons()
+    local fruitsFolder = waitForFruitsFolder(localPlayer)
+    for fruitName, btn in pairs(fruitButtons) do
+        local value = fruitsFolder and getValue(fruitsFolder, fruitName) or "N/A"
+        btn:SetValue(fruitName .. " = " .. tostring(value))
+    end
+end
+
+Tabs.stats:CreateButton({
     Title = "Refresh Fruits",
     Description = "Manually refresh fruit amounts",
-    Callback = updateFruitParagraphs
+    Callback = updateFruitButtons
 })
 
--- auto-refresh every 3 seconds
 task.spawn(function()
     while true do
-        updateFruitParagraphs()
+        updateFruitButtons()
         task.wait(3)
     end
 end)
-
-updateFruitParagraphs()
-
 
 Tabs.performance:CreateButton({
     Title = "Anti AFK",
