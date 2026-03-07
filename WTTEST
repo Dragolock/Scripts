@@ -6,7 +6,7 @@ local Window = Library:Window{
     Title = "CHub - Waste Time",
     SubTitle = "By ??? :)",
     TabWidth = 100,
-    Size =  UDim2.fromOffset(400, 300),
+    Size =  UDim2.fromOffset(450, 375),
     Resize = false, 
     Acrylic = true,
     Theme = "United GNOME",
@@ -376,7 +376,18 @@ Tabs.fruits:CreateButton{
 
 local Players = game:GetService("Players")
 local localPlayer = Players.LocalPlayer
-task.wait(2)
+
+local LemonsParagraph = Tabs.stats:CreateParagraph("LemonsCount", {Title = "Lemons", Content = "", TitleAlignment = "Middle", ContentAlignment = Enum.TextXAlignment.Middle})
+local LimesParagraph = Tabs.stats:CreateParagraph("LimesCount", {Title = "Limes", Content = "", TitleAlignment = "Middle", ContentAlignment = Enum.TextXAlignment.Middle})
+local OrangesParagraph = Tabs.stats:CreateParagraph("OrangesCount", {Title = "Oranges", Content = "", TitleAlignment = "Middle", ContentAlignment = Enum.TextXAlignment.Middle})
+local TangerinesParagraph = Tabs.stats:CreateParagraph("TangerinesCount", {Title = "Tangerines", Content = "", TitleAlignment = "Middle", ContentAlignment = Enum.TextXAlignment.Middle})
+
+local fruitMap = {
+    Lemons = LemonsParagraph,
+    Limes = LimesParagraph,
+    Oranges = OrangesParagraph,
+    Tangerines = TangerinesParagraph
+}
 
 local function getValue(folder, name)
     local stat = folder:FindFirstChild(name)
@@ -393,35 +404,23 @@ local function waitForFruitsFolder(player)
     return fruitsFolder
 end
 
-local fruitNames = {"Lemons", "Limes", "Oranges", "Tangerines"}
-local fruitButtons = {}
-
-for _, fruit in ipairs(fruitNames) do
-    local btn = Tabs.stats:CreateButton({
-        Title = fruit .. " = 0", -- initial text
-        Description = "Amount of " .. fruit,
-        Callback = function() end -- no action on click
-    })
-    fruitButtons[fruit] = btn
-end
-
-local function updateFruitButtons()
+local function updateFruitParagraphs()
     local fruitsFolder = waitForFruitsFolder(localPlayer)
-    for fruitName, btn in pairs(fruitButtons) do
+    for fruitName, paragraph in pairs(fruitMap) do
         local value = fruitsFolder and getValue(fruitsFolder, fruitName) or "N/A"
-        btn:SetValue(fruitName .. " = " .. tostring(value))
+        paragraph:SetValue(tostring(value))
     end
 end
 
 Tabs.stats:CreateButton({
     Title = "Refresh Fruits",
     Description = "Manually refresh fruit amounts",
-    Callback = updateFruitButtons
+    Callback = updateFruitParagraphs
 })
 
 task.spawn(function()
     while true do
-        updateFruitButtons()
+        updateFruitParagraphs()
         task.wait(3)
     end
 end)
