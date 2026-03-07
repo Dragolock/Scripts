@@ -373,56 +373,93 @@ Tabs.fruits:CreateButton{
     end
 }
 
-local FruitCountsParagraph = Tabs.stats:Paragraph("FruitCounts", {
-    Title = "Fruit Counts",
+local Players = game:GetService("Players")
+local localPlayer = Players.LocalPlayer
+local playerFolder = workspace:FindFirstChild(localPlayer.Name)
+
+if not playerFolder then
+    warn(localPlayer.Name .. " not found in workspace.")
+    return
+end
+
+local LemonsParagraph = Tabs.stats:Paragraph("LemonsCount", {
+    Title = "Lemons",
     Content = "Loading...",
     TitleAlignment = "Middle",
     ContentAlignment = Enum.TextXAlignment.Left
 })
 
-local function getFruitAmounts()
-    local player = game.Players.LocalPlayer
-    local otherData = player:FindFirstChild("OtherData")
-    if not otherData then return nil end
+local LimesParagraph = Tabs.stats:Paragraph("LimesCount", {
+    Title = "Limes",
+    Content = "Loading...",
+    TitleAlignment = "Middle",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
 
-    local fruitsFolder = otherData:FindFirstChild("Fruits")
-    if not fruitsFolder then return nil end
+local OrangesParagraph = Tabs.stats:Paragraph("OrangesCount", {
+    Title = "Oranges",
+    Content = "Loading...",
+    TitleAlignment = "Middle",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
 
-    local fruitNames = {"Lemons", "Limes", "Oranges", "Tangerines"}
-    local amounts = {}
+local TangerinesParagraph = Tabs.stats:Paragraph("TangerinesCount", {
+    Title = "Tangerines",
+    Content = "Loading...",
+    TitleAlignment = "Middle",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
 
-    for _, name in ipairs(fruitNames) do
-        local fruit = fruitsFolder:FindFirstChild(name)
-        amounts[name] = fruit and fruit.Value or 0
+local function getValue(folder, name)
+    if folder then
+        local stat = folder:FindFirstChild(name)
+        if stat and stat:IsA("ValueBase") then
+            return stat.Value
+        end
     end
-
-    return amounts
+    return 0
 end
 
-local function updateFruitParagraph()
-    local amounts = getFruitAmounts()
-    if not amounts then
-        FruitCountsParagraph:Set("Could not find fruit data")
+local function updateFruitParagraphs()
+    local otherData = playerFolder:FindFirstChild("OtherData")
+    local fruitsFolder = otherData and otherData:FindFirstChild("Fruits")
+    if not fruitsFolder then
+        for _, p in pairs({LemonsParagraph, LimesParagraph, OrangesParagraph, TangerinesParagraph}) do
+            if p.Update then
+                p:Update({Content = "N/A"})
+            elseif p.SetText then
+                p:SetText("N/A")
+            end
+        end
         return
     end
 
-    local content = string.format(
-        "Lemons: %d\nLimes: %d\nOranges: %d\nTangerines: %d",
-        amounts["Lemons"], amounts["Limes"], amounts["Oranges"], amounts["Tangerines"]
-    )
+    local fruitMap = {
+        Lemons = LemonsParagraph,
+        Limes = LimesParagraph,
+        Oranges = OrangesParagraph,
+        Tangerines = TangerinesParagraph
+    }
 
-    FruitCountsParagraph:Set(content)
+    for fruitName, paragraph in pairs(fruitMap) do
+        local value = getValue(fruitsFolder, fruitName)
+        if paragraph.Update then
+            paragraph:Update({Content = tostring(value)})
+        elseif paragraph.SetText then
+            paragraph:SetText(tostring(value))
+        end
+    end
 end
 
 Tabs.stats:CreateButton({
-    Title = "Refresh Fruits",
+    Title = "Refresh Stats",
     Description = "Manually refresh fruit amounts",
-    Callback = updateFruitParagraph
+    Callback = updateFruitParagraphs
 })
 
 task.spawn(function()
     while true do
-        updateFruitParagraph()
+        updateFruitParagraphs()
         task.wait(3)
     end
 end)
