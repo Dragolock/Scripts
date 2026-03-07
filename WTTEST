@@ -375,60 +375,50 @@ Tabs.fruits:CreateButton{
 
 local Players = game:GetService("Players")
 local localPlayer = Players.LocalPlayer
-local playerFolder = localPlayer
-task.wait(5)
 
-local LemonsParagraph = Tabs.stats:Paragraph("LemonsCount", {
-    Title = "Lemons",
-    Content = "",
-    TitleAlignment = "Middle",
-    ContentAlignment = Enum.TextXAlignment.Left
-})
+-- Wait for OtherData and Fruits folders to exist
+local function waitForFruitsFolder(player)
+    local otherData = player:WaitForChild("OtherData", 5)
+    if not otherData then return nil end
+    local fruitsFolder = otherData:WaitForChild("Fruits", 5)
+    return fruitsFolder
+end
 
-local LimesParagraph = Tabs.stats:Paragraph("LimesCount", {
-    Title = "Limes",
-    Content = "",
-    TitleAlignment = "Middle",
-    ContentAlignment = Enum.TextXAlignment.Left
-})
+-- Create paragraphs under Stats tab
+local LemonsParagraph = Tabs.stats:Paragraph("LemonsCount", {Title = "Lemons", Content = "", TitleAlignment = "Middle", ContentAlignment = Enum.TextXAlignment.Left})
+local LimesParagraph = Tabs.stats:Paragraph("LimesCount", {Title = "Limes", Content = "", TitleAlignment = "Middle", ContentAlignment = Enum.TextXAlignment.Left})
+local OrangesParagraph = Tabs.stats:Paragraph("OrangesCount", {Title = "Oranges", Content = "", TitleAlignment = "Middle", ContentAlignment = Enum.TextXAlignment.Left})
+local TangerinesParagraph = Tabs.stats:Paragraph("TangerinesCount", {Title = "Tangerines", Content = "", TitleAlignment = "Middle", ContentAlignment = Enum.TextXAlignment.Left})
 
-local OrangesParagraph = Tabs.stats:Paragraph("OrangesCount", {
-    Title = "Oranges",
-    Content = "",
-    TitleAlignment = "Middle",
-    ContentAlignment = Enum.TextXAlignment.Left
-})
+local fruitMap = {
+    Lemons = LemonsParagraph,
+    Limes = LimesParagraph,
+    Oranges = OrangesParagraph,
+    Tangerines = TangerinesParagraph
+}
 
-local TangerinesParagraph = Tabs.stats:Paragraph("TangerinesCount", {
-    Title = "Tangerines",
-    Content = "",
-    TitleAlignment = "Middle",
-    ContentAlignment = Enum.TextXAlignment.Left
-})
-
-local function getValue(folder, statName)
-    if folder then
-        local stat = folder:FindFirstChild(statName)
-        if stat and stat:IsA("ValueBase") then
-            return stat.Value
-        end
+-- Helper to get ValueBase safely
+local function getValue(folder, name)
+    local stat = folder:FindFirstChild(name)
+    if stat and stat:IsA("ValueBase") then
+        return stat.Value
     end
     return 0
 end
 
+-- Update all paragraphs
 local function updateFruitParagraphs()
-    local otherData = playerFolder:FindFirstChild("OtherData")
-    local fruitsFolder = otherData and otherData:FindFirstChild("Fruits")
-
-    local fruitMap = {
-        Lemons = LemonsParagraph,
-        Limes = LimesParagraph,
-        Oranges = OrangesParagraph,
-        Tangerines = TangerinesParagraph
-    }
+    local fruitsFolder = waitForFruitsFolder(localPlayer)
+    if not fruitsFolder then
+        for _, p in pairs(fruitMap) do
+            if p.Update then p:Update({Content = "N/A"}) 
+            elseif p.SetText then p:SetText("N/A") end
+        end
+        return
+    end
 
     for fruitName, paragraph in pairs(fruitMap) do
-        local value = fruitsFolder and getValue(fruitsFolder, fruitName) or "N/A"
+        local value = getValue(fruitsFolder, fruitName)
         if paragraph.Update then
             paragraph:Update({Content = tostring(value)})
         elseif paragraph.SetText then
@@ -437,19 +427,14 @@ local function updateFruitParagraphs()
     end
 end
 
+-- Manual refresh button
 Tabs.stats:CreateButton({
     Title = "Refresh Fruits",
     Description = "Manually refresh fruit amounts",
     Callback = updateFruitParagraphs
 })
 
-task.spawn(function()
-    while true do
-        updateFruitParagraphs()
-        task.wait(3)
-    end
-end)
-
+-- Auto-refresh every 3 seconds
 task.spawn(function()
     while true do
         updateFruitParagraphs()
