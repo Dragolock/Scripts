@@ -1,0 +1,567 @@
+local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
+local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
+local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
+
+local Window = Library:Window{
+    Title = "CHub - Waste Time",
+    SubTitle = "By ??? :)",
+    TabWidth = 100,
+    Size =  UDim2.fromOffset(400, 300),
+    Resize = false, 
+    Theme = "United GNOME",
+    MinimizeKey = Enum.KeyCode.LeftShift
+}
+
+local Tabs = {
+    mainTab = Window:CreateTab{Title = "Main Game", Icon = "phosphor-sword-bold"},
+    zones = Window:CreateTab{Title = "Zones", Icon = "phosphor-sword-bold"},
+    fruits = Window:CreateTab{Title = "Fruits", Icon = "phosphor-sword-bold"},
+    stats = Window:CreateTab{Title = "Stats", Icon = "phosphor-sword-bold"},
+    performance = Window:CreateTab{Title = "Performance", Icon = "phosphor-sword-bold"},
+    Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
+}
+
+local Options = Library.Options
+
+Tabs.mainTab:CreateToggle("AutomateEverything", {
+    Title = "Automate Everything",
+    Default = false
+}):OnChanged(function(state)
+    if not state then return end
+
+    task.spawn(function()
+        local Players = game:GetService("Players")
+        local RunService = game:GetService("RunService")
+        local player = Players.LocalPlayer
+        local target = CFrame.new(16, 4, 1)
+        local hrp
+
+        local function setChar(char)
+            hrp = char:WaitForChild("HumanoidRootPart")
+        end
+
+        setChar(player.Character or player.CharacterAdded:Wait())
+        player.CharacterAdded:Connect(setChar)
+
+        local hb
+        hb = RunService.Heartbeat:Connect(function()
+            if not Options.AutomateEverything.Value then
+                hb:Disconnect()
+                return
+            end
+            if hrp then
+                hrp.CFrame = target
+            end
+        end)
+
+        task.spawn(function()
+            local delayTime = 0.05
+            local targets = { n = true, Clicks = true }
+
+            while Options.AutomateEverything.Value do
+                for _, v in ipairs(workspace:GetDescendants()) do
+                    if v:IsA("ClickDetector") and targets[v.Parent and v.Parent.Name] then
+                        pcall(fireclickdetector, v)
+                    end
+                end
+                task.wait(delayTime)
+            end
+        end)
+
+        task.spawn(function()
+            while Options.AutomateEverything.Value do
+                local zone = workspace:FindFirstChild("aurorazone", true)
+                if zone and hrp then
+                    zone.CFrame = hrp.CFrame
+                end
+                task.wait(5)
+            end
+        end)
+    end)
+end)
+
+Tabs.mainTab:CreateToggle("ClickAnywhere", {
+    Title = "Click Both Buttons Anywhere",
+    Default = false
+})
+:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+
+            local CLICK_DELAY = 0.05
+            local TARGET_NAMES = {
+                ["n"] = true,
+                ["Clicks"] = true
+            }
+
+            while Options.ClickAnywhere.Value do
+                for _, obj in ipairs(workspace:GetDescendants()) do
+                    if obj:IsA("ClickDetector") then
+                        local parent = obj.Parent
+                        if parent and TARGET_NAMES[parent.Name] then
+                            pcall(function()
+                                fireclickdetector(obj)
+                            end)
+                        end
+                    end
+                end
+                task.wait(CLICK_DELAY)
+            end
+
+        end)
+    end
+end)
+
+Tabs.mainTab:CreateToggle("TPConverter", {
+    Title = "TP Converter",
+    Default = false
+}):OnChanged(function(state)
+    if not state then return end
+
+    task.spawn(function()
+        local Players = game:GetService("Players")
+        local RunService = game:GetService("RunService")
+        local player = Players.LocalPlayer
+        local target = CFrame.new(16, 4, 1)
+        local hrp
+
+        local function setCharacter(char)
+            hrp = char:WaitForChild("HumanoidRootPart")
+        end
+
+        setCharacter(player.Character or player.CharacterAdded:Wait())
+        player.CharacterAdded:Connect(setCharacter)
+
+        local connection
+        connection = RunService.Heartbeat:Connect(function()
+            if not Options.TPConverter.Value then
+                connection:Disconnect()
+                return
+            end
+            if hrp then
+                hrp.CFrame = target
+            end
+        end)
+    end)
+end)
+
+local noteAutoAll = Tabs.mainTab:Paragraph("AutoAllNote", {
+    Title = "Note",
+    Content = "Automate Everything TP's to converter / Clicks both buttons every 0.05s / TP's x67 zone into your hitbox.",
+    TitleAlignment = "Middle",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
+
+local TPZoneDropdown = Tabs.zones:CreateDropdown("TPZoneSelect", {
+    Title = "Select Zone",
+    Values = {
+        "Aero",
+        "Aqua",
+        "Metro",
+        "Dorfic",
+        "Aurora",
+        "Central"
+    },
+    Default = "Aero"
+})
+
+local ZonePositions = {
+    ["Aero"] = Vector3.new(79, 8, 13),
+    ["Aqua"] = Vector3.new(-902, 9, -1),
+    ["Metro"] = Vector3.new(129, 17, 855),
+    ["Dorfic"] = Vector3.new(-1112, 475, 903),
+    ["Aurora"] = Vector3.new(115, 475, 2482),
+    ["Central"] = Vector3.new(1599, 400, 2530)
+}
+
+Tabs.zones:CreateButton({
+    Title = "TP Zone",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+        local targetPosition = ZonePositions[TPZoneDropdown.Value]
+
+        if targetPosition then
+            humanoidRootPart.CFrame = CFrame.new(targetPosition)
+        end
+    end
+})
+
+local GiveBoostDropdown = Tabs.zones:CreateDropdown("GiveBoostSelect", {
+    Title = "Give Boost",
+    Values = {
+        "Aqua Zone",
+        "Metro Zone",
+        "Dorfic Zone",
+        "Aurora Zone",
+        "Central Zone"
+    },
+    Default = "Aqua Zone"
+})
+
+local ZoneParts = {
+    ["Aqua Zone"] = "aquazone",
+    ["Metro Zone"] = "metrozone",
+    ["Dorfic Zone"] = "dorficzone",
+    ["Aurora Zone"] = "aurorazone",
+    ["Central Zone"] = "centralzone"
+}
+
+Tabs.zones:CreateButton{
+    Title = "Give Boost",
+    Description = "Teleports selected zone into your hitbox",
+    Callback = function()
+        local selectedZone = GiveBoostDropdown.Value
+        local zoneName = ZoneParts[selectedZone] or "centralzone"
+
+        local zonePart = workspace:FindFirstChild(zoneName, true)
+        local root = game.Players.LocalPlayer.Character 
+            and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+
+        if zonePart and root then
+            zonePart.CFrame = root.CFrame
+        end
+    end
+}
+
+Tabs.zones:CreateButton({
+    Title = "TP Chapter 2",
+    Callback = function()
+
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+        local targetPosition = Vector3.new(-408.781677, 17.1923866, -1.96728301)
+
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            if obj:IsA("BasePart") and obj.Name == "Part" then
+                if (obj.Position - targetPosition).Magnitude < 5 then
+                    firetouchinterest(humanoidRootPart, obj, 0)
+                    firetouchinterest(humanoidRootPart, obj, 1)
+                    break
+                end
+            end
+        end
+
+    end
+})
+
+Tabs.fruits:CreateToggle("UpgradeOranges", {
+    Title = "Upgrade Oranges [% Tangerines]",
+    Default = false
+})
+:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            while Options.UpgradeOranges.Value do
+                pcall(function()
+                    game:GetService("ReplicatedStorage"):WaitForChild("FruitEvents"):WaitForChild("Oranges"):FireServer()
+                end)
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+Tabs.fruits:CreateToggle("UpgradeTangerines", {
+    Title = "Upgrade Tangerines [% Clicks]",
+    Default = false
+})
+:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            while Options.UpgradeTangerines.Value do
+                pcall(function()
+                    game:GetService("ReplicatedStorage"):WaitForChild("FruitEvents"):WaitForChild("Tangerines"):FireServer()
+                end)
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+Tabs.fruits:CreateToggle("UpgradeLemons", {
+    Title = "Upgrade Lemons [% Oranges]",
+    Default = false
+})
+:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            while Options.UpgradeLemons.Value do
+                pcall(function()
+                    game:GetService("ReplicatedStorage"):WaitForChild("FruitEvents"):WaitForChild("Lemons"):FireServer()
+                end)
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+Tabs.fruits:CreateToggle("UpgradeLimes", {
+    Title = "Upgrade Limes [% Lemons]",
+    Default = false
+})
+:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            while Options.UpgradeLimes.Value do
+                pcall(function()
+                    game:GetService("ReplicatedStorage"):WaitForChild("FruitEvents"):WaitForChild("Limes"):FireServer()
+                end)
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+Tabs.fruits:CreateToggle("UpgradeEverything", {
+    Title = "Upgrade Everything",
+    Default = false
+})
+:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            while Options.UpgradeEverything.Value do
+                pcall(function()
+                    local FruitEvents = game:GetService("ReplicatedStorage"):WaitForChild("FruitEvents")
+
+                    FruitEvents:WaitForChild("Oranges"):FireServer()
+                    FruitEvents:WaitForChild("Tangerines"):FireServer()
+                    FruitEvents:WaitForChild("Lemons"):FireServer()
+                    FruitEvents:WaitForChild("Limes"):FireServer()
+                end)
+
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+local noteAutoAll = Tabs.fruits:Paragraph("AutoAllNote", {
+    Title = "Note",
+    Content = "Upgrade Everything Upgrades every Fruit, including Limes. (I recommend only using it if you're late game and can generate more lemons than you can spend)",
+    TitleAlignment = "Middle",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
+
+Tabs.fruits:CreateButton{
+    Title = "TP Fruit Upgraders",
+    Description = "Teleport to Fruit Upgraders",
+    Callback = function()
+        local root = game.Players.LocalPlayer.Character 
+            and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+
+        if root then
+            root.CFrame = CFrame.new(-1152, 514, 849)
+        end
+    end
+}
+
+Tabs.fruits:CreateButton{
+    Title = "TP Lime Upgrader",
+    Description = "Teleport to Lime Upgrader",
+    Callback = function()
+        local root = game.Players.LocalPlayer.Character 
+            and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+
+        if root then
+            root.CFrame = CFrame.new(1542, 400, 2525)
+        end
+    end
+}
+
+local FruitCountsParagraph = Tabs.stats:Paragraph("FruitCounts", {
+    Title = "Fruit Counts",
+    Content = "Loading...",
+    TitleAlignment = "Middle",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
+
+local function getFruitAmounts()
+    local player = game.Players.LocalPlayer
+    local otherData = player:FindFirstChild("OtherData")
+    if not otherData then return nil end
+
+    local fruitsFolder = otherData:FindFirstChild("Fruits")
+    if not fruitsFolder then return nil end
+
+    local fruitNames = {"Lemons", "Limes", "Oranges", "Tangerines"}
+    local amounts = {}
+
+    for _, name in ipairs(fruitNames) do
+        local fruit = fruitsFolder:FindFirstChild(name)
+        amounts[name] = fruit and fruit.Value or 0
+    end
+
+    return amounts
+end
+
+local function updateFruitParagraph()
+    local amounts = getFruitAmounts()
+    if not amounts then
+        FruitCountsParagraph:Set("Could not find fruit data")
+        return
+    end
+
+    local content = string.format(
+        "Lemons: %d\nLimes: %d\nOranges: %d\nTangerines: %d",
+        amounts["Lemons"], amounts["Limes"], amounts["Oranges"], amounts["Tangerines"]
+    )
+
+    FruitCountsParagraph:Set(content)
+end
+
+Tabs.stats:CreateButton({
+    Title = "Refresh Fruits",
+    Description = "Manually refresh fruit amounts",
+    Callback = updateFruitParagraph
+})
+
+task.spawn(function()
+    while true do
+        updateFruitParagraph()
+        task.wait(3)
+    end
+end)
+
+Tabs.performance:CreateButton{
+    Title = "Hide Other Players",
+    Description = "Makes all other players invisible + removes NameplateGui",
+    Callback = function()
+
+        local Players = game:GetService("Players")
+        local LocalPlayer = Players.LocalPlayer
+
+        -- Hide players
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character then
+                local character = player.Character
+
+                for _, part in pairs(character:GetChildren()) do
+                    if part:IsA("BasePart") then
+                        part.Transparency = 1
+                        part.CanCollide = false
+                    end
+                end
+
+                for _, accessory in pairs(character:GetChildren()) do
+                    if accessory:IsA("Accessory") then
+                        local handle = accessory:FindFirstChild("Handle")
+                        if handle then
+                            handle.Transparency = 1
+                        end
+                    end
+                end
+
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+                end
+            end
+        end
+        for _, obj in ipairs(game:GetDescendants()) do
+            if obj.Name == "NameplateGui" then
+                obj:Destroy()
+            end
+        end
+
+    end
+}
+
+Tabs.performance:CreateButton({
+    Title = "Anti AFK",
+    Description = "Helps you to not get kicked.",
+    Callback = function()
+        game:GetService('Players').LocalPlayer.Idled:Connect(function()
+            game:GetService('VirtualUser'):CaptureController()
+            game:GetService('VirtualUser'):ClickButton2(Vector2.new())
+        end)
+
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Anti-AFK",
+            Text = "Anti-AFK is now enabled!",
+            Duration = 3
+        })
+    end
+})
+
+Tabs.performance:CreateButton({
+    Title = "Anti Lag",
+    Description = "Decrease quality to not lag.",
+    Callback = function()
+        local Lighting = game:GetService("Lighting")
+        local RunService = game:GetService("RunService")
+        local Terrain = workspace:FindFirstChildWhichIsA("Terrain")
+
+        if Terrain then
+            Terrain.WaterWaveSize = 0
+            Terrain.WaterWaveSpeed = 0
+            Terrain.WaterReflectance = 0
+            Terrain.WaterTransparency = 1
+        end
+
+        Lighting.GlobalShadows = false
+        Lighting.FogStart = 9e9
+        Lighting.FogEnd = 9e9
+        settings().Rendering.QualityLevel = 1
+
+        for _, v in pairs(game:GetDescendants()) do
+            if v:IsA("BasePart") then
+                v.CastShadow = false
+                v.Material = "Plastic"
+                v.Reflectance = 0
+                v.BackSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.BottomSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.FrontSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.LeftSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.RightSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.TopSurface = Enum.SurfaceType.SmoothNoOutlines
+            elseif v:IsA("Decal") then
+                v.Transparency = 1
+                v.Texture = ""
+            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                v.Lifetime = NumberRange.new(0)
+            end
+        end
+
+        for _, v in pairs(Lighting:GetDescendants()) do
+            if v:IsA("PostEffect") then
+                v.Enabled = false
+            end
+        end
+
+        workspace.DescendantAdded:Connect(function(child)
+            task.spawn(function()
+                if child:IsA("ForceField") or child:IsA("Sparkles") or child:IsA("Smoke") or child:IsA("Fire") or child:IsA("Beam") then
+                    RunService.Heartbeat:Wait()
+                    child:Destroy()
+                elseif child:IsA("BasePart") then
+                    child.CastShadow = false
+                end
+            end)
+        end)
+    end
+})
+
+--------------------------------------------------
+-- important stuff
+--------------------------------------------------
+
+SaveManager:SetLibrary(Library)
+InterfaceManager:SetLibrary(Library)
+
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+
+InterfaceManager:SetFolder("FluentEventsHub")
+SaveManager:SetFolder("FluentEventsHub/SpecificGame")
+
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+
+Window:SelectTab(1)
+Library:Notify{Title = "Fluent", Content = "Script loaded successfully!", Duration = 8}
+SaveManager:LoadAutoloadConfig()
