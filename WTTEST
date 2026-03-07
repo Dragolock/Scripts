@@ -325,17 +325,23 @@ Tabs.fruits:CreateToggle("UpgradeEverything", {
 :OnChanged(function(state)
     if state then
         task.spawn(function()
+            local Options = Options -- make sure your Options table exists
+            local FruitEvents = game:GetService("ReplicatedStorage"):WaitForChild("FruitEvents")
+
             while Options.UpgradeEverything.Value do
                 pcall(function()
-                    local FruitEvents = game:GetService("ReplicatedStorage"):WaitForChild("FruitEvents")
-
                     FruitEvents:WaitForChild("Oranges"):FireServer()
-                    FruitEvents:WaitForChild("Tangerines"):FireServer()
-                    FruitEvents:WaitForChild("Lemons"):FireServer()
-                    FruitEvents:WaitForChild("Limes"):FireServer()
-                end)
+                    task.wait(0.1)
 
-                task.wait(0.1)
+                    FruitEvents:WaitForChild("Tangerines"):FireServer()
+                    task.wait(0.1)
+
+                    FruitEvents:WaitForChild("Lemons"):FireServer()
+                    task.wait(0.1)
+
+                    FruitEvents:WaitForChild("Limes"):FireServer()
+                    task.wait(0.1)
+                end)
             end
         end)
     end
@@ -377,10 +383,11 @@ Tabs.fruits:CreateButton{
 local Players = game:GetService("Players")
 local localPlayer = Players.LocalPlayer
 
-local LemonsParagraph = Tabs.stats:CreateParagraph("LemonsCount", {Title = "Lemons", Content = "", TitleAlignment = "Middle", ContentAlignment = Enum.TextXAlignment.Middle})
-local LimesParagraph = Tabs.stats:CreateParagraph("LimesCount", {Title = "Limes", Content = "", TitleAlignment = "Middle", ContentAlignment = Enum.TextXAlignment.Middle})
-local OrangesParagraph = Tabs.stats:CreateParagraph("OrangesCount", {Title = "Oranges", Content = "", TitleAlignment = "Middle", ContentAlignment = Enum.TextXAlignment.Middle})
-local TangerinesParagraph = Tabs.stats:CreateParagraph("TangerinesCount", {Title = "Tangerines", Content = "", TitleAlignment = "Middle", ContentAlignment = Enum.TextXAlignment.Middle})
+-- Create paragraphs under Stats tab
+local LemonsParagraph = Tabs.stats:CreateParagraph("LemonsCount", {Title = "Lemons", Content = "", TitleAlignment = "Left", ContentAlignment = Enum.TextXAlignment.Left})
+local LimesParagraph = Tabs.stats:CreateParagraph("LimesCount", {Title = "Limes", Content = "", TitleAlignment = "Left", ContentAlignment = Enum.TextXAlignment.Left})
+local OrangesParagraph = Tabs.stats:CreateParagraph("OrangesCount", {Title = "Oranges", Content = "", TitleAlignment = "Left", ContentAlignment = Enum.TextXAlignment.Left})
+local TangerinesParagraph = Tabs.stats:CreateParagraph("TangerinesCount", {Title = "Tangerines", Content = "", TitleAlignment = "Left", ContentAlignment = Enum.TextXAlignment.Left})
 
 local fruitMap = {
     Lemons = LemonsParagraph,
