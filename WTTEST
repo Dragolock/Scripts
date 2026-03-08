@@ -71,7 +71,7 @@ Tabs.mainTab:CreateToggle("AutomateEverything", {
 
         task.spawn(function()
             while Options.AutomateEverything.Value do
-                local zone = workspace:FindFirstChild("aurorazone", true)
+                local zone = workspace:FindFirstChild("centralzone", true)
                 if zone and hrp then
                     zone.CFrame = hrp.CFrame
                 end
