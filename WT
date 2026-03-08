@@ -6,8 +6,9 @@ local Window = Library:Window{
     Title = "CHub - Waste Time",
     SubTitle = "By ??? :)",
     TabWidth = 100,
-    Size =  UDim2.fromOffset(400, 300),
+    Size =  UDim2.fromOffset(425, 375),
     Resize = false, 
+    Acrylic = true,
     Theme = "United GNOME",
     MinimizeKey = Enum.KeyCode.LeftShift
 }
@@ -16,6 +17,7 @@ local Tabs = {
     mainTab = Window:CreateTab{Title = "Main Game", Icon = "phosphor-sword-bold"},
     zones = Window:CreateTab{Title = "Zones", Icon = "phosphor-sword-bold"},
     fruits = Window:CreateTab{Title = "Fruits", Icon = "phosphor-sword-bold"},
+    stats = Window:CreateTab{Title = "Stats", Icon = "phosphor-sword-bold"},
     performance = Window:CreateTab{Title = "Performance", Icon = "phosphor-sword-bold"},
     Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
 }
@@ -69,7 +71,7 @@ Tabs.mainTab:CreateToggle("AutomateEverything", {
 
         task.spawn(function()
             while Options.AutomateEverything.Value do
-                local zone = workspace:FindFirstChild("aurorazone", true)
+                local zone = workspace:FindFirstChild("centralzone", true)
                 if zone and hrp then
                     zone.CFrame = hrp.CFrame
                 end
@@ -249,7 +251,7 @@ Tabs.zones:CreateButton({
 })
 
 Tabs.fruits:CreateToggle("UpgradeOranges", {
-    Title = "Upgrade Oranges",
+    Title = "Upgrade Oranges [% Tangerines]",
     Default = false
 })
 :OnChanged(function(state)
@@ -266,7 +268,7 @@ Tabs.fruits:CreateToggle("UpgradeOranges", {
 end)
 
 Tabs.fruits:CreateToggle("UpgradeTangerines", {
-    Title = "Upgrade Tangerines",
+    Title = "Upgrade Tangerines [% Clicks]",
     Default = false
 })
 :OnChanged(function(state)
@@ -283,7 +285,7 @@ Tabs.fruits:CreateToggle("UpgradeTangerines", {
 end)
 
 Tabs.fruits:CreateToggle("UpgradeLemons", {
-    Title = "Upgrade Lemons",
+    Title = "Upgrade Lemons [% Oranges]",
     Default = false
 })
 :OnChanged(function(state)
@@ -300,7 +302,7 @@ Tabs.fruits:CreateToggle("UpgradeLemons", {
 end)
 
 Tabs.fruits:CreateToggle("UpgradeLimes", {
-    Title = "Upgrade Limes",
+    Title = "Upgrade Limes [% Lemons]",
     Default = false
 })
 :OnChanged(function(state)
@@ -323,21 +325,34 @@ Tabs.fruits:CreateToggle("UpgradeEverything", {
 :OnChanged(function(state)
     if state then
         task.spawn(function()
+            local Options = Options -- make sure your Options table exists
+            local FruitEvents = game:GetService("ReplicatedStorage"):WaitForChild("FruitEvents")
+
             while Options.UpgradeEverything.Value do
                 pcall(function()
-                    local FruitEvents = game:GetService("ReplicatedStorage"):WaitForChild("FruitEvents")
-
                     FruitEvents:WaitForChild("Oranges"):FireServer()
-                    FruitEvents:WaitForChild("Tangerines"):FireServer()
-                    FruitEvents:WaitForChild("Lemons"):FireServer()
-                    FruitEvents:WaitForChild("Limes"):FireServer()
-                end)
+                    task.wait(0.1)
 
-                task.wait(0.1)
+                    FruitEvents:WaitForChild("Tangerines"):FireServer()
+                    task.wait(0.1)
+
+                    FruitEvents:WaitForChild("Lemons"):FireServer()
+                    task.wait(0.1)
+
+                    FruitEvents:WaitForChild("Limes"):FireServer()
+                    task.wait(0.1)
+                end)
             end
         end)
     end
 end)
+
+local noteAutoAll = Tabs.fruits:Paragraph("AutoAllNote", {
+    Title = "Note",
+    Content = "Upgrade Everything Upgrades every Fruit, including Limes. (I recommend only using it if you're late game and can generate more lemons than you can spend)",
+    TitleAlignment = "Middle",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
 
 Tabs.fruits:CreateButton{
     Title = "TP Fruit Upgraders",
@@ -365,49 +380,57 @@ Tabs.fruits:CreateButton{
     end
 }
 
-Tabs.performance:CreateButton{
-    Title = "Hide Other Players",
-    Description = "Makes all other players invisible + removes NameplateGui",
-    Callback = function()
+local Players = game:GetService("Players")
+local localPlayer = Players.LocalPlayer
 
-        local Players = game:GetService("Players")
-        local LocalPlayer = Players.LocalPlayer
+-- Create paragraphs under Stats tab
+local LemonsParagraph = Tabs.stats:CreateParagraph("LemonsCount", {Title = "Lemons", Content = "", TitleAlignment = "Left", ContentAlignment = Enum.TextXAlignment.Left})
+local LimesParagraph = Tabs.stats:CreateParagraph("LimesCount", {Title = "Limes", Content = "", TitleAlignment = "Left", ContentAlignment = Enum.TextXAlignment.Left})
+local OrangesParagraph = Tabs.stats:CreateParagraph("OrangesCount", {Title = "Oranges", Content = "", TitleAlignment = "Left", ContentAlignment = Enum.TextXAlignment.Left})
+local TangerinesParagraph = Tabs.stats:CreateParagraph("TangerinesCount", {Title = "Tangerines", Content = "", TitleAlignment = "Left", ContentAlignment = Enum.TextXAlignment.Left})
 
-        -- Hide players
-        for _, player in pairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character then
-                local character = player.Character
-
-                for _, part in pairs(character:GetChildren()) do
-                    if part:IsA("BasePart") then
-                        part.Transparency = 1
-                        part.CanCollide = false
-                    end
-                end
-
-                for _, accessory in pairs(character:GetChildren()) do
-                    if accessory:IsA("Accessory") then
-                        local handle = accessory:FindFirstChild("Handle")
-                        if handle then
-                            handle.Transparency = 1
-                        end
-                    end
-                end
-
-                local humanoid = character:FindFirstChildOfClass("Humanoid")
-                if humanoid then
-                    humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
-                end
-            end
-        end
-        for _, obj in ipairs(game:GetDescendants()) do
-            if obj.Name == "NameplateGui" then
-                obj:Destroy()
-            end
-        end
-
-    end
+local fruitMap = {
+    Lemons = LemonsParagraph,
+    Limes = LimesParagraph,
+    Oranges = OrangesParagraph,
+    Tangerines = TangerinesParagraph
 }
+
+local function getValue(folder, name)
+    local stat = folder:FindFirstChild(name)
+    if stat and stat:IsA("ValueBase") then
+        return stat.Value
+    end
+    return 0
+end
+
+local function waitForFruitsFolder(player)
+    local otherData = player:WaitForChild("OtherData", 5)
+    if not otherData then return nil end
+    local fruitsFolder = otherData:WaitForChild("Fruits", 5)
+    return fruitsFolder
+end
+
+local function updateFruitParagraphs()
+    local fruitsFolder = waitForFruitsFolder(localPlayer)
+    for fruitName, paragraph in pairs(fruitMap) do
+        local value = fruitsFolder and getValue(fruitsFolder, fruitName) or "N/A"
+        paragraph:SetValue(tostring(value))
+    end
+end
+
+Tabs.stats:CreateButton({
+    Title = "Refresh Fruits",
+    Description = "Manually refresh fruit amounts",
+    Callback = updateFruitParagraphs
+})
+
+task.spawn(function()
+    while true do
+        updateFruitParagraphs()
+        task.wait(3)
+    end
+end)
 
 Tabs.performance:CreateButton({
     Title = "Anti AFK",
