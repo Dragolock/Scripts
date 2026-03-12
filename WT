@@ -153,6 +153,7 @@ Tabs.mainTab:CreateToggle("TPEssence", {
 :OnChanged(function(state)
     if state then
         task.spawn(function()
+
             local Players = game:GetService("Players")
             local PathfindingService = game:GetService("PathfindingService")
 
@@ -167,31 +168,23 @@ Tabs.mainTab:CreateToggle("TPEssence", {
 
             root.CFrame = CFrame.new(startPos)
 
-            while Options.TPEssence.Value do
-                local distance = (root.Position - targetPos).Magnitude
-                if distance <= threshold then
+            local path = PathfindingService:CreatePath()
+            path:ComputeAsync(root.Position, targetPos)
+
+            local waypoints = path:GetWaypoints()
+
+            for _, wp in ipairs(waypoints) do
+                if not Options.TPEssence.Value then break end
+
+                if (root.Position - targetPos).Magnitude <= threshold then
                     hum:Move(Vector3.zero)
-                    task.wait(0.1)
-                else
-                    local path = PathfindingService:CreatePath()
-                    path:ComputeAsync(root.Position, targetPos)
-                    local waypoints = path:GetWaypoints()
-
-                    for _, wp in ipairs(waypoints) do
-                        if not Options.TPEssence.Value then break end
-
-                        if (root.Position - targetPos).Magnitude <= threshold then
-                            hum:Move(Vector3.zero)
-                            break
-                        end
-
-                        hum:MoveTo(wp.Position)
-                        local success = hum.MoveToFinished:Wait()
-                        if not success then break end
-                    end
+                    break
                 end
-                task.wait(0.1)
+
+                hum:MoveTo(wp.Position)
+                hum.MoveToFinished:Wait()
             end
+
         end)
     end
 end)
