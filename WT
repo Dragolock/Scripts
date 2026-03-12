@@ -153,9 +153,9 @@ Tabs.mainTab:CreateToggle("TPEssence", {
 :OnChanged(function(state)
     if state then
         task.spawn(function()
-
             local Players = game:GetService("Players")
             local PathfindingService = game:GetService("PathfindingService")
+            local RunService = game:GetService("RunService")
 
             local player = Players.LocalPlayer
             local char = player.Character or player.CharacterAdded:Wait()
@@ -168,23 +168,80 @@ Tabs.mainTab:CreateToggle("TPEssence", {
 
             root.CFrame = CFrame.new(startPos)
 
-            local path = PathfindingService:CreatePath()
-            path:ComputeAsync(root.Position, targetPos)
+            -- folder for line parts
+            local lineFolder = Instance.new("Folder")
+            lineFolder.Name = "PathLine"
+            lineFolder.Parent = workspace
 
-            local waypoints = path:GetWaypoints()
+            local lineParts = {}
 
-            for _, wp in ipairs(waypoints) do
-                if not Options.TPEssence.Value then break end
-
-                if (root.Position - targetPos).Magnitude <= threshold then
-                    hum:Move(Vector3.zero)
-                    break
-                end
-
-                hum:MoveTo(wp.Position)
-                hum.MoveToFinished:Wait()
+            local function clearLines()
+                for _,v in pairs(lineParts) do v:Destroy() end
+                lineParts = {}
             end
 
+            local function drawLineSegment(a,b)
+                local dist = (a-b).Magnitude
+                local part = Instance.new("Part")
+                part.Anchored = true
+                part.CanCollide = false
+                part.Size = Vector3.new(0.15,0.15,dist)
+                part.Material = Enum.Material.Neon
+                part.Color = Color3.fromRGB(0,255,0)
+                part.CFrame = CFrame.new(a,b) * CFrame.new(0,0,-dist/2)
+                part.Parent = lineFolder
+                table.insert(lineParts, part)
+            end
+
+            while Options.TPEssence.Value do
+                if (root.Position - targetPos).Magnitude > threshold then
+                    local path = PathfindingService:CreatePath()
+                    path:ComputeAsync(root.Position, targetPos)
+
+                    if path.Status == Enum.PathStatus.Success then
+                        clearLines()
+                        local waypoints = path:GetWaypoints()
+
+                        -- Draw smooth line connecting waypoints
+                        for i = 1,#waypoints do
+                            local wpPos = waypoints[i].Position
+                            local lastPos = (i==1) and root.Position or waypoints[i-1].Position
+                            drawLineSegment(lastPos, wpPos)
+                        end
+
+                        -- walk along path
+                        for _, wp in ipairs(waypoints) do
+                            if not Options.TPEssence.Value then break end
+                            if (root.Position - targetPos).Magnitude <= threshold then
+                                hum:Move(Vector3.zero)
+                                break
+                            end
+
+                            if wp.Action == Enum.PathWaypointAction.Jump then hum.Jump = true end
+                            hum:MoveTo(wp.Position)
+
+                            -- smooth update of line segment during movement
+                            local startTime = tick()
+                            while (root.Position - wp.Position).Magnitude > 1 and Options.TPEssence.Value do
+                                for i,part in ipairs(lineParts) do
+                                    if i==1 then
+                                        local nextPos = waypoints[1].Position
+                                        part.CFrame = CFrame.new(root.Position,nextPos) * CFrame.new(0,0,-(root.Position-nextPos).Magnitude/2)
+                                    else
+                                        local prev = waypoints[i-1].Position
+                                        local curr = waypoints[i].Position
+                                        part.CFrame = CFrame.new(prev,curr) * CFrame.new(0,0,-(prev-curr).Magnitude/2)
+                                    end
+                                end
+                                RunService.Heartbeat:Wait()
+                            end
+                        end
+                    end
+                end
+                task.wait(0.3)
+            end
+
+            lineFolder:Destroy()
         end)
     end
 end)
