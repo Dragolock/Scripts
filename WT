@@ -16,7 +16,7 @@ local Window = Library:Window{
 local Tabs = {
     mainTab = Window:CreateTab{Title = "Main Game", Icon = "phosphor-sword-bold"},
     zones = Window:CreateTab{Title = "Zones", Icon = "phosphor-sword-bold"},
-    fruits = Window:CreateTab{Title = "Fruits", Icon = "phosphor-sword-bold"},
+    fruits = Window:CreateTab{Title = "Fruits", Icon = "phosphor-orange-bold"},
     stats = Window:CreateTab{Title = "Stats", Icon = "phosphor-sword-bold"},
     performance = Window:CreateTab{Title = "Performance", Icon = "phosphor-sword-bold"},
     Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
@@ -144,6 +144,52 @@ Tabs.mainTab:CreateToggle("TPConverter", {
             end
         end)
     end)
+end)
+
+Tabs.mainTab:CreateToggle("TPEssence", {
+    Title = "TP Essence",
+    Default = false
+})
+:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+
+            local RunService = game:GetService("RunService")
+            local Players = game:GetService("Players")
+
+            local player = Players.LocalPlayer
+            local interval = 0.05
+            local elapsed = 0
+
+            local targetCFrame = CFrame.new(49, 470, 2474)
+
+            local function getRoot()
+                local character = player.Character or player.CharacterAdded:Wait()
+                return character:WaitForChild("HumanoidRootPart")
+            end
+
+            local root = getRoot()
+
+            player.CharacterAdded:Connect(function(char)
+                root = char:WaitForChild("HumanoidRootPart")
+            end)
+
+            local connection
+            connection = RunService.Heartbeat:Connect(function(dt)
+                if not Options.TPEssence.Value then
+                    connection:Disconnect()
+                    return
+                end
+
+                elapsed += dt
+                if elapsed >= interval and root then
+                    elapsed = 0
+                    root.CFrame = targetCFrame
+                end
+            end)
+
+        end)
+    end
 end)
 
 local noteAutoAll = Tabs.mainTab:Paragraph("AutoAllNote", {
