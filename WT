@@ -155,7 +155,6 @@ Tabs.mainTab:CreateToggle("TPEssence", {
         task.spawn(function()
             local Players = game:GetService("Players")
             local PathfindingService = game:GetService("PathfindingService")
-            local RunService = game:GetService("RunService")
 
             local player = Players.LocalPlayer
             local char = player.Character or player.CharacterAdded:Wait()
@@ -168,64 +167,31 @@ Tabs.mainTab:CreateToggle("TPEssence", {
 
             root.CFrame = CFrame.new(startPos)
 
-            local lineFolder = Instance.new("Folder")
-            lineFolder.Name = "PathLine"
-            lineFolder.Parent = workspace
-
-            local function clearLines()
-                for _,v in pairs(lineFolder:GetChildren()) do
-                    v:Destroy()
-                end
-            end
-
-            local function drawLine(a,b)
-                local dist = (a-b).Magnitude
-                local part = Instance.new("Part")
-                part.Anchored = true
-                part.CanCollide = false
-                part.Size = Vector3.new(0.15,0.15,dist)
-                part.Material = Enum.Material.Neon
-                part.Color = Color3.fromRGB(0,255,0)
-                part.CFrame = CFrame.new(a,b) * CFrame.new(0,0,-dist/2)
-                part.Parent = lineFolder
-            end
-
             while Options.TPEssence.Value do
-                if (root.Position - targetPos).Magnitude > threshold then
+                local distance = (root.Position - targetPos).Magnitude
+                if distance <= threshold then
+                    hum:Move(Vector3.zero)
+                    task.wait(0.1)
+                else
                     local path = PathfindingService:CreatePath()
                     path:ComputeAsync(root.Position, targetPos)
+                    local waypoints = path:GetWaypoints()
 
-                    if path.Status == Enum.PathStatus.Success then
-                        clearLines()
-                        local waypoints = path:GetWaypoints()
+                    for _, wp in ipairs(waypoints) do
+                        if not Options.TPEssence.Value then break end
 
-                        local lastPos = root.Position
-                        for _, wp in ipairs(waypoints) do
-                            drawLine(lastPos, wp.Position)
-                            lastPos = wp.Position
+                        if (root.Position - targetPos).Magnitude <= threshold then
+                            hum:Move(Vector3.zero)
+                            break
                         end
 
-                        for _, wp in ipairs(waypoints) do
-                            if not Options.TPEssence.Value then break end
-                            if (root.Position - targetPos).Magnitude <= threshold then break end
-
-                            if wp.Action == Enum.PathWaypointAction.Jump then
-                                hum.Jump = true
-                            end
-
-                            hum:MoveTo(wp.Position)
-                            local success = hum.MoveToFinished:Wait()
-
-                            if not success then break end
-                        end
+                        hum:MoveTo(wp.Position)
+                        local success = hum.MoveToFinished:Wait()
+                        if not success then break end
                     end
                 end
-
-                task.wait(0.5)
+                task.wait(0.1)
             end
-
-            clearLines()
-            lineFolder:Destroy()
         end)
     end
 end)
