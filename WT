@@ -154,25 +154,29 @@ Tabs.mainTab:CreateToggle("TPEssence", {
     if state then
         task.spawn(function()
 
-            local rs = game:GetService("RunService")
-            local p = game:GetService("Players").LocalPlayer
+            local TweenService = game:GetService("TweenService")
+            local Players = game:GetService("Players")
+
+            local player = Players.LocalPlayer
             local target = CFrame.new(49, 471, 2474)
 
-            local root = (p.Character or p.CharacterAdded:Wait()):WaitForChild("HumanoidRootPart")
-            p.CharacterAdded:Connect(function(c)
+            local root = (player.Character or player.CharacterAdded:Wait()):WaitForChild("HumanoidRootPart")
+            player.CharacterAdded:Connect(function(c)
                 root = c:WaitForChild("HumanoidRootPart")
             end)
 
-            local con
-            con = rs.Heartbeat:Connect(function()
-                if not Options.TPEssence.Value then
-                    con:Disconnect()
-                    return
-                end
+            local tween
+            while Options.TPEssence.Value do
                 if root then
-                    root.CFrame = target
+                    tween = TweenService:Create(
+                        root,
+                        TweenInfo.new(0.08, Enum.EasingStyle.Linear),
+                        {CFrame = target}
+                    )
+                    tween:Play()
+                    tween.Completed:Wait()
                 end
-            end)
+            end
 
         end)
     end
