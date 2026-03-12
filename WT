@@ -154,28 +154,35 @@ Tabs.mainTab:CreateToggle("TPEssence", {
     if state then
         task.spawn(function()
 
-            local TweenService = game:GetService("TweenService")
             local Players = game:GetService("Players")
+            local PathfindingService = game:GetService("PathfindingService")
 
             local player = Players.LocalPlayer
-            local target = CFrame.new(49, 471, 2474)
+            local char = player.Character or player.CharacterAdded:Wait()
+            local hum = char:WaitForChild("Humanoid")
+            local root = char:WaitForChild("HumanoidRootPart")
 
-            local root = (player.Character or player.CharacterAdded:Wait()):WaitForChild("HumanoidRootPart")
-            player.CharacterAdded:Connect(function(c)
-                root = c:WaitForChild("HumanoidRootPart")
-            end)
+            local startPos = Vector3.new(115,470,2482)
+            local targetPos = Vector3.new(49,471,2474)
+            local threshold = 5
 
-            local tween
-            while Options.TPEssence.Value do
-                if root then
-                    tween = TweenService:Create(
-                        root,
-                        TweenInfo.new(0.08, Enum.EasingStyle.Linear),
-                        {CFrame = target}
-                    )
-                    tween:Play()
-                    tween.Completed:Wait()
+            root.CFrame = CFrame.new(startPos)
+
+            local path = PathfindingService:CreatePath()
+            path:ComputeAsync(root.Position, targetPos)
+
+            local waypoints = path:GetWaypoints()
+
+            for _, wp in ipairs(waypoints) do
+                if not Options.TPEssence.Value then break end
+
+                if (root.Position - targetPos).Magnitude <= threshold then
+                    hum:Move(Vector3.zero)
+                    break
                 end
+
+                hum:MoveTo(wp.Position)
+                hum.MoveToFinished:Wait()
             end
 
         end)
