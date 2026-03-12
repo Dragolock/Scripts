@@ -9,7 +9,7 @@ local Window = Library:Window{
     Size =  UDim2.fromOffset(425, 375),
     Resize = false, 
     Acrylic = true,
-    Theme = "United GNOME",
+    Theme = "VS Dark",
     MinimizeKey = Enum.KeyCode.LeftShift
 }
 
