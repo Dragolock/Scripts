@@ -156,7 +156,7 @@ Tabs.mainTab:CreateToggle("TPEssence", {
 
             local rs = game:GetService("RunService")
             local p = game:GetService("Players").LocalPlayer
-            local target = CFrame.new(49, 473, 2474)
+            local target = CFrame.new(49, 471, 2474)
 
             local root = (p.Character or p.CharacterAdded:Wait()):WaitForChild("HumanoidRootPart")
             p.CharacterAdded:Connect(function(c)
