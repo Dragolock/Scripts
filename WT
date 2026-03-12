@@ -168,7 +168,6 @@ Tabs.mainTab:CreateToggle("TPEssence", {
 
             root.CFrame = CFrame.new(startPos)
 
-            -- folder for line parts
             local lineFolder = Instance.new("Folder")
             lineFolder.Name = "PathLine"
             lineFolder.Parent = workspace
@@ -202,36 +201,22 @@ Tabs.mainTab:CreateToggle("TPEssence", {
                         clearLines()
                         local waypoints = path:GetWaypoints()
 
-                        -- Draw smooth line connecting waypoints
-                        for i = 1,#waypoints do
-                            local wpPos = waypoints[i].Position
-                            local lastPos = (i==1) and root.Position or waypoints[i-1].Position
-                            drawLineSegment(lastPos, wpPos)
+                        local lastPos = root.Position
+                        for _,wp in ipairs(waypoints) do
+                            drawLineSegment(lastPos, wp.Position)
+                            lastPos = wp.Position
                         end
 
-                        -- walk along path
-                        for _, wp in ipairs(waypoints) do
+                        for i, wp in ipairs(waypoints) do
                             if not Options.TPEssence.Value then break end
-                            if (root.Position - targetPos).Magnitude <= threshold then
-                                hum:Move(Vector3.zero)
-                                break
-                            end
+                            if (root.Position - targetPos).Magnitude <= threshold then break end
 
                             if wp.Action == Enum.PathWaypointAction.Jump then hum.Jump = true end
                             hum:MoveTo(wp.Position)
 
-                            -- smooth update of line segment during movement
-                            local startTime = tick()
                             while (root.Position - wp.Position).Magnitude > 1 and Options.TPEssence.Value do
-                                for i,part in ipairs(lineParts) do
-                                    if i==1 then
-                                        local nextPos = waypoints[1].Position
-                                        part.CFrame = CFrame.new(root.Position,nextPos) * CFrame.new(0,0,-(root.Position-nextPos).Magnitude/2)
-                                    else
-                                        local prev = waypoints[i-1].Position
-                                        local curr = waypoints[i].Position
-                                        part.CFrame = CFrame.new(prev,curr) * CFrame.new(0,0,-(prev-curr).Magnitude/2)
-                                    end
+                                if #lineParts > 0 then
+                                    lineParts[1].CFrame = CFrame.new(root.Position, waypoints[1].Position) * CFrame.new(0,0,-(root.Position-waypoints[1].Position).Magnitude/2)
                                 end
                                 RunService.Heartbeat:Wait()
                             end
