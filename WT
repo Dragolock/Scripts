@@ -14,12 +14,12 @@ local Window = Library:Window{
 }
 
 local Tabs = {
-    mainTab = Window:CreateTab{Title = "Main Game", Icon = "phosphor-sword-bold"},
-    zones = Window:CreateTab{Title = "Zones", Icon = "phosphor-sword-bold"},
+    mainTab = Window:CreateTab{Title = "Main Game", Icon = "phosphor-game-controller-bold"},
+    zones = Window:CreateTab{Title = "Zones", Icon = "phosphor-atom-bold"},
     fruits = Window:CreateTab{Title = "Fruits", Icon = "phosphor-orange-bold"},
-    stats = Window:CreateTab{Title = "Stats", Icon = "phosphor-sword-bold"},
-    performance = Window:CreateTab{Title = "Performance", Icon = "phosphor-sword-bold"},
-    Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
+    stats = Window:CreateTab{Title = "Stats", Icon = "phosphor-chart-bar-horizontal-bold"},
+    performance = Window:CreateTab{Title = "Performance", Icon = "phosphor-device-tablet-bold"},
+    Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-gear-bold"}
 }
 
 local Options = Library.Options
@@ -154,37 +154,23 @@ Tabs.mainTab:CreateToggle("TPEssence", {
     if state then
         task.spawn(function()
 
-            local RunService = game:GetService("RunService")
-            local Players = game:GetService("Players")
+            local rs = game:GetService("RunService")
+            local p = game:GetService("Players").LocalPlayer
+            local target = CFrame.new(49, 473, 2474)
 
-            local player = Players.LocalPlayer
-            local interval = 0.05
-            local elapsed = 0
-
-            local targetCFrame = CFrame.new(49, 470, 2474)
-
-            local function getRoot()
-                local character = player.Character or player.CharacterAdded:Wait()
-                return character:WaitForChild("HumanoidRootPart")
-            end
-
-            local root = getRoot()
-
-            player.CharacterAdded:Connect(function(char)
-                root = char:WaitForChild("HumanoidRootPart")
+            local root = (p.Character or p.CharacterAdded:Wait()):WaitForChild("HumanoidRootPart")
+            p.CharacterAdded:Connect(function(c)
+                root = c:WaitForChild("HumanoidRootPart")
             end)
 
-            local connection
-            connection = RunService.Heartbeat:Connect(function(dt)
+            local con
+            con = rs.Heartbeat:Connect(function()
                 if not Options.TPEssence.Value then
-                    connection:Disconnect()
+                    con:Disconnect()
                     return
                 end
-
-                elapsed += dt
-                if elapsed >= interval and root then
-                    elapsed = 0
-                    root.CFrame = targetCFrame
+                if root then
+                    root.CFrame = target
                 end
             end)
 
@@ -194,7 +180,7 @@ end)
 
 local noteAutoAll = Tabs.mainTab:Paragraph("AutoAllNote", {
     Title = "Note",
-    Content = "Automate Everything TP's to converter / Clicks both buttons every 0.05s / TP's x67 zone into your hitbox.",
+    Content = "Automate Everything TP's to converter / Clicks both buttons every 0.05s / TP's x9 zone into your hitbox.",
     TitleAlignment = "Middle",
     ContentAlignment = Enum.TextXAlignment.Left
 })
