@@ -147,18 +147,19 @@ Tabs.mainTab:CreateToggle("TPConverter", {
 end)
 
 Tabs.mainTab:CreateToggle("AutoLerpPos", {
-    Title = "Auto Lerp Positions",
+    Title = "TP Essence",
     Default = false
 })
 :OnChanged(function(state)
+
+    local player = game.Players.LocalPlayer
+    local RunService = game:GetService("RunService")
+
     if state then
         task.spawn(function()
 
-            local player = game.Players.LocalPlayer
             local character = player.Character or player.CharacterAdded:Wait()
             local root = character:WaitForChild("HumanoidRootPart")
-
-            local RunService = game:GetService("RunService")
 
             local function lerpToPosition(targetPos, duration)
                 local startCFrame = root.CFrame
@@ -177,29 +178,29 @@ Tabs.mainTab:CreateToggle("AutoLerpPos", {
             end
 
             lerpToPosition(Vector3.new(113, 470, 2475), 0.3)
-
             if not Options.AutoLerpPos.Value then return end
 
             task.wait(0.5)
-
             if not Options.AutoLerpPos.Value then return end
 
-            lerpToPosition(Vector3.new(49, 472, 2474), 1.2)
+            lerpToPosition(Vector3.new(49, 469, 2474), 1.2)
+            if not Options.AutoLerpPos.Value then return end
 
-            local lockedPos = CFrame.new(49, 472, 2474)
-
-            while Options.AutoLerpPos.Value do
-                root.CFrame = lockedPos
-                RunService.RenderStepped:Wait()
-            end
+            root.Anchored = true
 
         end)
+
+    else
+        local character = player.Character
+        if character and character:FindFirstChild("HumanoidRootPart") then
+            character.HumanoidRootPart.Anchored = false
+        end
     end
 end)
 
 local noteAutoAll = Tabs.mainTab:Paragraph("AutoAllNote", {
     Title = "Note",
-    Content = "Automate Everything TP's to converter / Clicks both buttons every 0.05s / TP's x9 zone into your hitbox.",
+    Content = "Automate Everything TP's to converter / Clicks both buttons every 0.05s / TP's x99 zone into your hitbox.",
     TitleAlignment = "Middle",
     ContentAlignment = Enum.TextXAlignment.Left
 })
