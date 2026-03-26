@@ -176,7 +176,7 @@ Tabs.mainTab:CreateToggle("AutoLerpPos", {
                 end
             end
 
-            lerpToPosition(Vector3.new(113, 470, 2475), 2.5)
+            lerpToPosition(Vector3.new(113, 470, 2475), 0.3)
 
             if not Options.AutoLerpPos.Value then return end
 
@@ -184,9 +184,9 @@ Tabs.mainTab:CreateToggle("AutoLerpPos", {
 
             if not Options.AutoLerpPos.Value then return end
 
-            lerpToPosition(Vector3.new(49, 470, 2474), 0.5)
+            lerpToPosition(Vector3.new(49, 472, 2474), 1.2)
 
-            local lockedPos = CFrame.new(49, 470, 2474)
+            local lockedPos = CFrame.new(49, 472, 2474)
 
             while Options.AutoLerpPos.Value do
                 root.CFrame = lockedPos
