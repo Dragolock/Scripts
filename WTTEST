@@ -146,43 +146,51 @@ Tabs.mainTab:CreateToggle("TPConverter", {
     end)
 end)
 
-Tabs.mainTab:CreateToggle("TPEssence", {
-    Title = "TP Essence",
+Tabs.mainTab:CreateToggle("AutoLerpPos", {
+    Title = "Auto Lerp Positions",
     Default = false
 })
 :OnChanged(function(state)
     if state then
         task.spawn(function()
 
-            local Players = game:GetService("Players")
-            local PathfindingService = game:GetService("PathfindingService")
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local root = character:WaitForChild("HumanoidRootPart")
 
-            local player = Players.LocalPlayer
-            local char = player.Character or player.CharacterAdded:Wait()
-            local hum = char:WaitForChild("Humanoid")
-            local root = char:WaitForChild("HumanoidRootPart")
+            local RunService = game:GetService("RunService")
 
-            local startPos = Vector3.new(115,470,2482)
-            local targetPos = Vector3.new(49,471,2474)
-            local threshold = 5
+            local function lerpToPosition(targetPos, duration)
+                local startCFrame = root.CFrame
+                local endCFrame = CFrame.new(targetPos)
+                local startTime = tick()
 
-            root.CFrame = CFrame.new(startPos)
+                while Options.AutoLerpPos.Value do
+                    local elapsed = tick() - startTime
+                    local alpha = math.clamp(elapsed / duration, 0, 1)
 
-            local path = PathfindingService:CreatePath()
-            path:ComputeAsync(root.Position, targetPos)
+                    root.CFrame = startCFrame:Lerp(endCFrame, alpha)
 
-            local waypoints = path:GetWaypoints()
-
-            for _, wp in ipairs(waypoints) do
-                if not Options.TPEssence.Value then break end
-
-                if (root.Position - targetPos).Magnitude <= threshold then
-                    hum:Move(Vector3.zero)
-                    break
+                    if alpha >= 1 then break end
+                    RunService.RenderStepped:Wait()
                 end
+            end
 
-                hum:MoveTo(wp.Position)
-                hum.MoveToFinished:Wait()
+            lerpToPosition(Vector3.new(113, 470, 2475), 2.5)
+
+            if not Options.AutoLerpPos.Value then return end
+
+            task.wait(0.5)
+
+            if not Options.AutoLerpPos.Value then return end
+
+            lerpToPosition(Vector3.new(49, 470, 2474), 0.5)
+
+            local lockedPos = CFrame.new(49, 470, 2474)
+
+            while Options.AutoLerpPos.Value do
+                root.CFrame = lockedPos
+                RunService.RenderStepped:Wait()
             end
 
         end)
@@ -295,22 +303,19 @@ Tabs.zones:CreateButton({
 
 local RunService = game:GetService("RunService")
 local Player = game.Players.LocalPlayer
-local Folder = workspace:WaitForChild("FruitAutos")
 
-local SavedPositions = {}
+local function tp(x, y, z)
+    local char = Player.Character
+    if char and char:FindFirstChild("HumanoidRootPart") then
+        char.HumanoidRootPart.CFrame = CFrame.new(x, y, z)
+    end
+end
 
 Tabs.fruits:CreateToggle("UpgradeOranges", {
     Title = "Upgrade Oranges [% Tangerines]",
     Default = false
 })
 :OnChanged(function(state)
-    local part = Folder:FindFirstChild("Oranges")
-    if not part or not part:IsA("BasePart") then return end
-
-    if not SavedPositions["Oranges"] then
-        SavedPositions["Oranges"] = part.CFrame
-    end
-
     if state then
         local conn
         conn = RunService.Heartbeat:Connect(function()
@@ -318,15 +323,8 @@ Tabs.fruits:CreateToggle("UpgradeOranges", {
                 conn:Disconnect()
                 return
             end
-
-            local char = Player.Character
-            local hrp = char and char:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                part.CFrame = hrp.CFrame
-            end
+            tp(-1114, 513, 863)
         end)
-    else
-        part.CFrame = SavedPositions["Oranges"]
     end
 end)
 
@@ -335,13 +333,6 @@ Tabs.fruits:CreateToggle("UpgradeTangerines", {
     Default = false
 })
 :OnChanged(function(state)
-    local part = Folder:FindFirstChild("Tangerines")
-    if not part or not part:IsA("BasePart") then return end
-
-    if not SavedPositions["Tangerines"] then
-        SavedPositions["Tangerines"] = part.CFrame
-    end
-
     if state then
         local conn
         conn = RunService.Heartbeat:Connect(function()
@@ -349,15 +340,8 @@ Tabs.fruits:CreateToggle("UpgradeTangerines", {
                 conn:Disconnect()
                 return
             end
-
-            local char = Player.Character
-            local hrp = char and char:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                part.CFrame = hrp.CFrame
-            end
+            tp(-818, 4, -6)
         end)
-    else
-        part.CFrame = SavedPositions["Tangerines"]
     end
 end)
 
@@ -366,13 +350,6 @@ Tabs.fruits:CreateToggle("UpgradeLemons", {
     Default = false
 })
 :OnChanged(function(state)
-    local part = Folder:FindFirstChild("Lemons")
-    if not part or not part:IsA("BasePart") then return end
-
-    if not SavedPositions["Lemons"] then
-        SavedPositions["Lemons"] = part.CFrame
-    end
-
     if state then
         local conn
         conn = RunService.Heartbeat:Connect(function()
@@ -380,15 +357,8 @@ Tabs.fruits:CreateToggle("UpgradeLemons", {
                 conn:Disconnect()
                 return
             end
-
-            local char = Player.Character
-            local hrp = char and char:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                part.CFrame = hrp.CFrame
-            end
+            tp(-1099, 513, 860)
         end)
-    else
-        part.CFrame = SavedPositions["Lemons"]
     end
 end)
 
@@ -397,13 +367,6 @@ Tabs.fruits:CreateToggle("UpgradeLimes", {
     Default = false
 })
 :OnChanged(function(state)
-    local part = Folder:FindFirstChild("Limes")
-    if not part or not part:IsA("BasePart") then return end
-
-    if not SavedPositions["Limes"] then
-        SavedPositions["Limes"] = part.CFrame
-    end
-
     if state then
         local conn
         conn = RunService.Heartbeat:Connect(function()
@@ -411,15 +374,8 @@ Tabs.fruits:CreateToggle("UpgradeLimes", {
                 conn:Disconnect()
                 return
             end
-
-            local char = Player.Character
-            local hrp = char and char:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                part.CFrame = hrp.CFrame
-            end
+            tp(1499, 399, 2538)
         end)
-    else
-        part.CFrame = SavedPositions["Limes"]
     end
 end)
 
@@ -428,13 +384,6 @@ Tabs.fruits:CreateToggle("UpgradeMelons", {
     Default = false
 })
 :OnChanged(function(state)
-    local part = Folder:FindFirstChild("Melons")
-    if not part or not part:IsA("BasePart") then return end
-
-    if not SavedPositions["Melons"] then
-        SavedPositions["Melons"] = part.CFrame
-    end
-
     if state then
         local conn
         conn = RunService.Heartbeat:Connect(function()
@@ -442,15 +391,8 @@ Tabs.fruits:CreateToggle("UpgradeMelons", {
                 conn:Disconnect()
                 return
             end
-
-            local char = Player.Character
-            local hrp = char and char:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                part.CFrame = hrp.CFrame
-            end
+            tp(1499, 399, 2522)
         end)
-    else
-        part.CFrame = SavedPositions["Melons"]
     end
 end)
 
