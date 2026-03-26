@@ -160,6 +160,7 @@ Tabs.mainTab:CreateToggle("AutoLerpPos", {
 
             local character = player.Character or player.CharacterAdded:Wait()
             local root = character:WaitForChild("HumanoidRootPart")
+            local humanoid = character:WaitForChild("Humanoid")
 
             local function lerpToPosition(targetPos, duration)
                 local startCFrame = root.CFrame
@@ -189,14 +190,34 @@ Tabs.mainTab:CreateToggle("AutoLerpPos", {
             task.wait(1)
             if not Options.AutoLerpPos.Value then return end
 
-            root.Anchored = true
+            humanoid.WalkSpeed = 0
+            humanoid.JumpPower = 0
+            humanoid.AutoRotate = false
+
+            while Options.AutoLerpPos.Value do
+                root.AssemblyLinearVelocity = Vector3.zero
+                root.AssemblyAngularVelocity = Vector3.zero
+                RunService.RenderStepped:Wait()
+            end
 
         end)
 
     else
         local character = player.Character
-        if character and character:FindFirstChild("HumanoidRootPart") then
-            character.HumanoidRootPart.Anchored = false
+        if character then
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            local root = character:FindFirstChild("HumanoidRootPart")
+
+            if humanoid then
+                humanoid.WalkSpeed = 16
+                humanoid.JumpPower = 50
+                humanoid.AutoRotate = true
+            end
+
+            if root then
+                root.AssemblyLinearVelocity = Vector3.zero
+                root.AssemblyAngularVelocity = Vector3.zero
+            end
         end
     end
 end)
