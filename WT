@@ -293,19 +293,29 @@ Tabs.zones:CreateButton({
     end
 })
 
+local RunService = game:GetService("RunService")
+local Player = game.Players.LocalPlayer
+
+local function tp(x, y, z)
+    local char = Player.Character
+    if char and char:FindFirstChild("HumanoidRootPart") then
+        char.HumanoidRootPart.CFrame = CFrame.new(x, y, z)
+    end
+end
+
 Tabs.fruits:CreateToggle("UpgradeOranges", {
     Title = "Upgrade Oranges [% Tangerines]",
     Default = false
 })
 :OnChanged(function(state)
     if state then
-        task.spawn(function()
-            while Options.UpgradeOranges.Value do
-                pcall(function()
-                    game:GetService("ReplicatedStorage"):WaitForChild("FruitEvents"):WaitForChild("Oranges"):FireServer()
-                end)
-                task.wait(0.1)
+        local conn
+        conn = RunService.Heartbeat:Connect(function()
+            if not Options.UpgradeOranges.Value then
+                conn:Disconnect()
+                return
             end
+            tp(-1114, 513, 863)
         end)
     end
 end)
@@ -316,13 +326,13 @@ Tabs.fruits:CreateToggle("UpgradeTangerines", {
 })
 :OnChanged(function(state)
     if state then
-        task.spawn(function()
-            while Options.UpgradeTangerines.Value do
-                pcall(function()
-                    game:GetService("ReplicatedStorage"):WaitForChild("FruitEvents"):WaitForChild("Tangerines"):FireServer()
-                end)
-                task.wait(0.1)
+        local conn
+        conn = RunService.Heartbeat:Connect(function()
+            if not Options.UpgradeTangerines.Value then
+                conn:Disconnect()
+                return
             end
+            tp(-818, 4, -6)
         end)
     end
 end)
@@ -333,13 +343,13 @@ Tabs.fruits:CreateToggle("UpgradeLemons", {
 })
 :OnChanged(function(state)
     if state then
-        task.spawn(function()
-            while Options.UpgradeLemons.Value do
-                pcall(function()
-                    game:GetService("ReplicatedStorage"):WaitForChild("FruitEvents"):WaitForChild("Lemons"):FireServer()
-                end)
-                task.wait(0.1)
+        local conn
+        conn = RunService.Heartbeat:Connect(function()
+            if not Options.UpgradeLemons.Value then
+                conn:Disconnect()
+                return
             end
+            tp(-1099, 513, 860)
         end)
     end
 end)
@@ -350,52 +360,33 @@ Tabs.fruits:CreateToggle("UpgradeLimes", {
 })
 :OnChanged(function(state)
     if state then
-        task.spawn(function()
-            while Options.UpgradeLimes.Value do
-                pcall(function()
-                    game:GetService("ReplicatedStorage"):WaitForChild("FruitEvents"):WaitForChild("Limes"):FireServer()
-                end)
-                task.wait(0.1)
+        local conn
+        conn = RunService.Heartbeat:Connect(function()
+            if not Options.UpgradeLimes.Value then
+                conn:Disconnect()
+                return
             end
+            tp(1499, 399, 2538)
         end)
     end
 end)
 
-Tabs.fruits:CreateToggle("UpgradeEverything", {
-    Title = "Upgrade Everything",
+Tabs.fruits:CreateToggle("UpgradeMelons", {
+    Title = "Upgrade Melons [% Limes]",
     Default = false
 })
 :OnChanged(function(state)
     if state then
-        task.spawn(function()
-            local Options = Options -- make sure your Options table exists
-            local FruitEvents = game:GetService("ReplicatedStorage"):WaitForChild("FruitEvents")
-
-            while Options.UpgradeEverything.Value do
-                pcall(function()
-                    FruitEvents:WaitForChild("Oranges"):FireServer()
-                    task.wait(0.1)
-
-                    FruitEvents:WaitForChild("Tangerines"):FireServer()
-                    task.wait(0.1)
-
-                    FruitEvents:WaitForChild("Lemons"):FireServer()
-                    task.wait(0.1)
-
-                    FruitEvents:WaitForChild("Limes"):FireServer()
-                    task.wait(0.1)
-                end)
+        local conn
+        conn = RunService.Heartbeat:Connect(function()
+            if not Options.UpgradeMelons.Value then
+                conn:Disconnect()
+                return
             end
+            tp(1499, 399, 2522)
         end)
     end
 end)
-
-local noteAutoAll = Tabs.fruits:Paragraph("AutoAllNote", {
-    Title = "Note",
-    Content = "Upgrade Everything Upgrades every Fruit, including Limes. (I recommend only using it if you're late game and can generate more lemons than you can spend)",
-    TitleAlignment = "Middle",
-    ContentAlignment = Enum.TextXAlignment.Left
-})
 
 Tabs.fruits:CreateButton{
     Title = "TP Fruit Upgraders",
