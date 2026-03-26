@@ -146,52 +146,64 @@ Tabs.mainTab:CreateToggle("TPConverter", {
     end)
 end)
 
-Tabs.mainTab:CreateToggle("TPEssence", {
-    Title = "TP Essence",
+Tabs.mainTab:CreateToggle("AutoLerpPos", {
+    Title = "TP Essence Zone",
     Default = false
 })
 :OnChanged(function(state)
+
+    local player = game.Players.LocalPlayer
+    local RunService = game:GetService("RunService")
+
     if state then
         task.spawn(function()
 
-            local Players = game:GetService("Players")
-            local PathfindingService = game:GetService("PathfindingService")
+            local character = player.Character or player.CharacterAdded:Wait()
+            local root = character:WaitForChild("HumanoidRootPart")
 
-            local player = Players.LocalPlayer
-            local char = player.Character or player.CharacterAdded:Wait()
-            local hum = char:WaitForChild("Humanoid")
-            local root = char:WaitForChild("HumanoidRootPart")
+            local function lerpToPosition(targetPos, duration)
+                local startCFrame = root.CFrame
+                local endCFrame = CFrame.new(targetPos)
+                local startTime = tick()
 
-            local startPos = Vector3.new(115,470,2482)
-            local targetPos = Vector3.new(49,471,2474)
-            local threshold = 5
+                while Options.AutoLerpPos.Value do
+                    local elapsed = tick() - startTime
+                    local alpha = math.clamp(elapsed / duration, 0, 1)
 
-            root.CFrame = CFrame.new(startPos)
+                    root.CFrame = startCFrame:Lerp(endCFrame, alpha)
 
-            local path = PathfindingService:CreatePath()
-            path:ComputeAsync(root.Position, targetPos)
-
-            local waypoints = path:GetWaypoints()
-
-            for _, wp in ipairs(waypoints) do
-                if not Options.TPEssence.Value then break end
-
-                if (root.Position - targetPos).Magnitude <= threshold then
-                    hum:Move(Vector3.zero)
-                    break
+                    if alpha >= 1 then break end
+                    RunService.RenderStepped:Wait()
                 end
-
-                hum:MoveTo(wp.Position)
-                hum.MoveToFinished:Wait()
             end
 
+            lerpToPosition(Vector3.new(113, 470, 2475), 0.3)
+            if not Options.AutoLerpPos.Value then return end
+
+            task.wait(0.5)
+            if not Options.AutoLerpPos.Value then return end
+
+            lerpToPosition(Vector3.new(49, 469, 2474), 1.2)
+            if not Options.AutoLerpPos.Value then return end
+
+            task.wait(1)
+            if not Options.AutoLerpPos.Value then return end
+
+            root.Anchored = true
+
         end)
+
+    else
+        local character = player.Character
+        if character and character:FindFirstChild("HumanoidRootPart") then
+            character.HumanoidRootPart.Anchored = false
+        end
     end
 end)
 
 local noteAutoAll = Tabs.mainTab:Paragraph("AutoAllNote", {
     Title = "Note",
-    Content = "Automate Everything TP's to converter / Clicks both buttons every 0.05s / TP's x9 zone into your hitbox.",
+    Content = "Automate Everything TP's to converter / Clicks both buttons every 0.05s / TP's x99 zone into your hitbox.",
     TitleAlignment = "Middle",
     ContentAlignment = Enum.TextXAlignment.Left
 })
