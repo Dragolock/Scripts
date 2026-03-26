@@ -296,39 +296,164 @@ Tabs.zones:CreateButton({
 local RunService = game:GetService("RunService")
 local Player = game.Players.LocalPlayer
 local Folder = workspace:WaitForChild("FruitAutos")
+
 local SavedPositions = {}
 
-local function upgradePart(partName, optionName)
-    local part = Folder:FindFirstChild(partName)
+Tabs.fruits:CreateToggle("UpgradeOranges", {
+    Title = "Upgrade Oranges [% Tangerines]",
+    Default = false
+})
+:OnChanged(function(state)
+    local part = Folder:FindFirstChild("Oranges")
     if not part or not part:IsA("BasePart") then return end
-    if not SavedPositions[partName] then SavedPositions[partName] = part.CFrame end
 
-    if Options[optionName].Value then
+    if not SavedPositions["Oranges"] then
+        SavedPositions["Oranges"] = part.CFrame
+    end
+
+    if state then
         local conn
         conn = RunService.Heartbeat:Connect(function()
-            if not Options[optionName].Value then conn:Disconnect() return end
-            local hrp = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
-            if hrp then part.CFrame = hrp.CFrame end
+            if not Options.UpgradeOranges.Value then
+                conn:Disconnect()
+                return
+            end
+
+            local char = Player.Character
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                part.CFrame = hrp.CFrame
+            end
         end)
     else
-        part.CFrame = SavedPositions[partName]
+        part.CFrame = SavedPositions["Oranges"]
     end
-end
+end)
 
-Tabs.fruits:CreateToggle("UpgradeOranges", {Title="Upgrade Oranges [% Tangerines]", Default=false})
-:OnChanged(function(state) upgradePart("Oranges", "UpgradeOranges") end)
+Tabs.fruits:CreateToggle("UpgradeTangerines", {
+    Title = "Upgrade Tangerines [% Clicks]",
+    Default = false
+})
+:OnChanged(function(state)
+    local part = Folder:FindFirstChild("Tangerines")
+    if not part or not part:IsA("BasePart") then return end
 
-Tabs.fruits:CreateToggle("UpgradeTangerines", {Title="Upgrade Tangerines [% Clicks]", Default=false})
-:OnChanged(function(state) upgradePart("Tangerines", "UpgradeTangerines") end)
+    if not SavedPositions["Tangerines"] then
+        SavedPositions["Tangerines"] = part.CFrame
+    end
 
-Tabs.fruits:CreateToggle("UpgradeLemons", {Title="Upgrade Lemons [% Oranges]", Default=false})
-:OnChanged(function(state) upgradePart("Lemons", "UpgradeLemons") end)
+    if state then
+        local conn
+        conn = RunService.Heartbeat:Connect(function()
+            if not Options.UpgradeTangerines.Value then
+                conn:Disconnect()
+                return
+            end
 
-Tabs.fruits:CreateToggle("UpgradeLimes", {Title="Upgrade Limes [% Lemons]", Default=false})
-:OnChanged(function(state) upgradePart("Limes", "UpgradeLimes") end)
+            local char = Player.Character
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                part.CFrame = hrp.CFrame
+            end
+        end)
+    else
+        part.CFrame = SavedPositions["Tangerines"]
+    end
+end)
 
-Tabs.fruits:CreateToggle("UpgradeMelons", {Title="Upgrade Melons [% Limes]", Default=false})
-:OnChanged(function(state) upgradePart("Melons", "UpgradeMelons") end)
+Tabs.fruits:CreateToggle("UpgradeLemons", {
+    Title = "Upgrade Lemons [% Oranges]",
+    Default = false
+})
+:OnChanged(function(state)
+    local part = Folder:FindFirstChild("Lemons")
+    if not part or not part:IsA("BasePart") then return end
+
+    if not SavedPositions["Lemons"] then
+        SavedPositions["Lemons"] = part.CFrame
+    end
+
+    if state then
+        local conn
+        conn = RunService.Heartbeat:Connect(function()
+            if not Options.UpgradeLemons.Value then
+                conn:Disconnect()
+                return
+            end
+
+            local char = Player.Character
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                part.CFrame = hrp.CFrame
+            end
+        end)
+    else
+        part.CFrame = SavedPositions["Lemons"]
+    end
+end)
+
+Tabs.fruits:CreateToggle("UpgradeLimes", {
+    Title = "Upgrade Limes [% Lemons]",
+    Default = false
+})
+:OnChanged(function(state)
+    local part = Folder:FindFirstChild("Limes")
+    if not part or not part:IsA("BasePart") then return end
+
+    if not SavedPositions["Limes"] then
+        SavedPositions["Limes"] = part.CFrame
+    end
+
+    if state then
+        local conn
+        conn = RunService.Heartbeat:Connect(function()
+            if not Options.UpgradeLimes.Value then
+                conn:Disconnect()
+                return
+            end
+
+            local char = Player.Character
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                part.CFrame = hrp.CFrame
+            end
+        end)
+    else
+        part.CFrame = SavedPositions["Limes"]
+    end
+end)
+
+Tabs.fruits:CreateToggle("UpgradeMelons", {
+    Title = "Upgrade Melons [% Limes]",
+    Default = false
+})
+:OnChanged(function(state)
+    local part = Folder:FindFirstChild("Melons")
+    if not part or not part:IsA("BasePart") then return end
+
+    if not SavedPositions["Melons"] then
+        SavedPositions["Melons"] = part.CFrame
+    end
+
+    if state then
+        local conn
+        conn = RunService.Heartbeat:Connect(function()
+            if not Options.UpgradeMelons.Value then
+                conn:Disconnect()
+                return
+            end
+
+            local char = Player.Character
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                part.CFrame = hrp.CFrame
+            end
+        end)
+    else
+        part.CFrame = SavedPositions["Melons"]
+    end
+end)
+
 Tabs.fruits:CreateButton{
     Title = "TP Fruit Upgraders",
     Description = "Teleport to Fruit Upgraders",
@@ -363,14 +488,12 @@ local LemonsParagraph = Tabs.stats:CreateParagraph("LemonsCount", {Title = "Lemo
 local LimesParagraph = Tabs.stats:CreateParagraph("LimesCount", {Title = "Limes", Content = "", TitleAlignment = "Left", ContentAlignment = Enum.TextXAlignment.Left})
 local OrangesParagraph = Tabs.stats:CreateParagraph("OrangesCount", {Title = "Oranges", Content = "", TitleAlignment = "Left", ContentAlignment = Enum.TextXAlignment.Left})
 local TangerinesParagraph = Tabs.stats:CreateParagraph("TangerinesCount", {Title = "Tangerines", Content = "", TitleAlignment = "Left", ContentAlignment = Enum.TextXAlignment.Left})
-local MelonsParagraph = Tabs.stats:CreateParagraph("MelonsCount", {Title = "Melons", Content = "", TitleAlignment = "Left", ContentAlignment = Enum.TextXAlignment.Left})
 
 local fruitMap = {
     Lemons = LemonsParagraph,
     Limes = LimesParagraph,
     Oranges = OrangesParagraph,
     Tangerines = TangerinesParagraph
-    Melons = MelonsParagraph
 }
 
 local function getValue(folder, name)
