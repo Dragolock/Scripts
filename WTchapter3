@@ -320,17 +320,20 @@ local function getValue(folder, name)
     return 0
 end
 
-local function waitForStatsFolder(player)
+local function waitForOtherData(player)
     local otherData = player:WaitForChild("OtherData", 5)
-    if not otherData then return nil end
-    local statsFolder = otherData:WaitForChild("Stats", 5)
-    return statsFolder
+    return otherData
 end
 
 local function updateStatParagraphs()
-    local statsFolder = waitForStatsFolder(localPlayer)
+    local otherData = waitForOtherData(localPlayer)
+    if not otherData then
+        warn("OtherData folder not found!")
+        return
+    end
+    
     for statName, paragraph in pairs(statMap) do
-        local value = statsFolder and getValue(statsFolder, statName) or "N/A"
+        local value = getValue(otherData, statName)
         paragraph:SetValue(tostring(value))
     end
 end
