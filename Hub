@@ -1,19 +1,12 @@
-local TeleportService = game:GetService("TeleportService")
-local player = game.Players.LocalPlayer
-
 local Scripts = {
     [92050243909420] = "https://raw.githubusercontent.com/Dragolock/Scripts/refs/heads/main/WTchapter2",
     [99207780794303] = "https://raw.githubusercontent.com/Dragolock/Scripts/refs/heads/main/WTchapter3",
 }
 
+local defaultScript = "https://raw.githubusercontent.com/Dragolock/Scripts/refs/heads/main/Needed"
+
 local placeId = game.PlaceId
 
-if Scripts[placeId] then
-    loadstring(game:HttpGet(Scripts[placeId]))()
-else
-    warn("Wrong PlaceId, teleporting...")
+local scriptToLoad = Scripts[placeId] or defaultScript
 
-    local targetPlaceId = next(Scripts)
-
-    TeleportService:Teleport(targetPlaceId, player)
-end
+loadstring(game:HttpGet(scriptToLoad))()
