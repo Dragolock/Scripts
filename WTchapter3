@@ -15,6 +15,7 @@ local Window = Library:Window{
 
 local Tabs = {
     mainTab = Window:CreateTab{Title = "Main Game", Icon = "phosphor-game-controller-bold"},
+    tp = Window:CreateTab{Title = "Teleports", Icon = "phosphor-fast-forward-bold"},
     performance = Window:CreateTab{Title = "Performance", Icon = "phosphor-device-tablet-bold"},
     Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-gear-bold"}
 }
@@ -84,6 +85,17 @@ Tabs.mainTab:CreateToggle({
                 part.CFrame = originalCFrame
             end
         end
+    end
+})
+
+Tabs.tp:CreateButton({
+    Title = "TP XP Area",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local hrp = character:WaitForChild("HumanoidRootPart")
+
+        hrp.CFrame = CFrame.new(110, 90, -235)
     end
 })
 
