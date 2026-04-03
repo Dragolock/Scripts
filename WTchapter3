@@ -16,6 +16,7 @@ local Window = Library:Window{
 local Tabs = {
     mainTab = Window:CreateTab{Title = "Main Game", Icon = "phosphor-game-controller-bold"},
     tp = Window:CreateTab{Title = "Teleports", Icon = "phosphor-fast-forward-bold"},
+    stats = Window:CreateTab{Title = "Stats", Icon = "phosphor-fast-forward-bold"},
     performance = Window:CreateTab{Title = "Performance", Icon = "phosphor-device-tablet-bold"},
     Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-gear-bold"}
 }
@@ -280,6 +281,72 @@ Tabs.tp:CreateButton({
         hrp.CFrame = CFrame.new(110, 90, -235)
     end
 })
+
+local Players = game:GetService("Players")
+local localPlayer = Players.LocalPlayer
+
+local DayParagraph = Tabs.stats:CreateParagraph("Day Pad %", {
+    Title = "Day Pad %",
+    Content = "",
+    TitleAlignment = "Left",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
+
+local NightParagraph = Tabs.stats:CreateParagraph("Night Pad %", {
+    Title = "Night Pad %",
+    Content = "",
+    TitleAlignment = "Left",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
+
+local LevelParagraph = Tabs.stats:CreateParagraph("LevelCount", {
+    Title = "Level",
+    Content = "",
+    TitleAlignment = "Left",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
+
+local statMap = {
+    ["Day"] = DayParagraph,
+    ["Night"] = NightParagraph,
+    ["Level"] = LevelParagraph
+}
+
+local function getValue(folder, name)
+    local stat = folder:FindFirstChild(name)
+    if stat and stat:IsA("ValueBase") then
+        return stat.Value
+    end
+    return 0
+end
+
+local function waitForStatsFolder(player)
+    local otherData = player:WaitForChild("OtherData", 5)
+    if not otherData then return nil end
+    local statsFolder = otherData:WaitForChild("Stats", 5)
+    return statsFolder
+end
+
+local function updateStatParagraphs()
+    local statsFolder = waitForStatsFolder(localPlayer)
+    for statName, paragraph in pairs(statMap) do
+        local value = statsFolder and getValue(statsFolder, statName) or "N/A"
+        paragraph:SetValue(tostring(value))
+    end
+end
+
+Tabs.stats:CreateButton({
+    Title = "Refresh Stats",
+    Description = "Manually refresh Day Pad %, Night Pad %, and Level",
+    Callback = updateStatParagraphs
+})
+
+task.spawn(function()
+    while true do
+        updateStatParagraphs()
+        task.wait(1)
+    end
+end)
 
 Tabs.performance:CreateButton({
     Title = "Anti AFK",
