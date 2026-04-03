@@ -65,7 +65,7 @@ Tabs.mainTab:CreateToggle("FarmDayNightPad", {
             local player = game.Players.LocalPlayer
 
             local trackedParts = {}
-            local espTransparency = 0.2
+            local espTransparency = 0.8
             local SIZE = Vector3.new(10, 10, 10)
 
             local function getRoot(char)
@@ -106,7 +106,7 @@ Tabs.mainTab:CreateToggle("FarmDayNightPad", {
                 billboard.Name = name.."_TAG"
                 billboard.Adornee = v
                 billboard.Size = UDim2.new(0, 100, 0, 40)
-                billboard.StudsOffset = Vector3.new(0, 6, 0)
+                billboard.StudsOffset = Vector3.new(0, 8, 0)
                 billboard.AlwaysOnTop = true
                 billboard.Parent = v
 
