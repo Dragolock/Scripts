@@ -18,6 +18,7 @@ local Tabs = {
     zones = Window:CreateTab{Title = "Zones", Icon = "phosphor-atom-bold"},
     fruits = Window:CreateTab{Title = "Fruits", Icon = "phosphor-orange-bold"},
     stats = Window:CreateTab{Title = "Stats", Icon = "phosphor-chart-bar-horizontal-bold"},
+    tp = Window:CreateTab{Title = "Teleports", Icon = "phosphor-fast-forward-bold"},
     performance = Window:CreateTab{Title = "Performance", Icon = "phosphor-device-tablet-bold"},
     Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-gear-bold"}
 }
@@ -420,32 +421,6 @@ Tabs.fruits:CreateToggle("UpgradeMelons", {
     end
 end)
 
-Tabs.fruits:CreateButton{
-    Title = "TP Fruit Upgraders",
-    Description = "Teleport to Fruit Upgraders",
-    Callback = function()
-        local root = game.Players.LocalPlayer.Character 
-            and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-
-        if root then
-            root.CFrame = CFrame.new(-1152, 514, 849)
-        end
-    end
-}
-
-Tabs.fruits:CreateButton{
-    Title = "TP Lime Upgrader",
-    Description = "Teleport to Lime Upgrader",
-    Callback = function()
-        local root = game.Players.LocalPlayer.Character 
-            and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-
-        if root then
-            root.CFrame = CFrame.new(1542, 400, 2525)
-        end
-    end
-}
-
 local Players = game:GetService("Players")
 local localPlayer = Players.LocalPlayer
 
@@ -497,6 +472,39 @@ task.spawn(function()
         task.wait(3)
     end
 end)
+
+Tabs.tp:CreateButton({
+    Title = "TP Upgrade Tree",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+        humanoidRootPart.CFrame = CFrame.new(145, 114, 669)
+    end
+})
+
+Tabs.tp:CreateButton({
+    Title = "TP Dorfic Fruit Upgraders",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+        humanoidRootPart.CFrame = CFrame.new(-1152, 514, 849)
+    end
+})
+
+Tabs.tp:CreateButton({
+    Title = "TP Central Fruit Upgraders",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+        humanoidRootPart.CFrame = CFrame.new(1542, 400, 2525)
+    end
+})
 
 Tabs.performance:CreateButton({
     Title = "Anti AFK",
