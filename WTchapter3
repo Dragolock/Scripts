@@ -53,6 +53,127 @@ Tabs.mainTab:CreateToggle("AutoConvert", {
     end
 end)
 
+Tabs.mainTab:CreateToggle("FarmDayNightPad", {
+    Title = "Farm Day/Night Pad",
+    Default = false
+})
+:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            local RunService = game:GetService("RunService")
+            local player = game.Players.LocalPlayer
+
+            local trackedParts = {}
+            local espTransparency = 0.2
+            local SIZE = Vector3.new(10, 10, 10)
+
+            local function getRoot(char)
+                return char:FindFirstChild("HumanoidRootPart")
+            end
+
+            local function getDisplayName(name)
+                name = name:lower()
+                if name == "day" then
+                    return "DayPad"
+                elseif name == "night" then
+                    return "NightPad"
+                end
+            end
+
+            local function addESP(v)
+                local name = v.Name:lower()
+                if not v:FindFirstChild(name.."_PESP") then
+                    local a = Instance.new("BoxHandleAdornment")
+                    a.Name = name.."_PESP"
+                    a.Parent = v
+                    a.Adornee = v
+                    a.AlwaysOnTop = true
+                    a.ZIndex = 0
+                    a.Size = v.Size
+                    a.Transparency = espTransparency
+                    a.Color = BrickColor.new("white")
+                end
+            end
+
+            local function addNameTag(v)
+                local name = v.Name:lower()
+                local display = getDisplayName(name)
+                if not display then return end
+                if v:FindFirstChild(name.."_TAG") then return end
+
+                local billboard = Instance.new("BillboardGui")
+                billboard.Name = name.."_TAG"
+                billboard.Adornee = v
+                billboard.Size = UDim2.new(0, 100, 0, 40)
+                billboard.StudsOffset = Vector3.new(0, 6, 0)
+                billboard.AlwaysOnTop = true
+                billboard.Parent = v
+
+                local text = Instance.new("TextLabel")
+                text.Size = UDim2.new(1, 0, 1, 0)
+                text.BackgroundTransparency = 1
+                text.Text = display
+                text.TextColor3 = Color3.fromRGB(255, 255, 255)
+                text.TextStrokeTransparency = 0
+                text.TextScaled = true
+                text.Font = Enum.Font.SourceSansBold
+                text.Parent = billboard
+            end
+
+            local function setupPart(v)
+                if not v then return end
+                v.Size = SIZE
+                v.Anchored = true
+
+                addESP(v)
+                addNameTag(v)
+
+                table.insert(trackedParts, v)
+            end
+
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("BasePart") then
+                    local name = v.Name:lower()
+                    if name == "day" or name == "night" then
+                        setupPart(v)
+                    end
+                end
+            end
+
+            workspace.DescendantAdded:Connect(function(v)
+                if v:IsA("BasePart") then
+                    local name = v.Name:lower()
+                    if name == "day" or name == "night" then
+                        setupPart(v)
+                    end
+                end
+            end)
+
+            local connection
+            connection = RunService.Heartbeat:Connect(function()
+                if not Options.FarmDayNightPad.Value then
+                    if connection then
+                        connection:Disconnect()
+                    end
+                    return
+                end
+
+                local character = player.Character
+                if not character then return end
+
+                local root = getRoot(character)
+                if not root then return end
+
+                for _, v in pairs(trackedParts) do
+                    if v and v.Parent then
+                        v.CFrame = root.CFrame
+                    end
+                end
+            end)
+        end)
+    end
+end)
+
 local PathfindingService = game:GetService("PathfindingService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
@@ -141,6 +262,13 @@ Tabs.mainTab:CreateToggle("TPLevelArea", {
         end
     end
 end)
+
+local noteAutoAll = Tabs.mainTab:Paragraph("AutoAllNote", {
+    Title = "Note",
+    Content = "You don't need to unlock the Day/Night pad to farm them, my script farms them without actually unlocking them.",
+    TitleAlignment = "Middle",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
 
 Tabs.tp:CreateButton({
     Title = "TP XP Area",
