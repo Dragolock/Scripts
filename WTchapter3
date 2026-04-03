@@ -53,40 +53,48 @@ Tabs.mainTab:CreateToggle("AutoConvert", {
     end
 end)
 
-local RunService = game:GetService("RunService")
+Tabs.mainTab:CreateToggle("BringLevelArea", {
+    Title = "Bring Level Area",
+    Default = false
+})
+:OnChanged(function(state)
+    local TARGET_PART_NAME = "TouchPartLevelTeleport"
+    local RESET_POSITION = Vector3.new(137, 91, -226)
 
-local connection
-local originalCFrame = CFrame.new(137, 91, -226)
+    local function getCharacter()
+        return game.Players.LocalPlayer.Character
+    end
 
-Tabs.mainTab:CreateToggle({
-    Title = "Auto Level",
-    Default = false,
-    Callback = function(Value)
-        if Value then
-            connection = RunService.Heartbeat:Connect(function()
-                local player = game.Players.LocalPlayer
-                local character = player.Character or player.CharacterAdded:Wait()
-                local hrp = character:FindFirstChild("HumanoidRootPart")
+    local function getHRP()
+        local char = getCharacter()
+        return char and char:FindFirstChild("HumanoidRootPart")
+    end
 
-                local part = workspace:FindFirstChild("TouchPartLevelTeleport", true)
+    if state then
+        task.spawn(function()
+            while Options.BringLevelArea.Value do
+                local part = workspace:FindFirstChild(TARGET_PART_NAME, true)
+                local hrp = getHRP()
 
                 if part and hrp then
-                    part.CFrame = hrp.CFrame
+                    pcall(function()
+                        part.CFrame = hrp.CFrame
+                    end)
                 end
-            end)
-        else
-            if connection then
-                connection:Disconnect()
-                connection = nil
-            end
 
-            local part = workspace:FindFirstChild("TouchPartLevelTeleport", true)
-            if part then
-                part.CFrame = originalCFrame
+                task.wait(0.05)
             end
+        end)
+    else
+        -- send back when toggle is off
+        local part = workspace:FindFirstChild(TARGET_PART_NAME, true)
+        if part then
+            pcall(function()
+                part.CFrame = CFrame.new(RESET_POSITION)
+            end)
         end
     end
-})
+end)
 
 Tabs.tp:CreateButton({
     Title = "TP XP Area",
