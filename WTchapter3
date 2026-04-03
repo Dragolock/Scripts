@@ -52,6 +52,41 @@ Tabs.mainTab:CreateToggle("AutoConvert", {
     end
 end)
 
+local RunService = game:GetService("RunService")
+
+local connection
+local originalCFrame = CFrame.new(137, 91, -226)
+
+Tabs.main:CreateToggle({
+    Title = "Auto Level",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            connection = RunService.Heartbeat:Connect(function()
+                local player = game.Players.LocalPlayer
+                local character = player.Character or player.CharacterAdded:Wait()
+                local hrp = character:FindFirstChild("HumanoidRootPart")
+
+                local part = workspace:FindFirstChild("TouchPartLevelTeleport", true)
+
+                if part and hrp then
+                    part.CFrame = hrp.CFrame
+                end
+            end)
+        else
+            if connection then
+                connection:Disconnect()
+                connection = nil
+            end
+
+            local part = workspace:FindFirstChild("TouchPartLevelTeleport", true)
+            if part then
+                part.CFrame = originalCFrame
+            end
+        end
+    end
+})
+
 Tabs.performance:CreateButton({
     Title = "Anti AFK",
     Description = "Helps you to not get kicked.",
