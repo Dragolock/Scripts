@@ -53,45 +53,79 @@ Tabs.mainTab:CreateToggle("AutoConvert", {
     end
 end)
 
-Tabs.mainTab:CreateToggle("BringLevelArea", {
-    Title = "Bring Level Area",
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+
+Tabs.mainTab:CreateToggle("TPLevelArea", {
+    Title = "TP Level Area",
     Default = false
 })
 :OnChanged(function(state)
-    local TARGET_PART_NAME = "TouchPartLevelTeleport"
-    local RESET_POSITION = Vector3.new(137, 91, -226)
+
+    local player = Players.LocalPlayer
+
+    local START_POSITION = Vector3.new(110, 90, -235)
+    local TARGET_POSITION = Vector3.new(137, 91, -226)
+    local LERP_SPEED = 0.1
 
     local function getCharacter()
-        return game.Players.LocalPlayer.Character
+        return player.Character
     end
 
-    local function getHRP()
-        local char = getCharacter()
+    local function getHumanoid(char)
+        return char and char:FindFirstChildOfClass("Humanoid")
+    end
+
+    local function getRoot(char)
         return char and char:FindFirstChild("HumanoidRootPart")
     end
 
     if state then
         task.spawn(function()
-            while Options.BringLevelArea.Value do
-                local part = workspace:FindFirstChild(TARGET_PART_NAME, true)
-                local hrp = getHRP()
+            local character = getCharacter()
+            local humanoid = getHumanoid(character)
+            local root = getRoot(character)
 
-                if part and hrp then
-                    pcall(function()
-                        part.CFrame = hrp.CFrame
-                    end)
-                end
+            if not (character and humanoid and root) then return end
 
-                task.wait(0.05)
+            root.CFrame = CFrame.new(START_POSITION)
+
+            local targetCFrame = CFrame.new(TARGET_POSITION)
+
+            while Options.TPLevelArea.Value and (root.Position - TARGET_POSITION).Magnitude > 0.5 do
+                root.CFrame = root.CFrame:Lerp(targetCFrame, LERP_SPEED)
+                RunService.RenderStepped:Wait()
+            end
+
+            task.wait(1)
+
+            humanoid.WalkSpeed = 0
+            humanoid.JumpPower = 0
+            humanoid.AutoRotate = false
+
+            while Options.TPLevelArea.Value do
+                root.AssemblyLinearVelocity = Vector3.zero
+                root.AssemblyAngularVelocity = Vector3.zero
+                RunService.RenderStepped:Wait()
             end
         end)
+
     else
-        -- send back when toggle is off
-        local part = workspace:FindFirstChild(TARGET_PART_NAME, true)
-        if part then
-            pcall(function()
-                part.CFrame = CFrame.new(RESET_POSITION)
-            end)
+        local character = player.Character
+        if character then
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            local root = character:FindFirstChild("HumanoidRootPart")
+
+            if humanoid then
+                humanoid.WalkSpeed = 16
+                humanoid.JumpPower = 50
+                humanoid.AutoRotate = true
+            end
+
+            if root then
+                root.AssemblyLinearVelocity = Vector3.zero
+                root.AssemblyAngularVelocity = Vector3.zero
+            end
         end
     end
 end)
