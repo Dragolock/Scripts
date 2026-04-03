@@ -53,6 +53,7 @@ Tabs.mainTab:CreateToggle("AutoConvert", {
     end
 end)
 
+local PathfindingService = game:GetService("PathfindingService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 
@@ -66,7 +67,6 @@ Tabs.mainTab:CreateToggle("TPLevelArea", {
 
     local START_POSITION = Vector3.new(110, 90, -235)
     local TARGET_POSITION = Vector3.new(137, 91, -226)
-    local LERP_SPEED = 0.1
 
     local function getCharacter()
         return player.Character
@@ -90,12 +90,24 @@ Tabs.mainTab:CreateToggle("TPLevelArea", {
 
             root.CFrame = CFrame.new(START_POSITION)
 
-            local targetCFrame = CFrame.new(TARGET_POSITION)
+            local path = PathfindingService:CreatePath()
+            path:ComputeAsync(root.Position, TARGET_POSITION)
 
-            while Options.TPLevelArea.Value and (root.Position - TARGET_POSITION).Magnitude > 0.5 do
-                root.CFrame = root.CFrame:Lerp(targetCFrame, LERP_SPEED)
-                RunService.RenderStepped:Wait()
+            local waypoints = path:GetWaypoints()
+
+            for _, waypoint in ipairs(waypoints) do
+                if not Options.TPLevelArea.Value then break end
+
+                humanoid:MoveTo(waypoint.Position)
+
+                if waypoint.Action == Enum.PathWaypointAction.Jump then
+                    humanoid.Jump = true
+                end
+
+                humanoid.MoveToFinished:Wait()
             end
+
+            if not Options.TPLevelArea.Value then return end
 
             task.wait(1)
 
