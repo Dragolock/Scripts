@@ -109,7 +109,7 @@ Tabs.mainTab:CreateToggle("TPLevelArea", {
 
             if not Options.TPLevelArea.Value then return end
 
-            task.wait(1)
+            task.wait(0.2)
 
             humanoid.WalkSpeed = 0
             humanoid.JumpPower = 0
