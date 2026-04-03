@@ -57,7 +57,7 @@ local RunService = game:GetService("RunService")
 local connection
 local originalCFrame = CFrame.new(137, 91, -226)
 
-Tabs.main:CreateToggle({
+Tabs.mainTab:CreateToggle({
     Title = "Auto Level",
     Default = false,
     Callback = function(Value)
