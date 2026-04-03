@@ -1,0 +1,57 @@
+local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
+local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
+local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
+
+local Window = Library:Window{
+    Title = "CHub - Waste Time Place ID",
+    SubTitle = "By ??? :)",
+    TabWidth = 100,
+    Size =  UDim2.fromOffset(425, 375),
+    Resize = false, 
+    Acrylic = true,
+    Theme = "VS Dark",
+    MinimizeKey = Enum.KeyCode.LeftShift
+}
+
+local Tabs = {
+    tp = Window:CreateTab{Title = "Teleports", Icon = "phosphor-fast-forward-bold"}
+}
+
+local Options = Library.Options
+
+local TeleportService = game:GetService("TeleportService")
+local player = game.Players.LocalPlayer
+
+Tabs.tp:CreateButton({
+    Title = "Teleport to Chapter 2",
+    Callback = function()
+        TeleportService:Teleport(92050243909420, player)
+    end
+})
+
+Tabs.tp:CreateButton({
+    Title = "Teleport to Chapter 3",
+    Callback = function()
+        TeleportService:Teleport(99207780794303, player)
+    end
+})
+
+--------------------------------------------------
+-- important stuff
+--------------------------------------------------
+
+SaveManager:SetLibrary(Library)
+InterfaceManager:SetLibrary(Library)
+
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+
+InterfaceManager:SetFolder("FluentEventsHub")
+SaveManager:SetFolder("FluentEventsHub/SpecificGame")
+
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+
+Window:SelectTab(1)
+Library:Notify{Title = "Fluent", Content = "Script loaded successfully!", Duration = 8}
+SaveManager:LoadAutoloadConfig()
