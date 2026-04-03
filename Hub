@@ -1,5 +1,5 @@
 local Scripts = {
-    [92050243909420] = "https://raw.githubusercontent.com/Dragolock/Scripts/refs/heads/main/WTTEST",
+    [92050243909420] = "https://raw.githubusercontent.com/Dragolock/Scripts/refs/heads/main/WT",
     -- [123456789] = "https://raw.githubusercontent.com/YourName/YourRepo/main/script1.lua",
     -- [987654321] = "https://raw.githubusercontent.com/YourName/YourRepo/main/script2.lua"
 }
