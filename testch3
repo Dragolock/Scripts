@@ -6,7 +6,7 @@ local Window = Library:Window{
     Title = "CHub - Waste Time chapter 3",
     SubTitle = "By ??? :)",
     TabWidth = 100,
-    Size =  UDim2.fromOffset(425, 375),
+    Size =  UDim2.fromOffset(350, 325),
     Resize = false, 
     Acrylic = true,
     Theme = "VS Dark",
@@ -16,6 +16,8 @@ local Window = Library:Window{
 local Tabs = {
     mainTab = Window:CreateTab{Title = "Main Game", Icon = "phosphor-game-controller-bold"},
     tp = Window:CreateTab{Title = "Teleports", Icon = "phosphor-fast-forward-bold"},
+    stats = Window:CreateTab{Title = "Stats", Icon = "phosphor-fast-forward-bold"},
+    player = Window:CreateTab{Title = "Player", Icon = "phosphor-person-bold"},
     performance = Window:CreateTab{Title = "Performance", Icon = "phosphor-device-tablet-bold"},
     Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-gear-bold"}
 }
@@ -46,6 +48,127 @@ Tabs.mainTab:CreateToggle("AutoConvert", {
                     local root = character:FindFirstChild("HumanoidRootPart")
                     if root then
                         root.CFrame = CFrame.new(53, 9, -114)
+                    end
+                end
+            end)
+        end)
+    end
+end)
+
+Tabs.mainTab:CreateToggle("FarmDayNightPad", {
+    Title = "Farm Day/Night Pad",
+    Default = false
+})
+:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            local RunService = game:GetService("RunService")
+            local player = game.Players.LocalPlayer
+
+            local trackedParts = {}
+            local espTransparency = 0.8
+            local SIZE = Vector3.new(10, 10, 10)
+
+            local function getRoot(char)
+                return char:FindFirstChild("HumanoidRootPart")
+            end
+
+            local function getDisplayName(name)
+                name = name:lower()
+                if name == "day" then
+                    return "DayPad"
+                elseif name == "night" then
+                    return "NightPad"
+                end
+            end
+
+            local function addESP(v)
+                local name = v.Name:lower()
+                if not v:FindFirstChild(name.."_PESP") then
+                    local a = Instance.new("BoxHandleAdornment")
+                    a.Name = name.."_PESP"
+                    a.Parent = v
+                    a.Adornee = v
+                    a.AlwaysOnTop = true
+                    a.ZIndex = 0
+                    a.Size = v.Size
+                    a.Transparency = espTransparency
+                    a.Color = BrickColor.new("white")
+                end
+            end
+
+            local function addNameTag(v)
+                local name = v.Name:lower()
+                local display = getDisplayName(name)
+                if not display then return end
+                if v:FindFirstChild(name.."_TAG") then return end
+
+                local billboard = Instance.new("BillboardGui")
+                billboard.Name = name.."_TAG"
+                billboard.Adornee = v
+                billboard.Size = UDim2.new(0, 100, 0, 40)
+                billboard.StudsOffset = Vector3.new(0, 8, 0)
+                billboard.AlwaysOnTop = true
+                billboard.Parent = v
+
+                local text = Instance.new("TextLabel")
+                text.Size = UDim2.new(1, 0, 1, 0)
+                text.BackgroundTransparency = 1
+                text.Text = display
+                text.TextColor3 = Color3.fromRGB(255, 255, 255)
+                text.TextStrokeTransparency = 0
+                text.TextScaled = true
+                text.Font = Enum.Font.SourceSansBold
+                text.Parent = billboard
+            end
+
+            local function setupPart(v)
+                if not v then return end
+                v.Size = SIZE
+                v.Anchored = true
+
+                addESP(v)
+                addNameTag(v)
+
+                table.insert(trackedParts, v)
+            end
+
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("BasePart") then
+                    local name = v.Name:lower()
+                    if name == "day" or name == "night" then
+                        setupPart(v)
+                    end
+                end
+            end
+
+            workspace.DescendantAdded:Connect(function(v)
+                if v:IsA("BasePart") then
+                    local name = v.Name:lower()
+                    if name == "day" or name == "night" then
+                        setupPart(v)
+                    end
+                end
+            end)
+
+            local connection
+            connection = RunService.Heartbeat:Connect(function()
+                if not Options.FarmDayNightPad.Value then
+                    if connection then
+                        connection:Disconnect()
+                    end
+                    return
+                end
+
+                local character = player.Character
+                if not character then return end
+
+                local root = getRoot(character)
+                if not root then return end
+
+                for _, v in pairs(trackedParts) do
+                    if v and v.Parent then
+                        v.CFrame = root.CFrame
                     end
                 end
             end)
@@ -109,7 +232,7 @@ Tabs.mainTab:CreateToggle("TPLevelArea", {
 
             if not Options.TPLevelArea.Value then return end
 
-            task.wait(1)
+            task.wait(0.2)
 
             humanoid.WalkSpeed = 0
             humanoid.JumpPower = 0
@@ -142,6 +265,13 @@ Tabs.mainTab:CreateToggle("TPLevelArea", {
     end
 end)
 
+local noteAutoAll = Tabs.mainTab:Paragraph("AutoAllNote", {
+    Title = "Note",
+    Content = "You don't need to unlock the Day/Night pad to farm them, my script farms them without actually unlocking them.",
+    TitleAlignment = "Middle",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
+
 Tabs.tp:CreateButton({
     Title = "TP XP Area",
     Callback = function()
@@ -150,6 +280,164 @@ Tabs.tp:CreateButton({
         local hrp = character:WaitForChild("HumanoidRootPart")
 
         hrp.CFrame = CFrame.new(110, 90, -235)
+    end
+})
+
+local Players = game:GetService("Players")
+local localPlayer = Players.LocalPlayer
+
+local DayParagraph = Tabs.stats:CreateParagraph("Day Pad %", {
+    Title = "Day Pad %",
+    Content = "",
+    TitleAlignment = "Left",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
+
+local NightParagraph = Tabs.stats:CreateParagraph("Night Pad %", {
+    Title = "Night Pad %",
+    Content = "",
+    TitleAlignment = "Left",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
+
+local LevelParagraph = Tabs.stats:CreateParagraph("LevelCount", {
+    Title = "Level",
+    Content = "",
+    TitleAlignment = "Left",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
+
+local statMap = {
+    ["Day"] = DayParagraph,
+    ["Night"] = NightParagraph,
+    ["Level"] = LevelParagraph
+}
+
+local function getValue(folder, name)
+    local stat = folder:FindFirstChild(name)
+    if stat and stat:IsA("ValueBase") then
+        return stat.Value
+    end
+    return 0
+end
+
+local function waitForOtherData(player)
+    local otherData = player:WaitForChild("OtherData", 5)
+    return otherData
+end
+
+local function updateStatParagraphs()
+    local otherData = waitForOtherData(localPlayer)
+    if not otherData then
+        warn("OtherData folder not found!")
+        return
+    end
+    
+    for statName, paragraph in pairs(statMap) do
+        local value = getValue(otherData, statName)
+        paragraph:SetValue(tostring(value))
+    end
+end
+
+Tabs.stats:CreateButton({
+    Title = "Refresh Stats",
+    Description = "Manually refresh Day Pad %, Night Pad %, and Level",
+    Callback = updateStatParagraphs
+})
+
+task.spawn(function()
+    while true do
+        updateStatParagraphs()
+        task.wait(1)
+    end
+end)
+
+local RunService = game:GetService("RunService")
+
+local tpwalking
+local tpSpeed = 1
+
+local Slider = Tabs.player:CreateSlider("TPWalkSpeed", {
+    Title = "Walk Speed Increase",
+    Description = "Makes you walk faster",
+    Default = 1,
+    Min = 1,
+    Max = 10,
+    Rounding = 1,
+    Callback = function(Value)
+        tpSpeed = Value
+        print("TP Speed changed to:", Value)
+    end
+})
+
+local function startTPWalk()
+    pcall(function()
+        if tpwalking then
+            tpwalking:Disconnect()
+        end
+    end)
+
+    local character = game.Players.LocalPlayer.Character
+    local humanoid = character and character:FindFirstChildWhichIsA("Humanoid")
+
+    tpwalking = RunService.Heartbeat:Connect(function(delta)
+        if not (character and humanoid and humanoid.Parent) then
+            tpwalking:Disconnect()
+            return
+        end
+
+        if humanoid.MoveDirection.Magnitude > 0 then
+            character:TranslateBy(humanoid.MoveDirection * tpSpeed * delta * 10)
+        end
+    end)
+end
+
+startTPWalk()
+
+local jumpPowerValue = 50
+
+local Slider = Tabs.player:CreateSlider("JumpPower", {
+    Title = "Jump Power Increase",
+    Description = "Controls your jump height",
+    Default = 50,
+    Min = 50,
+    Max = 300,
+    Rounding = 1,
+    Callback = function(Value)
+        jumpPowerValue = Value
+
+        local character = game.Players.LocalPlayer.Character
+        local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+
+        if humanoid then
+            if humanoid.UseJumpPower then
+                humanoid.JumpPower = jumpPowerValue
+            else
+                humanoid.JumpHeight = jumpPowerValue
+            end
+        end
+
+        print("Jump Power set to:", Value)
+    end
+})
+
+Tabs.player:CreateButton({
+    Title = "FullBright",
+    Description = "Makes you see in the night.",
+    Callback = function()
+        local Lighting = game:GetService("Lighting")
+
+        Lighting.Brightness = 2
+        Lighting.ClockTime = 14
+        Lighting.FogEnd = 100000
+        Lighting.GlobalShadows = false
+        Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "FullBright",
+            Text = "FullBright enabled!",
+            Duration = 3
+        })
     end
 })
 
