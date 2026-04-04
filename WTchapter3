@@ -17,6 +17,7 @@ local Tabs = {
     mainTab = Window:CreateTab{Title = "Main Game", Icon = "phosphor-game-controller-bold"},
     tp = Window:CreateTab{Title = "Teleports", Icon = "phosphor-fast-forward-bold"},
     stats = Window:CreateTab{Title = "Stats", Icon = "phosphor-fast-forward-bold"},
+    player = Window:CreateTab{Title = "Player", Icon = "phosphor-person-bold"},
     performance = Window:CreateTab{Title = "Performance", Icon = "phosphor-device-tablet-bold"},
     Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-gear-bold"}
 }
@@ -350,6 +351,95 @@ task.spawn(function()
         task.wait(1)
     end
 end)
+
+local RunService = game:GetService("RunService")
+
+local tpwalking
+local tpSpeed = 1
+
+local Slider = Tabs.player:CreateSlider("TPWalkSpeed", {
+    Title = "Walk Speed Increase",
+    Description = "",
+    Default = 1,
+    Min = 1,
+    Max = 10,
+    Rounding = 1,
+    Callback = function(Value)
+        tpSpeed = Value
+        print("TP Speed changed to:", Value)
+    end
+})
+
+local function startTPWalk()
+    pcall(function()
+        if tpwalking then
+            tpwalking:Disconnect()
+        end
+    end)
+
+    local character = game.Players.LocalPlayer.Character
+    local humanoid = character and character:FindFirstChildWhichIsA("Humanoid")
+
+    tpwalking = RunService.Heartbeat:Connect(function(delta)
+        if not (character and humanoid and humanoid.Parent) then
+            tpwalking:Disconnect()
+            return
+        end
+
+        if humanoid.MoveDirection.Magnitude > 0 then
+            character:TranslateBy(humanoid.MoveDirection * tpSpeed * delta * 10)
+        end
+    end)
+end
+
+startTPWalk()
+
+local jumpPowerValue = 50
+
+local Slider = Tabs.player:CreateSlider("JumpPower", {
+    Title = "Jump Power Increase",
+    Description = "",
+    Default = 50,
+    Min = 50,
+    Max = 300,
+    Rounding = 1,
+    Callback = function(Value)
+        jumpPowerValue = Value
+
+        local character = game.Players.LocalPlayer.Character
+        local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+
+        if humanoid then
+            if humanoid.UseJumpPower then
+                humanoid.JumpPower = jumpPowerValue
+            else
+                humanoid.JumpHeight = jumpPowerValue
+            end
+        end
+
+        print("Jump Power set to:", Value)
+    end
+})
+
+Tabs.player:CreateButton({
+    Title = "FullBright",
+    Description = "",
+    Callback = function()
+        local Lighting = game:GetService("Lighting")
+
+        Lighting.Brightness = 2
+        Lighting.ClockTime = 14
+        Lighting.FogEnd = 100000
+        Lighting.GlobalShadows = false
+        Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "FullBright",
+            Text = "FullBright enabled!",
+            Duration = 3
+        })
+    end
+})
 
 Tabs.performance:CreateButton({
     Title = "Anti AFK",
