@@ -359,7 +359,7 @@ local tpSpeed = 1
 
 local Slider = Tabs.player:CreateSlider("TPWalkSpeed", {
     Title = "Walk Speed Increase",
-    Description = "Makes you walk faster",
+    Description = "",
     Default = 1,
     Min = 1,
     Max = 10,
@@ -398,7 +398,7 @@ local jumpPowerValue = 50
 
 local Slider = Tabs.player:CreateSlider("JumpPower", {
     Title = "Jump Power Increase",
-    Description = "Controls your jump height",
+    Description = "",
     Default = 50,
     Min = 50,
     Max = 300,
@@ -423,7 +423,7 @@ local Slider = Tabs.player:CreateSlider("JumpPower", {
 
 Tabs.player:CreateButton({
     Title = "FullBright",
-    Description = "Makes you see in the night.",
+    Description = "",
     Callback = function()
         local Lighting = game:GetService("Lighting")
 
