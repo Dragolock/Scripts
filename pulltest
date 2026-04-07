@@ -1,0 +1,350 @@
+local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
+local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
+local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+local StarterGui = game:GetService("StarterGui")
+local VirtualUser = game:GetService("VirtualUser")
+
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local MainUI = PlayerGui:WaitForChild("MainUI")
+local UI_Group = MainUI:WaitForChild("UI_Group")
+
+local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+local Events = Remotes:WaitForChild("Events")
+local EventFolder = ReplicatedStorage:WaitForChild("EventFolder")
+
+local ClickEvent = Events:WaitForChild("ClickEvent")
+local RemoveEvent = Events:WaitForChild("RemoveC")
+local BarrelHitEvent = Events:WaitForChild("BarrelHit")
+local PortalEvent = Events:WaitForChild("PortalC")
+local WinBossEvent = EventFolder:WaitForChild("WinBossEvent")
+local WinEvent = EventFolder:WaitForChild("WinEvent")
+
+local Window = Library:Window{
+    Title = "CHub - Pull A Sword",
+    SubTitle = "By secret",
+    TabWidth = 100,
+    Size = UDim2.fromOffset(430, 320),
+    Resize = false,
+    Theme = "United GNOME",
+    MinimizeKey = Enum.KeyCode.LeftShift
+}
+
+local Tabs = {
+    apex = Window:CreateTab{Title = "Celestial", Icon = "phosphor-sword-bold"},
+    player = Window:CreateTab{Title = "Player", Icon = "phosphor-person-bold"},
+    performance = Window:CreateTab{Title = "Performance", Icon = "phosphor-device-tablet-bold"},
+    Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
+}
+
+local Options = Library.Options
+
+local function fireRemove(state)
+    RemoveEvent:FireServer(state)
+end
+
+local function notify(title, text)
+    StarterGui:SetCore("SendNotification", {
+        Title = title,
+        Text = text,
+        Duration = 3
+    })
+end
+
+local BossDropdown = Tabs.apex:CreateDropdown("Boss Select", {
+    Title = "Select Boss",
+    Values = {
+        "Celestial Scout",
+        "Celestial Guardian",
+        "Celestial Warden"
+    },
+    Default = "Celestial Scout"
+})
+
+local BossMap = {
+    ["Celestial Scout"] = "FixedBoss-1",
+    ["Celestial Guardian"] = "FixedBoss-2",
+    ["Celestial Warden"] = "FixedBoss-3"
+}
+
+local SwordDropdown = Tabs.apex:CreateDropdown("SwordSelect", {
+    Title = "Select Sword",
+    Values = {
+        "Sunscale",
+        "Seraphind"
+    },
+    Default = "Sunscale"
+})
+
+local SwordMap = {
+    ["Sunscale"] = "1731",
+    ["Seraphind"] = "1732"
+}
+
+Tabs.apex:CreateToggle("AutoClick", {Title = "Auto Click", Default = false})
+    :OnChanged(function(state)
+        if state then
+            task.spawn(function()
+                while Options.AutoClick.Value do
+                    ClickEvent:FireServer()
+                    task.wait()
+                end
+            end)
+        end
+    end)
+
+Tabs.apex:CreateToggle("AutoBoss", {
+    Title = "Auto Boss",
+    Default = false
+}):OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            fireRemove(1)
+            task.wait(0.1)
+
+            while Options.AutoBoss.Value do
+                local bossId = BossMap[BossDropdown.Value]
+                if bossId then
+                    WinBossEvent:FireServer(bossId)
+                    WinBossEvent:FireServer(bossId)
+                end
+                task.wait()
+            end
+        end)
+    else
+        fireRemove(0)
+    end
+end)
+
+Tabs.apex:CreateToggle("AutoSword", {
+    Title = "Auto Sword",
+    Default = false
+}):OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            fireRemove(1)
+
+            while Options.AutoSword.Value do
+                local swordId = SwordMap[SwordDropdown.Value]
+                if swordId then
+                    WinEvent:FireServer(swordId)
+                end
+                task.wait(1.2)
+            end
+        end)
+    else
+        fireRemove(0)
+    end
+end)
+
+Tabs.apex:CreateToggle("HitBarrels", {
+    Title = "Break Barrels",
+    Default = false
+}):OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            while Options.HitBarrels.Value do
+                for i = 1, 30 do
+                    BarrelHitEvent:FireServer(tostring(i))
+                    task.wait()
+                end
+                task.wait(5)
+            end
+        end)
+    end
+end)
+
+Tabs.XMAS:CreateButton{
+    Title = "Open Shop",
+    Description = "Opens the Event Shop",
+    Callback = function()
+        UI_Group.EventShop.Visible = true
+    end
+}
+
+Tabs.apex:CreateButton({
+    Title = "Remove Drop Popups",
+    Description = "Deletes Drop Popups (rejoin to see again)",
+    Callback = function()
+        local folder = LocalPlayer:FindFirstChild("RewardAnimationFolder")
+        if folder then
+            folder:Destroy()
+        end
+    end
+})
+
+Tabs.apex:CreateButton{
+    Title = "Use Celestial Portal",
+    Description = "Teleports you to Celestial World",
+    Callback = function()
+        PortalEvent:FireServer("-50", false)
+    end
+}
+
+local tpwalking
+local tpSpeed = 1
+local jumpPowerValue = 50
+
+Tabs.player:CreateSlider("TPWalkSpeed", {
+    Title = "Walk Speed Increase",
+    Description = "",
+    Default = 1,
+    Min = 1,
+    Max = 10,
+    Rounding = 1,
+    Callback = function(Value)
+        tpSpeed = Value
+    end
+})
+
+local function startTPWalk()
+    if tpwalking then
+        tpwalking:Disconnect()
+    end
+
+    local character = LocalPlayer.Character
+    local humanoid = character and character:FindFirstChildWhichIsA("Humanoid")
+
+    tpwalking = RunService.Heartbeat:Connect(function(delta)
+        if not (character and humanoid and humanoid.Parent) then
+            if tpwalking then
+                tpwalking:Disconnect()
+                tpwalking = nil
+            end
+            return
+        end
+
+        if humanoid.MoveDirection.Magnitude > 0 then
+            character:TranslateBy(humanoid.MoveDirection * tpSpeed * delta * 10)
+        end
+    end)
+end
+
+startTPWalk()
+
+Tabs.player:CreateSlider("JumpPower", {
+    Title = "Jump Power Increase",
+    Description = "",
+    Default = 50,
+    Min = 50,
+    Max = 300,
+    Rounding = 1,
+    Callback = function(Value)
+        jumpPowerValue = Value
+
+        local character = LocalPlayer.Character
+        local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+
+        if humanoid then
+            if humanoid.UseJumpPower then
+                humanoid.JumpPower = jumpPowerValue
+            else
+                humanoid.JumpHeight = jumpPowerValue
+            end
+        end
+    end
+})
+
+Tabs.player:CreateButton({
+    Title = "FullBright",
+    Description = "",
+    Callback = function()
+        Lighting.Brightness = 2
+        Lighting.ClockTime = 14
+        Lighting.FogEnd = 100000
+        Lighting.GlobalShadows = false
+        Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+
+        notify("FullBright", "FullBright enabled!")
+    end
+})
+
+Tabs.performance:CreateButton({
+    Title = "Anti AFK",
+    Description = "Helps you to not get kicked.",
+    Callback = function()
+        LocalPlayer.Idled:Connect(function()
+            VirtualUser:CaptureController()
+            VirtualUser:ClickButton2(Vector2.new())
+        end)
+
+        notify("Anti-AFK", "Anti-AFK is now enabled!")
+    end
+})
+
+Tabs.performance:CreateButton({
+    Title = "Anti Lag",
+    Description = "Decrease quality to not lag.",
+    Callback = function()
+        local Terrain = workspace:FindFirstChildWhichIsA("Terrain")
+
+        if Terrain then
+            Terrain.WaterWaveSize = 0
+            Terrain.WaterWaveSpeed = 0
+            Terrain.WaterReflectance = 0
+            Terrain.WaterTransparency = 1
+        end
+
+        Lighting.GlobalShadows = false
+        Lighting.FogStart = 9e9
+        Lighting.FogEnd = 9e9
+        settings().Rendering.QualityLevel = 1
+
+        for _, v in pairs(game:GetDescendants()) do
+            if v:IsA("BasePart") then
+                v.CastShadow = false
+                v.Material = Enum.Material.Plastic
+                v.Reflectance = 0
+                v.TopSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.BottomSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.LeftSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.RightSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.FrontSurface = Enum.SurfaceType.SmoothNoOutlines
+                v.BackSurface = Enum.SurfaceType.SmoothNoOutlines
+            elseif v:IsA("Decal") then
+                v.Transparency = 1
+                v.Texture = ""
+            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                v.Lifetime = NumberRange.new(0)
+            end
+        end
+
+        for _, v in pairs(Lighting:GetDescendants()) do
+            if v:IsA("PostEffect") then
+                v.Enabled = false
+            end
+        end
+
+        workspace.DescendantAdded:Connect(function(child)
+            task.spawn(function()
+                if child:IsA("ForceField") or child:IsA("Sparkles") or child:IsA("Smoke") or child:IsA("Fire") or child:IsA("Beam") then
+                    RunService.Heartbeat:Wait()
+                    child:Destroy()
+                elseif child:IsA("BasePart") then
+                    child.CastShadow = false
+                end
+            end)
+        end)
+    end
+})
+
+SaveManager:SetLibrary(Library)
+InterfaceManager:SetLibrary(Library)
+
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+
+InterfaceManager:SetFolder("FluentEventsHub")
+SaveManager:SetFolder("FluentEventsHub/SpecificGame")
+
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+
+Window:SelectTab(1)
+Library:Notify{Title = "Fluent", Content = "CHub loaded successfully!", Duration = 8}
+SaveManager:LoadAutoloadConfig()
