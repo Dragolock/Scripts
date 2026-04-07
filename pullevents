@@ -150,6 +150,16 @@ Tabs.apex:CreateToggle("HitBarrels", {
     end
 end)
 
+Tabs.XMAS:CreateButton{
+    Title = "Open Shop",
+    Description = "Opens the Event Shop",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local uiGroup = player.PlayerGui.MainUI.UI_Group
+        uiGroup.EventShop.Visible = true
+    end
+}
+
 Tabs.apex:CreateButton({
     Title = "Remove Drop Popups",
     Description = "Deletes Drop Popups (rejoin to see again)",
@@ -168,7 +178,7 @@ Tabs.apex:CreateButton({
 
 Tabs.apex:CreateButton{
     Title = "Use Celestial Portal",
-    Description = "Teleports you to XMAS World",
+    Description = "Teleports you to Celestial World",
     Callback = function()
         local args = {"-50", false}
         local portalRemote = game:GetService("ReplicatedStorage")
