@@ -159,7 +159,7 @@ Tabs.apex:CreateToggle("HitBarrels", {
     end
 end)
 
-Tabs.XMAS:CreateButton{
+Tabs.apex:CreateButton{
     Title = "Open Shop",
     Description = "Opens the Event Shop",
     Callback = function()
