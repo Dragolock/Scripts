@@ -188,7 +188,7 @@ Tabs.apex:CreateButton{
 
 local tpwalking
 local tpSpeed = 1
-local jumpPowerValue = 50
+local jumpPowerValue = 20
 
 Tabs.player:CreateSlider("TPWalkSpeed", {
     Title = "Walk Speed Increase",
