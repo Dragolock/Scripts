@@ -20,6 +20,8 @@ local Tabs = {
     Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
 }
 
+local Options = Library.Options
+
 Tabs.apex:CreateToggle("AutoClick", {Title = "Auto Click", Default = false})
     :OnChanged(function(state)
         if state then
@@ -122,7 +124,7 @@ Tabs.apex:CreateToggle("AutoSword", {
 end)
 
 Tabs.apex:CreateToggle("HitBarrels", {
-    Title = "Break  Barrels",
+    Title = "Break Barrels",
     Default = false
 }):OnChanged(function(state)
     if state then
