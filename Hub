@@ -1,6 +1,7 @@
 local Scripts = {
     [92050243909420] = "https://raw.githubusercontent.com/Dragolock/Scripts/refs/heads/main/WTchapter2",
     [99207780794303] = "https://raw.githubusercontent.com/Dragolock/Scripts/refs/heads/main/WTchapter3",
+    [13827198708] = "https://raw.githubusercontent.com/Dragolock/Scripts/refs/heads/main/pullevents",
 }
 
 local defaultScript = "https://raw.githubusercontent.com/Dragolock/Scripts/refs/heads/main/Needed"
