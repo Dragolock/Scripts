@@ -23,16 +23,23 @@ local TeleportService = game:GetService("TeleportService")
 local player = game.Players.LocalPlayer
 
 Tabs.tp:CreateButton({
-    Title = "Teleport to Chapter 2",
+    Title = "Teleport to Chapter 2 - Waste Time",
     Callback = function()
         TeleportService:Teleport(92050243909420, player)
     end
 })
 
 Tabs.tp:CreateButton({
-    Title = "Teleport to Chapter 3",
+    Title = "Teleport to Chapter 3- Waste Time",
     Callback = function()
         TeleportService:Teleport(99207780794303, player)
+    end
+})
+
+Tabs.tp:CreateButton({
+    Title = "Teleport to Pull A Sword",
+    Callback = function()
+        TeleportService:Teleport(13827198708, player)
     end
 })
 
