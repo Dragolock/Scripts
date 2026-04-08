@@ -328,7 +328,7 @@ local tpSpeed = 1
 local jumpPowerValue = 50
 
 Tabs.player:CreateSlider("TPWalkSpeed", {
-    Title = "Walk Speed Increase",
+    Title = "Walk Speed",
     Description = "",
     Default = 0.2,
     Min = 0.2,
@@ -362,7 +362,7 @@ end
 startTPWalk()
 
 Tabs.player:CreateSlider("JumpPower", {
-    Title = "Jump Power Increase",
+    Title = "Jump Power",
     Description = "",
     Default = 50,
     Min = 50,
