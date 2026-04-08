@@ -2,12 +2,20 @@ local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOog
 local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
 local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
 
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local PathfindingService = game:GetService("PathfindingService")
+local StarterGui = game:GetService("StarterGui")
+local VirtualUser = game:GetService("VirtualUser")
+
+local LocalPlayer = Players.LocalPlayer
+
 local Window = Library:Window{
     Title = "CHub - Waste Time chapter 3",
     SubTitle = "By ??? :)",
     TabWidth = 100,
-    Size =  UDim2.fromOffset(350, 325),
-    Resize = false, 
+    Size = UDim2.fromOffset(350, 325),
+    Resize = false,
     Acrylic = true,
     Theme = "VS Dark",
     MinimizeKey = Enum.KeyCode.LeftShift
@@ -24,32 +32,44 @@ local Tabs = {
 
 local Options = Library.Options
 
+local function notify(title, text)
+    StarterGui:SetCore("SendNotification", {
+        Title = title,
+        Text = text,
+        Duration = 3
+    })
+end
+
+local function getCharacter()
+    local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
+    local root = character:WaitForChild("HumanoidRootPart")
+    return character, humanoid, root
+end
+
+local function getRoot(char)
+    return char and char:FindFirstChild("HumanoidRootPart")
+end
+
+local function getHumanoid(char)
+    return char and char:FindFirstChildOfClass("Humanoid")
+end
+
 Tabs.mainTab:CreateToggle("AutoConvert", {
     Title = "Auto Convert",
     Default = false
-})
-:OnChanged(function(state)
+}):OnChanged(function(state)
     if state then
         task.spawn(function()
-            local RunService = game:GetService("RunService")
-            local player = game.Players.LocalPlayer
-
             local connection
             connection = RunService.Heartbeat:Connect(function()
                 if not Options.AutoConvert.Value then
-                    if connection then
-                        connection:Disconnect()
-                    end
+                    if connection then connection:Disconnect() end
                     return
                 end
 
-                local character = player.Character
-                if character then
-                    local root = character:FindFirstChild("HumanoidRootPart")
-                    if root then
-                        root.CFrame = CFrame.new(53, 9, -114)
-                    end
-                end
+                local _, _, root = getCharacter()
+                root.CFrame = CFrame.new(53, 9, -114)
             end)
         end)
     end
@@ -58,50 +78,39 @@ end)
 Tabs.mainTab:CreateToggle("FarmDayNightPad", {
     Title = "Farm Day/Night Pad",
     Default = false
-})
-:OnChanged(function(state)
+}):OnChanged(function(state)
     if state then
         task.spawn(function()
-            local RunService = game:GetService("RunService")
-            local player = game.Players.LocalPlayer
-
             local trackedParts = {}
             local espTransparency = 0.8
             local SIZE = Vector3.new(10, 10, 10)
 
-            local function getRoot(char)
-                return char:FindFirstChild("HumanoidRootPart")
-            end
-
             local function getDisplayName(name)
                 name = name:lower()
-                if name == "day" then
-                    return "DayPad"
-                elseif name == "night" then
-                    return "NightPad"
+                if name == "day" then return "DayPad"
+                elseif name == "night" then return "NightPad"
                 end
             end
 
             local function addESP(v)
                 local name = v.Name:lower()
-                if not v:FindFirstChild(name.."_PESP") then
-                    local a = Instance.new("BoxHandleAdornment")
-                    a.Name = name.."_PESP"
-                    a.Parent = v
-                    a.Adornee = v
-                    a.AlwaysOnTop = true
-                    a.ZIndex = 0
-                    a.Size = v.Size
-                    a.Transparency = espTransparency
-                    a.Color = BrickColor.new("white")
-                end
+                if v:FindFirstChild(name.."_PESP") then return end
+
+                local a = Instance.new("BoxHandleAdornment")
+                a.Name = name.."_PESP"
+                a.Parent = v
+                a.Adornee = v
+                a.AlwaysOnTop = true
+                a.ZIndex = 0
+                a.Size = v.Size
+                a.Transparency = espTransparency
+                a.Color = BrickColor.new("white")
             end
 
             local function addNameTag(v)
                 local name = v.Name:lower()
                 local display = getDisplayName(name)
-                if not display then return end
-                if v:FindFirstChild(name.."_TAG") then return end
+                if not display or v:FindFirstChild(name.."_TAG") then return end
 
                 local billboard = Instance.new("BillboardGui")
                 billboard.Name = name.."_TAG"
@@ -129,7 +138,6 @@ Tabs.mainTab:CreateToggle("FarmDayNightPad", {
 
                 addESP(v)
                 addNameTag(v)
-
                 table.insert(trackedParts, v)
             end
 
@@ -154,13 +162,11 @@ Tabs.mainTab:CreateToggle("FarmDayNightPad", {
             local connection
             connection = RunService.Heartbeat:Connect(function()
                 if not Options.FarmDayNightPad.Value then
-                    if connection then
-                        connection:Disconnect()
-                    end
+                    if connection then connection:Disconnect() end
                     return
                 end
 
-                local character = player.Character
+                local character = LocalPlayer.Character
                 if not character then return end
 
                 local root = getRoot(character)
@@ -176,41 +182,16 @@ Tabs.mainTab:CreateToggle("FarmDayNightPad", {
     end
 end)
 
-local PathfindingService = game:GetService("PathfindingService")
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
+local START_POSITION = Vector3.new(110, 90, -235)
+local TARGET_POSITION = Vector3.new(137, 91, -226)
 
 Tabs.mainTab:CreateToggle("TPLevelArea", {
     Title = "TP Level Area",
     Default = false
-})
-:OnChanged(function(state)
-
-    local player = Players.LocalPlayer
-
-    local START_POSITION = Vector3.new(110, 90, -235)
-    local TARGET_POSITION = Vector3.new(137, 91, -226)
-
-    local function getCharacter()
-        return player.Character
-    end
-
-    local function getHumanoid(char)
-        return char and char:FindFirstChildOfClass("Humanoid")
-    end
-
-    local function getRoot(char)
-        return char and char:FindFirstChild("HumanoidRootPart")
-    end
-
+}):OnChanged(function(state)
     if state then
         task.spawn(function()
-            local character = getCharacter()
-            local humanoid = getHumanoid(character)
-            local root = getRoot(character)
-
-            if not (character and humanoid and root) then return end
-
+            local character, humanoid, root = getCharacter()
             root.CFrame = CFrame.new(START_POSITION)
 
             local path = PathfindingService:CreatePath()
@@ -244,12 +225,11 @@ Tabs.mainTab:CreateToggle("TPLevelArea", {
                 RunService.RenderStepped:Wait()
             end
         end)
-
     else
-        local character = player.Character
+        local character = LocalPlayer.Character
         if character then
-            local humanoid = character:FindFirstChildOfClass("Humanoid")
-            local root = character:FindFirstChild("HumanoidRootPart")
+            local humanoid = getHumanoid(character)
+            local root = getRoot(character)
 
             if humanoid then
                 humanoid.WalkSpeed = 16
@@ -265,7 +245,7 @@ Tabs.mainTab:CreateToggle("TPLevelArea", {
     end
 end)
 
-local noteAutoAll = Tabs.mainTab:Paragraph("AutoAllNote", {
+Tabs.mainTab:Paragraph("AutoAllNote", {
     Title = "Note",
     Content = "You don't need to unlock the Day/Night pad to farm them, my script farms them without actually unlocking them.",
     TitleAlignment = "Middle",
@@ -275,16 +255,23 @@ local noteAutoAll = Tabs.mainTab:Paragraph("AutoAllNote", {
 Tabs.tp:CreateButton({
     Title = "TP XP Area",
     Callback = function()
-        local player = game.Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local hrp = character:WaitForChild("HumanoidRootPart")
-
-        hrp.CFrame = CFrame.new(110, 90, -235)
+        local _, _, root = getCharacter()
+        root.CFrame = CFrame.new(110, 90, -235)
     end
 })
 
-local Players = game:GetService("Players")
-local localPlayer = Players.LocalPlayer
+local function getValue(folder, name)
+    local stat = folder:FindFirstChild(name)
+    if stat and stat:IsA("ValueBase") then
+        return stat.Value
+    end
+    return 0
+end
+
+local function waitForOtherData()
+    local otherData = LocalPlayer:WaitForChild("OtherData", 5)
+    return otherData
+end
 
 local DayParagraph = Tabs.stats:CreateParagraph("Day Pad %", {
     Title = "Day Pad %",
@@ -308,30 +295,14 @@ local LevelParagraph = Tabs.stats:CreateParagraph("LevelCount", {
 })
 
 local statMap = {
-    ["Day"] = DayParagraph,
-    ["Night"] = NightParagraph,
-    ["Level"] = LevelParagraph
+    Day = DayParagraph,
+    Night = NightParagraph,
+    Level = LevelParagraph
 }
 
-local function getValue(folder, name)
-    local stat = folder:FindFirstChild(name)
-    if stat and stat:IsA("ValueBase") then
-        return stat.Value
-    end
-    return 0
-end
-
-local function waitForOtherData(player)
-    local otherData = player:WaitForChild("OtherData", 5)
-    return otherData
-end
-
 local function updateStatParagraphs()
-    local otherData = waitForOtherData(localPlayer)
-    if not otherData then
-        warn("OtherData folder not found!")
-        return
-    end
+    local otherData = waitForOtherData()
+    if not otherData then return end
     
     for statName, paragraph in pairs(statMap) do
         local value = getValue(otherData, statName)
@@ -352,37 +323,33 @@ task.spawn(function()
     end
 end)
 
-local RunService = game:GetService("RunService")
-
 local tpwalking
 local tpSpeed = 1
+local jumpPowerValue = 50
 
-local Slider = Tabs.player:CreateSlider("TPWalkSpeed", {
+Tabs.player:CreateSlider("TPWalkSpeed", {
     Title = "Walk Speed Increase",
     Description = "",
-    Default = 1,
-    Min = 1,
+    Default = 0.2,
+    Min = 0.2,
     Max = 10,
     Rounding = 1,
     Callback = function(Value)
         tpSpeed = Value
-        print("TP Speed changed to:", Value)
     end
 })
 
 local function startTPWalk()
-    pcall(function()
-        if tpwalking then
-            tpwalking:Disconnect()
-        end
-    end)
+    if tpwalking then
+        tpwalking:Disconnect()
+    end
 
-    local character = game.Players.LocalPlayer.Character
+    local character = LocalPlayer.Character
     local humanoid = character and character:FindFirstChildWhichIsA("Humanoid")
 
     tpwalking = RunService.Heartbeat:Connect(function(delta)
         if not (character and humanoid and humanoid.Parent) then
-            tpwalking:Disconnect()
+            if tpwalking then tpwalking:Disconnect() end
             return
         end
 
@@ -394,9 +361,7 @@ end
 
 startTPWalk()
 
-local jumpPowerValue = 50
-
-local Slider = Tabs.player:CreateSlider("JumpPower", {
+Tabs.player:CreateSlider("JumpPower", {
     Title = "Jump Power Increase",
     Description = "",
     Default = 50,
@@ -406,7 +371,7 @@ local Slider = Tabs.player:CreateSlider("JumpPower", {
     Callback = function(Value)
         jumpPowerValue = Value
 
-        local character = game.Players.LocalPlayer.Character
+        local character = LocalPlayer.Character
         local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 
         if humanoid then
@@ -416,8 +381,6 @@ local Slider = Tabs.player:CreateSlider("JumpPower", {
                 humanoid.JumpHeight = jumpPowerValue
             end
         end
-
-        print("Jump Power set to:", Value)
     end
 })
 
@@ -433,11 +396,7 @@ Tabs.player:CreateButton({
         Lighting.GlobalShadows = false
         Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
 
-        game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "FullBright",
-            Text = "FullBright enabled!",
-            Duration = 3
-        })
+        notify("FullBright", "FullBright enabled!")
     end
 })
 
@@ -445,16 +404,12 @@ Tabs.performance:CreateButton({
     Title = "Anti AFK",
     Description = "Helps you to not get kicked.",
     Callback = function()
-        game:GetService('Players').LocalPlayer.Idled:Connect(function()
-            game:GetService('VirtualUser'):CaptureController()
-            game:GetService('VirtualUser'):ClickButton2(Vector2.new())
+        LocalPlayer.Idled:Connect(function()
+            VirtualUser:CaptureController()
+            VirtualUser:ClickButton2(Vector2.new())
         end)
 
-        game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "Anti-AFK",
-            Text = "Anti-AFK is now enabled!",
-            Duration = 3
-        })
+        notify("Anti-AFK", "Anti-AFK is now enabled!")
     end
 })
 
@@ -463,7 +418,6 @@ Tabs.performance:CreateButton({
     Description = "Decrease quality to not lag.",
     Callback = function()
         local Lighting = game:GetService("Lighting")
-        local RunService = game:GetService("RunService")
         local Terrain = workspace:FindFirstChildWhichIsA("Terrain")
 
         if Terrain then
@@ -481,7 +435,7 @@ Tabs.performance:CreateButton({
         for _, v in pairs(game:GetDescendants()) do
             if v:IsA("BasePart") then
                 v.CastShadow = false
-                v.Material = "Plastic"
+                v.Material = Enum.Material.Plastic
                 v.Reflectance = 0
                 v.BackSurface = Enum.SurfaceType.SmoothNoOutlines
                 v.BottomSurface = Enum.SurfaceType.SmoothNoOutlines
@@ -515,10 +469,6 @@ Tabs.performance:CreateButton({
         end)
     end
 })
-
---------------------------------------------------
--- important stuff
---------------------------------------------------
 
 SaveManager:SetLibrary(Library)
 InterfaceManager:SetLibrary(Library)
