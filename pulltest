@@ -187,7 +187,7 @@ Tabs.apex:CreateButton{
     end
 }
 
-local ZonesDropdown = Tabs.zone:CreateDropdown("ZoneSelect", {
+local ZonesDropdown = Tabs.Main:CreateDropdown("ZoneSelect", {
     Title = "Zones",
     Values = {
         "Zone 1",
@@ -205,13 +205,16 @@ local ZonePositions = {
     ["Zone 4 (Tower)"] = Vector3.new(4673, 336, 10289)
 }
 
-Tabs.zone:CreateButton({
+Tabs.Main:CreateButton({
     Title = "Teleport",
     Description = "Teleport to selected zone",
     Callback = function()
-        local _, _, root = getCharacter()
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        local root = character and character:FindFirstChild("HumanoidRootPart")
+        
         local position = ZonePositions[ZonesDropdown.Value]
-        if position then
+        if position and root then
             root.CFrame = CFrame.new(position)
         end
     end
