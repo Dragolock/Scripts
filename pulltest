@@ -187,7 +187,7 @@ Tabs.apex:CreateButton{
     end
 }
 
-local ZonesDropdown = Tabs.Main:CreateDropdown("ZoneSelect", {
+local ZonesDropdown = Tabs.zone:CreateDropdown("ZoneSelect", {
     Title = "Zones",
     Values = {
         "Zone 1",
@@ -205,7 +205,7 @@ local ZonePositions = {
     ["Zone 4 (Tower)"] = Vector3.new(4673, 336, 10289)
 }
 
-Tabs.Main:CreateButton({
+Tabs.zone:CreateButton({
     Title = "Teleport",
     Description = "Teleport to selected zone",
     Callback = function()
