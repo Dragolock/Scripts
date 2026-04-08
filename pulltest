@@ -37,6 +37,7 @@ local Window = Library:Window{
 
 local Tabs = {
     apex = Window:CreateTab{Title = "Celestial", Icon = "phosphor-sword-bold"},
+    zone = Window:CreateTab{Title = "Zones", Icon = "phosphor-sword-bold"},
     player = Window:CreateTab{Title = "Player", Icon = "phosphor-person-bold"},
     performance = Window:CreateTab{Title = "Performance", Icon = "phosphor-device-tablet-bold"},
     Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
@@ -185,6 +186,36 @@ Tabs.apex:CreateButton{
         PortalEvent:FireServer("-50", false)
     end
 }
+
+local ZonesDropdown = Tabs.zone:CreateDropdown("ZoneSelect", {
+    Title = "Zones",
+    Values = {
+        "Zone 1",
+        "Zone 2", 
+        "Zone 3",
+        "Zone 4 (Tower)"
+    },
+    Default = "Zone 1"
+})
+
+local ZonePositions = {
+    ["Zone 1"] = Vector3.new(4677, 336, 9796),
+    ["Zone 2"] = Vector3.new(4674, 336, 10074),
+    ["Zone 3"] = Vector3.new(4805, 336, 10205),
+    ["Zone 4 (Tower)"] = Vector3.new(4673, 336, 10289)
+}
+
+Tabs.zone:CreateButton({
+    Title = "Teleport",
+    Description = "Teleport to selected zone",
+    Callback = function()
+        local _, _, root = getCharacter()
+        local position = ZonePositions[ZonesDropdown.Value]
+        if position then
+            root.CFrame = CFrame.new(position)
+        end
+    end
+})
 
 local tpwalking
 local tpSpeed = 1
