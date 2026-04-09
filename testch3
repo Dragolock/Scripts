@@ -182,67 +182,65 @@ Tabs.mainTab:CreateToggle("FarmDayNightPad", {
     end
 end)
 
+local RunService = game:GetService("RunService")
 local START_POSITION = Vector3.new(110, 90, -235)
 local TARGET_POSITION = Vector3.new(137, 91, -226)
+
+local connection = nil
 
 Tabs.mainTab:CreateToggle("TPLevelArea", {
     Title = "TP Level Area",
     Default = false
 }):OnChanged(function(state)
-    local character = LocalPlayer.Character
-    if not character then return end
-
-    local humanoid = getHumanoid(character)
-    local root = getRoot(character)
-    if not humanoid or not root then return end
-
     if state then
-        task.spawn(function()
-            root.CFrame = CFrame.new(START_POSITION)
-            task.wait(0.1)
+        local character = LocalPlayer.Character
+        if not character then return end
+        
+        local humanoid = getHumanoid(character)
+        local root = getRoot(character)
+        if not humanoid or not root then return end
 
-            local path = PathfindingService:CreatePath()
-            path:ComputeAsync(root.Position, TARGET_POSITION)
+        root.CFrame = CFrame.new(START_POSITION)
+        task.wait(0.1)
 
-            local waypoints = path:GetWaypoints()
-            for _, waypoint in ipairs(waypoints) do
-                if not Options.TPLevelArea.Value then return end
+        local path = PathfindingService:CreatePath()
+        path:ComputeAsync(root.Position, TARGET_POSITION)
 
-                humanoid:MoveTo(waypoint.Position)
-
-                if waypoint.Action == Enum.PathWaypointAction.Jump then
-                    humanoid.Jump = true
-                end
-
-                humanoid.MoveToFinished:Wait()
-            end
-
+        local waypoints = path:GetWaypoints()
+        for _, waypoint in ipairs(waypoints) do
             if not Options.TPLevelArea.Value then return end
 
-            task.wait(0.1)
-
-            humanoid.WalkSpeed = 0
-            humanoid.JumpPower = 0
-            humanoid.AutoRotate = false
-            humanoid:ChangeState(Enum.HumanoidStateType.Physics)
-
-            root.CFrame = CFrame.new(TARGET_POSITION)
-            root.AssemblyLinearVelocity = Vector3.zero
-            root.AssemblyAngularVelocity = Vector3.zero
-            root.Anchored = true
-        end)
-    else
-        if root then
-            root.Anchored = false
-            root.AssemblyLinearVelocity = Vector3.zero
-            root.AssemblyAngularVelocity = Vector3.zero
+            humanoid:MoveTo(waypoint.Position)
+            if waypoint.Action == Enum.PathWaypointAction.Jump then
+                humanoid.Jump = true
+            end
+            humanoid.MoveToFinished:Wait()
         end
 
-        if humanoid then
-            humanoid.WalkSpeed = 16
-            humanoid.JumpPower = 50
-            humanoid.AutoRotate = true
-            humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+        if Options.TPLevelArea.Value then
+            connection = RunService.Heartbeat:Connect(function()
+                if root.Parent then  -- Ensure root still exists
+                    root.CFrame = CFrame.new(TARGET_POSITION)
+                end
+            end)
+        end
+
+    else
+        if connection then
+            connection:Disconnect()
+            connection = nil
+        end
+
+        local character = LocalPlayer.Character
+        if character then
+            local humanoid = getHumanoid(character)
+            local root = getRoot(character)
+
+            if humanoid then
+                humanoid.WalkSpeed = 16
+                humanoid.JumpPower = 50
+                humanoid.AutoRotate = true
+            end
         end
     end
 end)
