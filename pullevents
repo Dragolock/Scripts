@@ -193,6 +193,14 @@ Tabs.apex:CreateButton{
     end
 }
 
+Tabs.apex:CreateButton{
+    Title = "Open Merchant Menu",
+    Description = "Opens the Merchant Menu",
+    Callback = function()
+        UI_Group.CelestialMerchant.Visible = true
+    end
+}
+
 Tabs.apex:CreateButton({
     Title = "Remove Drop Popups",
     Description = "Deletes Drop Popups (rejoin to see again)",
