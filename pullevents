@@ -185,6 +185,39 @@ Tabs.apex:CreateToggle("HitBarrels", {
     end
 end)
 
+Tabs.apex:CreateToggle("CollectScribes", {
+    Title = "Collect Scribes",
+    Default = false
+}):OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            local player = game.Players.LocalPlayer
+
+            local function getHRP()
+                local char = player.Character or player.CharacterAdded:Wait()
+                return char:WaitForChild("HumanoidRootPart")
+            end
+
+            local function getOrb()
+                return workspace:FindFirstChild("OrbGhost", true)
+            end
+
+            while Options.CollectScribes.Value do
+                local hrp = getHRP()
+                local orb = getOrb()
+
+                if orb and orb:IsA("BasePart") then
+                    firetouchinterest(hrp, orb, 0)
+                    task.wait()
+                    firetouchinterest(hrp, orb, 1)
+                end
+
+                task.wait(5)
+            end
+        end)
+    end
+end)
+
 Tabs.apex:CreateButton{
     Title = "Open Shop",
     Description = "Opens the Event Shop",
