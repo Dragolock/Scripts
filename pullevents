@@ -199,7 +199,7 @@ Tabs.apex:CreateToggle("CollectScribes", {
             end
 
             local function getOrb()
-                return workspace:FindFirstChild("OrbGhost", true)
+                return workspace:FindFirstChild("FlyingOrb", true)
             end
 
             while Options.CollectScribes.Value do
