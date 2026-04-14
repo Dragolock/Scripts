@@ -68,9 +68,9 @@ local BossDropdown = Tabs.apex:CreateDropdown("Boss Select", {
 })
 
 local BossMap = {
-    ["Celestial Scout"] = "FixedBoss-1",
-    ["Celestial Guardian"] = "FixedBoss-2",
-    ["Celestial Warden"] = "FixedBoss-3"
+    ["Celestial Scout (20k)"] = "FixedBoss-1",
+    ["Celestial Guardian (1M"] = "FixedBoss-2",
+    ["Celestial Warden (150M)"] = "FixedBoss-3"
 }
 
 local SwordDropdown = Tabs.apex:CreateDropdown("SwordSelect", {
@@ -98,31 +98,6 @@ Tabs.apex:CreateToggle("AutoClick", {Title = "Auto Click", Default = false})
             end)
         end
     end)
-
-Tabs.apex:CreateToggle("AutoTower", {
-    Title = "Auto Tower",
-    Default = false
-}):OnChanged(function(state)
-    if state then
-        task.spawn(function()
-            local towerEvent = game:GetService("ReplicatedStorage"):WaitForChild("TowerEventRemotes"):WaitForChild("TowerRewardsEvent")
-
-            local lastFalse = tick()
-
-            while Options.AutoTower.Value do
-                for i = 1, 20 do
-                    if not Options.AutoTower.Value then break end
-                    towerEvent:FireServer("-20", true)
-                    task.wait(1.5 / 20)
-                end
-                if tick() - lastFalse >= 1.5 then
-                    towerEvent:FireServer("-20", false)
-                    lastFalse = tick()
-                end
-            end
-        end)
-    end
-end)
 
 Tabs.apex:CreateToggle("AutoBoss", {
     Title = "Auto Boss",
@@ -165,6 +140,31 @@ Tabs.apex:CreateToggle("AutoSword", {
         end)
     else
         fireRemove(0)
+    end
+end)
+
+Tabs.apex:CreateToggle("AutoTower", {
+    Title = "Auto Tower",
+    Default = false
+}):OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            local towerEvent = game:GetService("ReplicatedStorage"):WaitForChild("TowerEventRemotes"):WaitForChild("TowerRewardsEvent")
+
+            local lastFalse = tick()
+
+            while Options.AutoTower.Value do
+                for i = 1, 20 do
+                    if not Options.AutoTower.Value then break end
+                    towerEvent:FireServer("-20", true)
+                    task.wait(1.5 / 20)
+                end
+                if tick() - lastFalse >= 1.5 then
+                    towerEvent:FireServer("-20", false)
+                    lastFalse = tick()
+                end
+            end
+        end)
     end
 end)
 
