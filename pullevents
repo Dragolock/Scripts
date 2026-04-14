@@ -60,9 +60,9 @@ end
 local BossDropdown = Tabs.apex:CreateDropdown("Boss Select", {
     Title = "Select Boss",
     Values = {
-        "Celestial Scout",
-        "Celestial Guardian",
-        "Celestial Warden"
+        "Celestial Scout (20k)",
+        "Celestial Guardian (1M)",
+        "Celestial Warden (150M)"
     },
     Default = "Celestial Scout"
 })
