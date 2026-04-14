@@ -22,6 +22,18 @@ else
     end
 end
 
+WindUI:AddTheme({
+    Name = "My Theme", -- theme name
+    
+    Accent = WindUI:Gradient({                                                      
+        ["0"] = { Color = Color3.fromHex("##FFBF00"), Transparency = 0 },            
+        ["100"]   = { Color = Color3.fromHex("#18181b"), Transparency = 0 },        
+    }, {                                                                            
+        Rotation = ,                                                               
+    }),                                                                             
+    
+})
+
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local MainUI = PlayerGui:WaitForChild("MainUI")
