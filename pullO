@@ -5,6 +5,40 @@ local Lighting = game:GetService("Lighting")
 local StarterGui = game:GetService("StarterGui")
 local VirtualUser = game:GetService("VirtualUser")
 
+WindUI:AddTheme({
+    Name = "test",
+    Accent = WindUI:Gradient({
+        ["0"] = { Color = Color3.fromHex("#FFBF00"), Transparency = 0 },
+        ["100"] = { Color = Color3.fromHex("#000000"), Transparency = 0 },
+    }, { Rotation = 0 }),
+    Background = WindUI:Gradient({
+        ["0"] = { Color = Color3.fromHex("#FFBF00"), Transparency = 0 },
+        ["100"] = { Color = Color3.fromHex("#000000"), Transparency = 0 },
+    }, { Rotation = 0 }),
+    Outline = WindUI:Gradient({
+        ["0"] = { Color = Color3.fromHex("#FFBF00"), Transparency = 0 },
+        ["100"] = { Color = Color3.fromHex("#000000"), Transparency = 0 },
+    }, { Rotation = 0 }),
+    Text = WindUI:Gradient({
+        ["0"] = { Color = Color3.fromHex("#FFBF00"), Transparency = 0 },
+        ["100"] = { Color = Color3.fromHex("#000000"), Transparency = 0 },
+    }, { Rotation = 0 }),
+    Placeholder = WindUI:Gradient({
+        ["0"] = { Color = Color3.fromHex("#FFBF00"), Transparency = 0 },
+        ["100"] = { Color = Color3.fromHex("#000000"), Transparency = 0 },
+    }, { Rotation = 0 }),
+    Button = WindUI:Gradient({
+        ["0"] = { Color = Color3.fromHex("#FFBF00"), Transparency = 0 },
+        ["100"] = { Color = Color3.fromHex("#000000"), Transparency = 0 },
+    }, { Rotation = 0 }),
+    Icon = WindUI:Gradient({
+        ["0"] = { Color = Color3.fromHex("#FFBF00"), Transparency = 0 },
+        ["100"] = { Color = Color3.fromHex("#000000"), Transparency = 0 },
+    }, { Rotation = 0 }),
+})
+
+WindUI:SetTheme("test")
+
 local cloneref = (cloneref or clonereference or function(instance) return instance end)
 local WindUI
 
@@ -22,17 +56,6 @@ else
     end
 end
 
-WindUI:AddTheme({
-    Name = "My Theme", -- theme name
-    
-    Accent = WindUI:Gradient({                                                      
-        ["0"] = { Color = Color3.fromHex("##FFBF00"), Transparency = 0 },            
-        ["100"]   = { Color = Color3.fromHex("#18181b"), Transparency = 0 },        
-    }, {                                                                            
-        Rotation = ,                                                               
-    }),                                                                             
-    
-})
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
