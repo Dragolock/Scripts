@@ -1,0 +1,309 @@
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Lighting = game:GetService("Lighting")
+local StarterGui = game:GetService("StarterGui")
+local VirtualUser = game:GetService("VirtualUser")
+
+local cloneref = (cloneref or clonereference or function(instance) return instance end)
+local WindUI
+
+local ok, result = pcall(function()
+    return require("./src/Init")
+end)
+
+if ok then
+    WindUI = result
+else
+    if cloneref(game:GetService("RunService")):IsStudio() then
+        WindUI = require(cloneref(ReplicatedStorage:WaitForChild("WindUI"):WaitForChild("Init")))
+    else
+        WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
+    end
+end
+
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local MainUI = PlayerGui:WaitForChild("MainUI")
+local UI_Group = MainUI:WaitForChild("UI_Group")
+
+local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+local Events = Remotes:WaitForChild("Events")
+local EventFolder = ReplicatedStorage:WaitForChild("EventFolder")
+
+local ClickEvent = Events:WaitForChild("ClickEvent")
+local RemoveEvent = Events:WaitForChild("RemoveC")
+local BarrelHitEvent = Events:WaitForChild("BarrelHit")
+local PortalEvent = Events:WaitForChild("PortalC")
+local WinBossEvent = EventFolder:WaitForChild("WinBossEvent")
+local WinEvent = EventFolder:WaitForChild("WinEvent")
+
+local Window = WindUI:CreateWindow({
+    Title = "CHub - Pull A Sword",
+    Folder = "CHub",
+    Icon = "solar:sword-bold",
+    NewElements = true,
+    HideSearchBar = true,
+    OpenButton = {
+        Title = "Open CHub UI",
+        CornerRadius = UDim.new(1, 0),
+        StrokeThickness = 3,
+        Enabled = true,
+        Draggable = true,
+        OnlyMobile = false,
+        Scale = 0.5,
+        Color = ColorSequence.new(Color3.fromHex("#30FF6A"), Color3.fromHex("#e7ff2f")),
+    },
+    Topbar = {
+        Height = 44,
+        ButtonsType = "Mac",
+    },
+})
+
+Window:Tag({
+    Title = "v" .. WindUI.Version,
+    Icon = "github",
+    Color = Color3.fromHex("#1c1c1c"),
+    Border = true,
+})
+
+local MainTab = Window:Tab({
+    Title = "Main",
+    Icon = "solar:home-2-bold",
+})
+
+local UtilityTab = Window:Tab({
+    Title = "Utility",
+    Icon = "solar:device-tablet-bold",
+})
+
+local SettingsTab = Window:Tab({
+    Title = "Settings",
+    Icon = "solar:settings-bold",
+})
+
+local function notify(title, text)
+    WindUI:Notify({ Title = title, Content = text })
+end
+
+local function fireRemove(state)
+    RemoveEvent:FireServer(state)
+end
+
+local BossMap = {
+    ["Celestial Scout [20k]"] = "FixedBoss-1",
+    ["Celestial Guardian [1M]"] = "FixedBoss-2",
+    ["Celestial Warden [150M]"] = "FixedBoss-3",
+}
+
+local SwordMap = {
+    ["Sunscale"] = "1731",
+    ["Seraphind"] = "1732",
+}
+
+local BossDropdown = MainTab:Dropdown({
+    Title = "Select Boss",
+    Values = {"Celestial Scout [20k]", "Celestial Guardian [1M]", "Celestial Warden [150M]"},
+    Value = "Celestial Scout [20k]",
+})
+
+local SwordDropdown = MainTab:Dropdown({
+    Title = "Select Sword",
+    Values = {"Sunscale", "Seraphind"},
+    Value = "Sunscale",
+})
+
+MainTab:Toggle({
+    Title = "Auto Click",
+    Callback = function(state)
+        if state then
+            task.spawn(function()
+                while state do
+                    ClickEvent:FireServer()
+                    task.wait()
+                end
+            end)
+        end
+    end,
+})
+
+MainTab:Toggle({
+    Title = "Auto Boss",
+    Callback = function(state)
+        if state then
+            task.spawn(function()
+                fireRemove(1)
+                task.wait(0.1)
+                while state do
+                    local bossId = BossMap[BossDropdown.Value]
+                    if bossId then
+                        WinBossEvent:FireServer(bossId)
+                        WinBossEvent:FireServer(bossId)
+                    end
+                    task.wait()
+                end
+            end)
+        else
+            fireRemove(0)
+        end
+    end,
+})
+
+MainTab:Toggle({
+    Title = "Auto Sword",
+    Callback = function(state)
+        if state then
+            task.spawn(function()
+                fireRemove(1)
+                while state do
+                    local swordId = SwordMap[SwordDropdown.Value]
+                    if swordId then
+                        WinEvent:FireServer(swordId)
+                    end
+                    task.wait(1.2)
+                end
+            end)
+        else
+            fireRemove(0)
+        end
+    end,
+})
+
+MainTab:Button({
+    Title = "Open Shop",
+    Callback = function()
+        UI_Group.EventShop.Visible = true
+    end,
+})
+
+MainTab:Button({
+    Title = "Open Merchant Menu",
+    Callback = function()
+        UI_Group.CelestialMerchant.Visible = true
+    end,
+})
+
+MainTab:Button({
+    Title = "Use Celestial Portal",
+    Callback = function()
+        PortalEvent:FireServer("-50", false)
+    end,
+})
+
+local ZonesDropdown = UtilityTab:Dropdown({
+    Title = "Zones",
+    Values = {"Zone 1", "Zone 2", "Zone 3", "Zone 4 (Tower)"},
+    Value = "Zone 1",
+})
+
+local ZonePositions = {
+    ["Zone 1"] = Vector3.new(4677, 336, 9796),
+    ["Zone 2"] = Vector3.new(4674, 336, 10074),
+    ["Zone 3"] = Vector3.new(4805, 336, 10205),
+    ["Zone 4 (Tower)"] = Vector3.new(4673, 336, 10289),
+}
+
+UtilityTab:Button({
+    Title = "Teleport",
+    Callback = function()
+        local character = LocalPlayer.Character
+        local root = character and character:FindFirstChild("HumanoidRootPart")
+        local position = ZonePositions[ZonesDropdown.Value]
+        if position and root then
+            root.CFrame = CFrame.new(position)
+        end
+    end,
+})
+
+UtilityTab:Toggle({
+    Title = "Break Barrels",
+    Callback = function(state)
+        if state then
+            task.spawn(function()
+                while state do
+                    for i = 1, 30 do
+                        BarrelHitEvent:FireServer(tostring(i))
+                        task.wait()
+                    end
+                    task.wait(5)
+                end
+            end)
+        end
+    end,
+})
+
+UtilityTab:Button({
+    Title = "Remove Drop Popups",
+    Callback = function()
+        local folder = LocalPlayer:FindFirstChild("RewardAnimationFolder")
+        if folder then folder:Destroy() end
+    end,
+})
+
+UtilityTab:Button({
+    Title = "FullBright",
+    Callback = function()
+        Lighting.Brightness = 2
+        Lighting.ClockTime = 14
+        Lighting.FogEnd = 100000
+        Lighting.GlobalShadows = false
+        Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+        notify("FullBright", "FullBright enabled!")
+    end,
+})
+
+UtilityTab:Button({
+    Title = "Anti AFK",
+    Callback = function()
+        LocalPlayer.Idled:Connect(function()
+            VirtualUser:CaptureController()
+            VirtualUser:ClickButton2(Vector2.new())
+        end)
+        notify("Anti-AFK", "Anti-AFK is now enabled!")
+    end,
+})
+
+UtilityTab:Button({
+    Title = "Anti Lag",
+    Callback = function()
+        local Terrain = workspace:FindFirstChildWhichIsA("Terrain")
+        if Terrain then
+            Terrain.WaterWaveSize = 0
+            Terrain.WaterWaveSpeed = 0
+            Terrain.WaterReflectance = 0
+            Terrain.WaterTransparency = 1
+        end
+        Lighting.GlobalShadows = false
+        Lighting.FogStart = 9e9
+        Lighting.FogEnd = 9e9
+        settings().Rendering.QualityLevel = 1
+    end,
+})
+
+local ConfigManager = Window.ConfigManager
+local ConfigName = "default"
+
+SettingsTab:Input({
+    Title = "Config Name",
+    Callback = function(value)
+        ConfigName = value
+    end,
+})
+
+SettingsTab:Button({
+    Title = "Save Config",
+    Callback = function()
+        Window.CurrentConfig = ConfigManager:Config(ConfigName)
+        Window.CurrentConfig:Save()
+    end,
+})
+
+SettingsTab:Button({
+    Title = "Load Config",
+    Callback = function()
+        Window.CurrentConfig = ConfigManager:CreateConfig(ConfigName)
+        Window.CurrentConfig:Load()
+    end,
+})
+
+Window:SelectTab(1)
