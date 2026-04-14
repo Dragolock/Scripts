@@ -60,17 +60,17 @@ end
 local BossDropdown = Tabs.apex:CreateDropdown("Boss Select", {
     Title = "Select Boss",
     Values = {
-        "Celestial Scout (20k)",
-        "Celestial Guardian (1M)",
-        "Celestial Warden (150M)"
+        "Celestial Scout [20k]",
+        "Celestial Guardian [1M]",
+        "Celestial Warden [150M]"
     },
-    Default = "Celestial Scout"
+    Default = "Celestial Scout [20k]"
 })
 
 local BossMap = {
-    ["Celestial Scout (20k)"] = "FixedBoss-1",
-    ["Celestial Guardian (1M"] = "FixedBoss-2",
-    ["Celestial Warden (150M)"] = "FixedBoss-3"
+    ["Celestial Scout [20k]"] = "FixedBoss-1",
+    ["Celestial Guardian [1M]"] = "FixedBoss-2",
+    ["Celestial Warden [150M]"] = "FixedBoss-3"
 }
 
 local SwordDropdown = Tabs.apex:CreateDropdown("SwordSelect", {
