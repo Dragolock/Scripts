@@ -168,8 +168,8 @@ Tabs.mainTab:Paragraph("AutoAllNote", {
     ContentAlignment = Enum.TextXAlignment.Left
 })
 
-Tabs.fruits:CreateToggle("UpgradeFruits", {
-    Title = "Upgrade Fruits",
+Tabs.fruits:CreateToggle("UpgradeApples", {
+    Title = "Upgrade Apples",
     Default = false
 }):OnChanged(function(state)
     if state then
@@ -177,10 +177,25 @@ Tabs.fruits:CreateToggle("UpgradeFruits", {
             local ReplicatedStorage = game:GetService("ReplicatedStorage")
             local UpgradeEvent = ReplicatedStorage:WaitForChild("Events"):WaitForChild("UpgradeEvent")
 
-            while Options.UpgradeFruits.Value do
+            while Options.UpgradeApples.Value do
                 UpgradeEvent:FireServer("PillarUpgrade", "Apples")
+                task.wait(0.001)
+            end
+        end)
+    end
+end)
+
+Tabs.fruits:CreateToggle("UpgradeBerries", {
+    Title = "Upgrade Berries",
+    Default = false
+}):OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            local ReplicatedStorage = game:GetService("ReplicatedStorage")
+            local UpgradeEvent = ReplicatedStorage:WaitForChild("Events"):WaitForChild("UpgradeEvent")
+
+            while Options.UpgradeBerries.Value do
                 UpgradeEvent:FireServer("PillarUpgrade", "Berries")
-                
                 task.wait(0.001)
             end
         end)
