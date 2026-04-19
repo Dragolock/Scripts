@@ -23,6 +23,7 @@ local Window = Library:Window{
 
 local Tabs = {
     mainTab = Window:CreateTab{Title = "Main Game", Icon = "phosphor-game-controller-bold"},
+    fruits = Window:CreateTab{Title = "Fruits", Icon = "phosphor-game-controller-bold"},
     tp = Window:CreateTab{Title = "Teleports", Icon = "phosphor-fast-forward-bold"},
     stats = Window:CreateTab{Title = "Stats", Icon = "phosphor-fast-forward-bold"},
     player = Window:CreateTab{Title = "Player", Icon = "phosphor-person-bold"},
@@ -81,151 +82,72 @@ Tabs.mainTab:CreateToggle("FarmDayNightPad", {
 }):OnChanged(function(state)
     if state then
         task.spawn(function()
-            local trackedParts = {}
-            local espTransparency = 0.8
-            local SIZE = Vector3.new(10, 10, 10)
+            local ReplicatedStorage = game:GetService("ReplicatedStorage")
+            local Events = ReplicatedStorage:WaitForChild("Events")
 
-            local function getDisplayName(name)
-                name = name:lower()
-                if name == "day" then return "DayPad"
-                elseif name == "night" then return "NightPad"
-                end
+            local DayRemote = Events:WaitForChild("Day")
+            local NightRemote = Events:WaitForChild("Night")
+
+            while Options.FarmDayNightPad.Value do
+                DayRemote:FireServer()
+                task.wait(0.05)
+
+                NightRemote:FireServer()
+                task.wait(0.05)
             end
-
-            local function addESP(v)
-                local name = v.Name:lower()
-                if v:FindFirstChild(name.."_PESP") then return end
-
-                local a = Instance.new("BoxHandleAdornment")
-                a.Name = name.."_PESP"
-                a.Parent = v
-                a.Adornee = v
-                a.AlwaysOnTop = true
-                a.ZIndex = 0
-                a.Size = v.Size
-                a.Transparency = espTransparency
-                a.Color = BrickColor.new("white")
-            end
-
-            local function addNameTag(v)
-                local name = v.Name:lower()
-                local display = getDisplayName(name)
-                if not display or v:FindFirstChild(name.."_TAG") then return end
-
-                local billboard = Instance.new("BillboardGui")
-                billboard.Name = name.."_TAG"
-                billboard.Adornee = v
-                billboard.Size = UDim2.new(0, 100, 0, 40)
-                billboard.StudsOffset = Vector3.new(0, 8, 0)
-                billboard.AlwaysOnTop = true
-                billboard.Parent = v
-
-                local text = Instance.new("TextLabel")
-                text.Size = UDim2.new(1, 0, 1, 0)
-                text.BackgroundTransparency = 1
-                text.Text = display
-                text.TextColor3 = Color3.fromRGB(255, 255, 255)
-                text.TextStrokeTransparency = 0
-                text.TextScaled = true
-                text.Font = Enum.Font.SourceSansBold
-                text.Parent = billboard
-            end
-
-            local function setupPart(v)
-                if not v then return end
-                v.Size = SIZE
-                v.Anchored = true
-
-                addESP(v)
-                addNameTag(v)
-                table.insert(trackedParts, v)
-            end
-
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("BasePart") then
-                    local name = v.Name:lower()
-                    if name == "day" or name == "night" then
-                        setupPart(v)
-                    end
-                end
-            end
-
-            workspace.DescendantAdded:Connect(function(v)
-                if v:IsA("BasePart") then
-                    local name = v.Name:lower()
-                    if name == "day" or name == "night" then
-                        setupPart(v)
-                    end
-                end
-            end)
-
-            local connection
-            connection = RunService.Heartbeat:Connect(function()
-                if not Options.FarmDayNightPad.Value then
-                    if connection then connection:Disconnect() end
-                    return
-                end
-
-                local character = LocalPlayer.Character
-                if not character then return end
-
-                local root = getRoot(character)
-                if not root then return end
-
-                for _, v in pairs(trackedParts) do
-                    if v and v.Parent then
-                        v.CFrame = root.CFrame
-                    end
-                end
-            end)
         end)
     end
 end)
 
+local RunService = game:GetService("RunService")
 local START_POSITION = Vector3.new(110, 90, -235)
 local TARGET_POSITION = Vector3.new(137, 91, -226)
+
+local connection = nil
 
 Tabs.mainTab:CreateToggle("TPLevelArea", {
     Title = "TP Level Area",
     Default = false
 }):OnChanged(function(state)
     if state then
-        task.spawn(function()
-            local character, humanoid, root = getCharacter()
-            root.CFrame = CFrame.new(START_POSITION)
+        local character = LocalPlayer.Character
+        if not character then return end
+        
+        local humanoid = getHumanoid(character)
+        local root = getRoot(character)
+        if not humanoid or not root then return end
 
-            local path = PathfindingService:CreatePath()
-            path:ComputeAsync(root.Position, TARGET_POSITION)
+        root.CFrame = CFrame.new(START_POSITION)
+        task.wait(0.1)
 
-            local waypoints = path:GetWaypoints()
+        local path = PathfindingService:CreatePath()
+        path:ComputeAsync(root.Position, TARGET_POSITION)
 
-            for _, waypoint in ipairs(waypoints) do
-                if not Options.TPLevelArea.Value then break end
-
-                humanoid:MoveTo(waypoint.Position)
-
-                if waypoint.Action == Enum.PathWaypointAction.Jump then
-                    humanoid.Jump = true
-                end
-
-                humanoid.MoveToFinished:Wait()
-            end
-
+        local waypoints = path:GetWaypoints()
+        for _, waypoint in ipairs(waypoints) do
             if not Options.TPLevelArea.Value then return end
 
-            task.wait(0.2)
-
-            humanoid.WalkSpeed = 0
-            humanoid.JumpPower = 0
-            humanoid.AutoRotate = false
-
-            while Options.TPLevelArea.Value do
-                root.AssemblyLinearVelocity = Vector3.zero
-                root.AssemblyAngularVelocity = Vector3.zero
-                RunService.RenderStepped:Wait()
+            humanoid:MoveTo(waypoint.Position)
+            if waypoint.Action == Enum.PathWaypointAction.Jump then
+                humanoid.Jump = true
             end
-        end)
+            humanoid.MoveToFinished:Wait()
+        end
+
+        if Options.TPLevelArea.Value then
+            connection = RunService.Heartbeat:Connect(function()
+                if root.Parent then  -- Ensure root still exists
+                    root.CFrame = CFrame.new(TARGET_POSITION)
+                end
+            end)
+        end
+
     else
+        if connection then
+            connection:Disconnect()
+            connection = nil
+        end
+
         local character = LocalPlayer.Character
         if character then
             local humanoid = getHumanoid(character)
@@ -235,11 +157,6 @@ Tabs.mainTab:CreateToggle("TPLevelArea", {
                 humanoid.WalkSpeed = 16
                 humanoid.JumpPower = 50
                 humanoid.AutoRotate = true
-            end
-
-            if root then
-                root.AssemblyLinearVelocity = Vector3.zero
-                root.AssemblyAngularVelocity = Vector3.zero
             end
         end
     end
@@ -252,11 +169,54 @@ Tabs.mainTab:Paragraph("AutoAllNote", {
     ContentAlignment = Enum.TextXAlignment.Left
 })
 
+Tabs.fruits:CreateToggle("UpgradeFruits", {
+    Title = "Upgrade Fruits",
+    Default = false
+}):OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            local ReplicatedStorage = game:GetService("ReplicatedStorage")
+            local UpgradeEvent = ReplicatedStorage:WaitForChild("Events"):WaitForChild("UpgradeEvent")
+
+            while Options.UpgradeFruits.Value do
+                UpgradeEvent:FireServer("PillarUpgrade", "Apples")
+                UpgradeEvent:FireServer("PillarUpgrade", "Berries")
+                
+                task.wait(0.001)
+            end
+        end)
+    end
+end)
+
 Tabs.tp:CreateButton({
-    Title = "TP XP Area",
+    Title = "TP Level",
     Callback = function()
         local _, _, root = getCharacter()
-        root.CFrame = CFrame.new(110, 90, -235)
+        root.CFrame = CFrame.new(110, 90, -236)
+    end
+})
+
+Tabs.tp:CreateButton({
+    Title = "TP Lanterns",
+    Callback = function()
+        local _, _, root = getCharacter()
+        root.CFrame = CFrame.new(259, 103, -240)
+    end
+})
+
+Tabs.tp:CreateButton({
+    Title = "TP Day and Night",
+    Callback = function()
+        local _, _, root = getCharacter()
+        root.CFrame = CFrame.new(339, 148, -172)
+    end
+})
+
+Tabs.tp:CreateButton({
+    Title = "TP Fruits",
+    Callback = function()
+        local _, _, root = getCharacter()
+        root.CFrame = CFrame.new(191, 174, -165)
     end
 })
 
