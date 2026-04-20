@@ -273,7 +273,7 @@ Tabs.easter:CreateToggle("CollectEggs", {
     end
 end)
 
-local EggParagraph = Tabs.stats:CreateParagraph("Egg Notify Display", {
+local EggParagraph = Tabs.easter:CreateParagraph("Egg Notify Display", {
     Title = "Egg Status",
     Content = "Waiting for eggs...",
     TitleAlignment = "Left",
