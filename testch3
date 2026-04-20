@@ -101,7 +101,7 @@ end)
 
 local RunService = game:GetService("RunService")
 local START_POSITION2 = Vector3.new(-660, 996, -7103)
-local TARGET_POSITION2 = Vector3.new(-630, 998, -7074)
+local TARGET_POSITION2 = Vector3.new(-630, 998, -7083)
 
 local connection = nil
 
@@ -359,7 +359,7 @@ Tabs.upgrades:CreateToggle("UpgradeDarkEssence", {
         if value then
             spawn(function()
                 while essenceEnabled do
-                    fireNamedProx("Essence Prox")
+                    fireNamedProx("EssenceProx")
                     task.wait(5)
                 end
             end)
@@ -383,20 +383,8 @@ Tabs.upgrades:CreateToggle("UpgradeMoreStats", {
     end
 })
 
-local TeleportMap = {
-    ["TP Level"] = CFrame.new(110, 90, -236),
-    ["TP Lanterns"] = CFrame.new(259, 103, -240),
-    ["TP Day and Night"] = CFrame.new(339, 148, -172),
-    ["TP Fruits"] = CFrame.new(191, 174, -165),
-    ["TP Ruined-Scapes Portal"] = CFrame.new(288, 181, 36),
-    ["Dark Essence Converter"] = CFrame.new(-668, 955, -6985),
-    ["Dark Essence Zone"] = CFrame.new(-658, 996, -7101)
-}
-
-local selectedTeleport = "TP Level"
-
-local TeleportDropdown = Tabs.tp:CreateDropdown({
-    Title = "Select Teleport",
+local ZonesDropdown = Tabs.tp:CreateDropdown("ZoneSelect", {
+    Title = "Zones",
     Values = {
         "TP Level",
         "TP Lanterns", 
@@ -406,17 +394,31 @@ local TeleportDropdown = Tabs.tp:CreateDropdown({
         "Dark Essence Converter",
         "Dark Essence Zone"
     },
-    Default = "TP Level",
-    Callback = function(value)
-        selectedTeleport = value
-    end
+    Default = "TP Level"
 })
 
+local ZonePositions = {
+    ["TP Level"] = Vector3.new(110, 90, -236),
+    ["TP Lanterns"] = Vector3.new(259, 103, -240),
+    ["TP Day and Night"] = Vector3.new(339, 148, -172),
+    ["TP Fruits"] = Vector3.new(191, 174, -165),
+    ["TP Ruined-Scapes Portal"] = Vector3.new(288, 181, 36),
+    ["Dark Essence Converter"] = Vector3.new(-668, 955, -6985),
+    ["Dark Essence Zone"] = Vector3.new(-658, 996, -7101)
+}
+
 Tabs.tp:CreateButton({
-    Title = "TP To Zone",
+    Title = "Teleport",
+    Description = "Teleport to selected zone",
     Callback = function()
-        local _, _, root = getCharacter()
-        root.CFrame = TeleportMap[selectedTeleport]
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        local root = character and character:FindFirstChild("HumanoidRootPart")
+        
+        local position = ZonePositions[ZonesDropdown.Value]
+        if position and root then
+            root.CFrame = CFrame.new(position)
+        end
     end
 })
 
