@@ -398,11 +398,11 @@ local ZonesDropdown = Tabs.tp:CreateDropdown("ZoneSelect", {
 })
 
 local ZonePositions = {
-    ["TP Level"] = Vector3.new(110, 90, -236),
-    ["TP Lanterns"] = Vector3.new(259, 103, -240),
-    ["TP Day and Night"] = Vector3.new(339, 148, -172),
-    ["TP Fruits"] = Vector3.new(191, 174, -165),
-    ["TP Ruined-Scapes Portal"] = Vector3.new(288, 181, 36),
+    ["Level"] = Vector3.new(110, 90, -236),
+    ["Lanterns"] = Vector3.new(259, 103, -240),
+    ["Day and Night"] = Vector3.new(339, 148, -172),
+    ["Fruits/Automation"] = Vector3.new(191, 174, -165),
+    ["Ruined-Scapes Portal"] = Vector3.new(288, 181, 36),
     ["Dark Essence Converter"] = Vector3.new(-668, 955, -6985),
     ["Dark Essence Zone"] = Vector3.new(-658, 996, -7101)
 }
