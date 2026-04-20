@@ -340,6 +340,9 @@ Tabs.upgrades:CreateToggle("UpgradeBerries", {
     end
 end)
 
+local essenceEnabled = false
+local statsEnabled = false
+
 local function fireNamedProx(name)
     for _, descendant in ipairs(workspace:GetDescendants()) do
         if descendant:IsA("ProximityPrompt") and (descendant.Name == name or descendant.Parent.Name == name) then
@@ -352,9 +355,10 @@ Tabs.upgrades:CreateToggle("UpgradeDarkEssence", {
     Title = "Upgrade Dark Essence",
     Default = false,
     Callback = function(value)
+        essenceEnabled = value
         if value then
             spawn(function()
-                while true do
+                while essenceEnabled do
                     fireNamedProx("Essence Prox")
                     task.wait(5)
                 end
@@ -367,9 +371,10 @@ Tabs.upgrades:CreateToggle("UpgradeMoreStats", {
     Title = "Upgrade More Stats",
     Default = false,
     Callback = function(value)
+        statsEnabled = value
         if value then
             spawn(function()
-                while true do
+                while statsEnabled do
                     fireNamedProx("MoreStatsProx")
                     task.wait(5)
                 end
@@ -388,6 +393,8 @@ local TeleportMap = {
     ["Dark Essence Zone"] = CFrame.new(-658, 996, -7101)
 }
 
+local selectedTeleport = "TP Level"
+
 local TeleportDropdown = Tabs.tp:CreateDropdown({
     Title = "Select Teleport",
     Values = {
@@ -399,15 +406,17 @@ local TeleportDropdown = Tabs.tp:CreateDropdown({
         "Dark Essence Converter",
         "Dark Essence Zone"
     },
-    Default = "TP Level"
+    Default = "TP Level",
+    Callback = function(value)
+        selectedTeleport = value
+    end
 })
 
 Tabs.tp:CreateButton({
     Title = "TP To Zone",
     Callback = function()
-        local selected = TeleportDropdown.Value
         local _, _, root = getCharacter()
-        root.CFrame = TeleportMap[selected]
+        root.CFrame = TeleportMap[selectedTeleport]
     end
 })
 
