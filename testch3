@@ -394,7 +394,7 @@ local ZonesDropdown = Tabs.tp:CreateDropdown("ZoneSelect", {
         "Dark Essence Converter",
         "Dark Essence Zone"
     },
-    Default = "TP Level"
+    Default = "Level"
 })
 
 local ZonePositions = {
