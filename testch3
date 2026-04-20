@@ -24,7 +24,7 @@ local Window = Library:Window{
 local Tabs = {
     mainTab = Window:CreateTab{Title = "Main Game", Icon = "phosphor-game-controller-bold"},
     easter = Window:CreateTab{Title = "Easter", Icon = "phosphor-game-controller-bold"},
-    fruits = Window:CreateTab{Title = "Fruits", Icon = "phosphor-game-controller-bold"},
+    upgrades = Window:CreateTab{Title = "Upgrades", Icon = "phosphor-game-controller-bold"},
     tp = Window:CreateTab{Title = "Teleports", Icon = "phosphor-fast-forward-bold"},
     stats = Window:CreateTab{Title = "Stats", Icon = "phosphor-fast-forward-bold"},
     player = Window:CreateTab{Title = "Player", Icon = "phosphor-person-bold"},
@@ -101,7 +101,7 @@ end)
 
 local RunService = game:GetService("RunService")
 local START_POSITION2 = Vector3.new(-660, 996, -7103)
-local TARGET_POSITION2 = Vector3.new(-630, 998, -7082)
+local TARGET_POSITION2 = Vector3.new(-630, 998, -7074)
 
 local connection = nil
 
@@ -306,7 +306,7 @@ Tabs.easter:CreateButton({
     end
 })
 
-Tabs.fruits:CreateToggle("UpgradeApples", {
+Tabs.upgrades:CreateToggle("UpgradeApples", {
     Title = "Upgrade Apples",
     Default = false
 }):OnChanged(function(state)
@@ -323,7 +323,7 @@ Tabs.fruits:CreateToggle("UpgradeApples", {
     end
 end)
 
-Tabs.fruits:CreateToggle("UpgradeBerries", {
+Tabs.upgrades:CreateToggle("UpgradeBerries", {
     Title = "Upgrade Berries",
     Default = false
 }):OnChanged(function(state)
@@ -340,7 +340,44 @@ Tabs.fruits:CreateToggle("UpgradeBerries", {
     end
 end)
 
--- Teleport positions map
+local function fireNamedProx(name)
+    for _, descendant in ipairs(workspace:GetDescendants()) do
+        if descendant:IsA("ProximityPrompt") and (descendant.Name == name or descendant.Parent.Name == name) then
+            fireproximityprompt(descendant)
+        end
+    end
+end
+
+Tabs.upgrades:CreateToggle("UpgradeDarkEssence", {
+    Title = "Upgrade Dark Essence",
+    Default = false,
+    Callback = function(value)
+        if value then
+            spawn(function()
+                while true do
+                    fireNamedProx("Essence Prox")
+                    task.wait(5)
+                end
+            end)
+        end
+    end
+})
+
+Tabs.upgrades:CreateToggle("UpgradeMoreStats", {
+    Title = "Upgrade More Stats",
+    Default = false,
+    Callback = function(value)
+        if value then
+            spawn(function()
+                while true do
+                    fireNamedProx("MoreStatsProx")
+                    task.wait(5)
+                end
+            end)
+        end
+    end
+})
+
 local TeleportMap = {
     ["TP Level"] = CFrame.new(110, 90, -236),
     ["TP Lanterns"] = CFrame.new(259, 103, -240),
@@ -368,7 +405,7 @@ local TeleportDropdown = Tabs.tp:CreateDropdown({
 Tabs.tp:CreateButton({
     Title = "TP To Zone",
     Callback = function()
-        local selected = TeleportDropdown.Value -- Gets the current dropdown selection
+        local selected = TeleportDropdown.Value
         local _, _, root = getCharacter()
         root.CFrame = TeleportMap[selected]
     end
