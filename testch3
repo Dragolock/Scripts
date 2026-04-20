@@ -23,10 +23,10 @@ local Window = Library:Window{
 
 local Tabs = {
     mainTab = Window:CreateTab{Title = "Main Game", Icon = "phosphor-game-controller-bold"},
-    easter = Window:CreateTab{Title = "Easter", Icon = "phosphor-game-controller-bold"},
+    easter = Window:CreateTab{Title = "Easter", Icon = "phosphor-egg"},
     upgrades = Window:CreateTab{Title = "Upgrades", Icon = "phosphor-game-controller-bold"},
     tp = Window:CreateTab{Title = "Teleports", Icon = "phosphor-fast-forward-bold"},
-    stats = Window:CreateTab{Title = "Stats", Icon = "phosphor-fast-forward-bold"},
+    stats = Window:CreateTab{Title = "Stats", Icon = "phosphor-trend-up"},
     player = Window:CreateTab{Title = "Player", Icon = "phosphor-person-bold"},
     performance = Window:CreateTab{Title = "Performance", Icon = "phosphor-device-tablet-bold"},
     Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-gear-bold"}
@@ -232,45 +232,114 @@ Tabs.mainTab:Paragraph("AutoAllNote", {
     ContentAlignment = Enum.TextXAlignment.Left
 })
 
-Tabs.easter:CreateButton({
-    Title = "Get all Auras",
-    Callback = function()
-        local remotes = {
-            {
-                Chance = 0.1,
-                Name = "Chronos",
-                Reward = { Type = "Rank", Value = "Chronos", BackupAmount = 35 }
-            },
-            {
-                Chance = 0.5,
-                Name = "Ethereal",
-                Reward = { Type = "Rank", Value = "Ethereal", BackupAmount = 15 }
-            },
-            {
-                Chance = 2,
-                Name = "Poseidon",
-                Reward = { Type = "Rank", Value = "Poseidon", BackupAmount = 8 }
-            },
-            {
-                Chance = 5,
-                Name = "Flame",
-                Reward = { Type = "Rank", Value = "Flame", BackupAmount = 5 }
-            }
-        }
+Tabs.easter:CreateToggle("CollectEggs", {
+    Title = "Collect Eggs",
+    Default = false
+}):OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            local folder = workspace:WaitForChild("ActiveEggs")
+            local prompts = {}
 
+            for _, obj in ipairs(folder:GetDescendants()) do
+                if obj:IsA("ProximityPrompt") then
+                    table.insert(prompts, obj)
+                end
+            end
+
+            local connection
+            connection = folder.DescendantAdded:Connect(function(obj)
+                if obj:IsA("ProximityPrompt") then
+                    table.insert(prompts, obj)
+                end
+            end)
+
+            while Options.CollectEggs.Value do
+                for i = #prompts, 1, -1 do
+                    local prompt = prompts[i]
+
+                    if not prompt or not prompt.Parent then
+                        table.remove(prompts, i)
+                    else
+                        fireproximityprompt(prompt)
+                    end
+                end
+                task.wait(10)
+            end
+            if connection then
+                connection:Disconnect()
+            end
+        end)
+    end
+end)
+
+local auraData = {
+    Chronos = {
+        Chance = 0.1,
+        Name = "Chronos",
+        Reward = { Type = "Rank", Value = "Chronos", BackupAmount = 35 }
+    },
+    Ethereal = {
+        Chance = 0.5,
+        Name = "Ethereal",
+        Reward = { Type = "Rank", Value = "Ethereal", BackupAmount = 15 }
+    },
+    Poseidon = {
+        Chance = 2,
+        Name = "Poseidon",
+        Reward = { Type = "Rank", Value = "Poseidon", BackupAmount = 8 }
+    },
+    Flame = {
+        Chance = 5,
+        Name = "Flame",
+        Reward = { Type = "Rank", Value = "Flame", BackupAmount = 5 }
+    }
+}
+
+local MultiDropdown = Tabs.easter:CreateDropdown("AuraSelect", {
+    Title = "Select Auras",
+    Description = "Pick the auras you want",
+    Values = {"Chronos", "Ethereal", "Poseidon", "Flame"},
+    Multi = true,
+    Default = {}
+})
+
+Tabs.easter:CreateButton({
+    Title = "Give Aura",
+    Callback = function()
+        local selected = Options.AuraSelect.Value
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local EggEvent = ReplicatedStorage:WaitForChild("EggEvent")
 
-        for _, data in ipairs(remotes) do
-            local args = { "CollectTest", data }
-            EggEvent:FireServer(unpack(args))
-            task.wait(0.1)
+        local fired = {}
+
+        for auraName, isSelected in pairs(selected) do
+            if isSelected and auraData[auraName] and not fired[auraName] then
+                fired[auraName] = true
+                EggEvent:FireServer("CollectTest", auraData[auraName])
+            end
+        end
+    end
+})
+
+local rerollLockAmount = 100
+
+Tabs.easter:CreateInput("RangeInput", {
+    Title = "Roll/Lock Amount",
+    Default = "10000",
+    Placeholder = "Enter amount",
+    Numeric = true,
+    Finished = false,
+    Callback = function(Value)
+        local num = tonumber(Value)
+        if num and num > 0 then
+            rerollLockAmount = num
         end
     end
 })
 
 Tabs.easter:CreateButton({
-    Title = "Inf Rerolls/Locks",
+    Title = "Give Locks/Rolls",
     Callback = function()
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local EggEvent = ReplicatedStorage:WaitForChild("EggEvent")
@@ -282,7 +351,7 @@ Tabs.easter:CreateButton({
                 ModelName = "NormalEgg",
                 Name = "Normal",
                 Reward = {
-                    Range = { 1, 10000 },
+                    Range = {1, rerollLockAmount},
                     Type = "Lock"
                 }
             }
@@ -295,7 +364,7 @@ Tabs.easter:CreateButton({
                 ModelName = "NormalEgg",
                 Name = "Normal",
                 Reward = {
-                    Range = { 1, 10000 },
+                    Range = {1, rerollLockAmount},
                     Type = "Reroll"
                 }
             }
