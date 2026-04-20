@@ -389,7 +389,7 @@ local ZonesDropdown = Tabs.tp:CreateDropdown("ZoneSelect", {
         "Level",
         "Lanterns", 
         "Day and Night",
-        "Fruits",
+        "Fruits/Automation",
         "Ruined-Scapes Portal",
         "Dark Essence Converter",
         "Dark Essence Zone"
