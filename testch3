@@ -23,6 +23,7 @@ local Window = Library:Window{
 
 local Tabs = {
     mainTab = Window:CreateTab{Title = "Main Game", Icon = "phosphor-game-controller-bold"},
+    easter = Window:CreateTab{Title = "Easter", Icon = "phosphor-game-controller-bold"},
     fruits = Window:CreateTab{Title = "Fruits", Icon = "phosphor-game-controller-bold"},
     tp = Window:CreateTab{Title = "Teleports", Icon = "phosphor-fast-forward-bold"},
     stats = Window:CreateTab{Title = "Stats", Icon = "phosphor-fast-forward-bold"},
@@ -99,6 +100,69 @@ Tabs.mainTab:CreateToggle("FarmDayNightPad", {
 end)
 
 local RunService = game:GetService("RunService")
+local START_POSITION2 = Vector3.new(-660, 996, -7103)
+local TARGET_POSITION2 = Vector3.new(-630, 998, -7082)
+
+local connection = nil
+
+Tabs.mainTab:CreateToggle("TPDarkEssence", {
+    Title = "TP Dark Essence Area",
+    Default = false
+}):OnChanged(function(state)
+    if state then
+        local character = LocalPlayer.Character
+        if not character then return end
+        
+        local humanoid = getHumanoid(character)
+        local root = getRoot(character)
+        if not humanoid or not root then return end
+
+        root.CFrame = CFrame.new(START_POSITION2)
+        task.wait(0.1)
+
+        local path = PathfindingService:CreatePath()
+        path:ComputeAsync(root.Position, TARGET_POSITION2)
+
+        local waypoints = path:GetWaypoints()
+        for _, waypoint in ipairs(waypoints) do
+            if not Options.TPDarkEssence.Value then return end
+
+            humanoid:MoveTo(waypoint.Position)
+            if waypoint.Action == Enum.PathWaypointAction.Jump then
+                humanoid.Jump = true
+            end
+            humanoid.MoveToFinished:Wait()
+        end
+
+        if Options.TPDarkEssence.Value then
+            connection = RunService.Heartbeat:Connect(function()
+                if root.Parent then  -- Ensure root still exists
+                    root.CFrame = CFrame.new(TARGET_POSITION2)
+                end
+            end)
+        end
+
+    else
+        if connection then
+            connection:Disconnect()
+            connection = nil
+        end
+
+        local character = LocalPlayer.Character
+        if character then
+            local humanoid = getHumanoid(character)
+            local root = getRoot(character)
+
+            if humanoid then
+                humanoid.WalkSpeed = 16
+                humanoid.JumpPower = 50
+                humanoid.AutoRotate = true
+            end
+        end
+    end
+end)
+
+local RunService = game:GetService("RunService")
 local START_POSITION = Vector3.new(110, 90, -235)
 local TARGET_POSITION = Vector3.new(137, 91, -226)
 
@@ -168,6 +232,80 @@ Tabs.mainTab:Paragraph("AutoAllNote", {
     ContentAlignment = Enum.TextXAlignment.Left
 })
 
+Tabs.easter:CreateButton({
+    Title = "Get all Auras",
+    Callback = function()
+        local remotes = {
+            {
+                Chance = 0.1,
+                Name = "Chronos",
+                Reward = { Type = "Rank", Value = "Chronos", BackupAmount = 35 }
+            },
+            {
+                Chance = 0.5,
+                Name = "Ethereal",
+                Reward = { Type = "Rank", Value = "Ethereal", BackupAmount = 15 }
+            },
+            {
+                Chance = 2,
+                Name = "Poseidon",
+                Reward = { Type = "Rank", Value = "Poseidon", BackupAmount = 8 }
+            },
+            {
+                Chance = 5,
+                Name = "Flame",
+                Reward = { Type = "Rank", Value = "Flame", BackupAmount = 5 }
+            }
+        }
+
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local EggEvent = ReplicatedStorage:WaitForChild("EggEvent")
+
+        for _, data in ipairs(remotes) do
+            local args = { "CollectTest", data }
+            EggEvent:FireServer(unpack(args))
+            task.wait(0.1)
+        end
+    end
+})
+
+Tabs.easter:CreateButton({
+    Title = "Inf Rerolls/Locks",
+    Callback = function()
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local EggEvent = ReplicatedStorage:WaitForChild("EggEvent")
+
+        local lockArgs = {
+            "CollectTest",
+            {
+                Chance = 67.4,
+                ModelName = "NormalEgg",
+                Name = "Normal",
+                Reward = {
+                    Range = { 1, 10000 },
+                    Type = "Lock"
+                }
+            }
+        }
+
+        local rerollArgs = {
+            "CollectTest",
+            {
+                Chance = 67.4,
+                ModelName = "NormalEgg",
+                Name = "Normal",
+                Reward = {
+                    Range = { 1, 10000 },
+                    Type = "Reroll"
+                }
+            }
+        }
+
+        EggEvent:FireServer(unpack(lockArgs))
+        EggEvent:FireServer(unpack(rerollArgs))
+    end
+})
+
 Tabs.fruits:CreateToggle("UpgradeApples", {
     Title = "Upgrade Apples",
     Default = false
@@ -202,35 +340,37 @@ Tabs.fruits:CreateToggle("UpgradeBerries", {
     end
 end)
 
-Tabs.tp:CreateButton({
-    Title = "TP Level",
-    Callback = function()
-        local _, _, root = getCharacter()
-        root.CFrame = CFrame.new(110, 90, -236)
-    end
+-- Teleport positions map
+local TeleportMap = {
+    ["TP Level"] = CFrame.new(110, 90, -236),
+    ["TP Lanterns"] = CFrame.new(259, 103, -240),
+    ["TP Day and Night"] = CFrame.new(339, 148, -172),
+    ["TP Fruits"] = CFrame.new(191, 174, -165),
+    ["TP Ruined-Scapes Portal"] = CFrame.new(288, 181, 36),
+    ["Dark Essence Converter"] = CFrame.new(-668, 955, -6985),
+    ["Dark Essence Zone"] = CFrame.new(-658, 996, -7101)
+}
+
+local TeleportDropdown = Tabs.tp:CreateDropdown({
+    Title = "Select Teleport",
+    Values = {
+        "TP Level",
+        "TP Lanterns", 
+        "TP Day and Night",
+        "TP Fruits",
+        "TP Ruined-Scapes Portal",
+        "Dark Essence Converter",
+        "Dark Essence Zone"
+    },
+    Default = "TP Level"
 })
 
 Tabs.tp:CreateButton({
-    Title = "TP Lanterns",
+    Title = "TP To Zone",
     Callback = function()
+        local selected = TeleportDropdown.Value -- Gets the current dropdown selection
         local _, _, root = getCharacter()
-        root.CFrame = CFrame.new(259, 103, -240)
-    end
-})
-
-Tabs.tp:CreateButton({
-    Title = "TP Day and Night",
-    Callback = function()
-        local _, _, root = getCharacter()
-        root.CFrame = CFrame.new(339, 148, -172)
-    end
-})
-
-Tabs.tp:CreateButton({
-    Title = "TP Fruits",
-    Callback = function()
-        local _, _, root = getCharacter()
-        root.CFrame = CFrame.new(191, 174, -165)
+        root.CFrame = TeleportMap[selected]
     end
 })
 
