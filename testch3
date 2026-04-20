@@ -386,11 +386,11 @@ Tabs.upgrades:CreateToggle("UpgradeMoreStats", {
 local ZonesDropdown = Tabs.tp:CreateDropdown("ZoneSelect", {
     Title = "Zones",
     Values = {
-        "TP Level",
-        "TP Lanterns", 
-        "TP Day and Night",
-        "TP Fruits",
-        "TP Ruined-Scapes Portal",
+        "Level",
+        "Lanterns", 
+        "Day and Night",
+        "Fruits",
+        "Ruined-Scapes Portal",
         "Dark Essence Converter",
         "Dark Essence Zone"
     },
