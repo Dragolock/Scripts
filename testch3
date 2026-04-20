@@ -273,6 +273,68 @@ Tabs.easter:CreateToggle("CollectEggs", {
     end
 end)
 
+Tabs.easter:CreateToggle("NotifyEggs", {
+    Title = "Notify Eggs",
+    Default = false
+}):OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            local folder = workspace:WaitForChild("ActiveEggs")
+
+            local function getEggName(lobbyPart)
+                local eggNameGui = lobbyPart:FindFirstChild("EggName")
+                if not eggNameGui then return "Unknown Egg" end
+
+                local shadow = eggNameGui:FindFirstChild("Shadow")
+                if not shadow then return "Unknown Egg" end
+
+                if shadow:IsA("TextLabel") or shadow:IsA("TextButton") then
+                    return shadow.Text
+                elseif shadow:IsA("StringValue") then
+                    return shadow.Value
+                end
+
+                return "Unknown Egg"
+            end
+
+            local function updateUI(eggName)
+                EggParagraph:Set({
+                    Title = "EGG NOTIFIER",
+                    Content = "EGG SPAWNED - " .. eggName
+                })
+            end
+
+            local function notifyEgg(eggName)
+                Library:Notify{
+                    Title = "EGG NOTIFIER",
+                    Content = "New Egg Spawned!",
+                    SubContent = eggName,
+                    Duration = 5
+                }
+            end
+
+            local connection
+            connection = folder.ChildAdded:Connect(function(child)
+                if child.Name == "Lobby" then
+                    task.wait(0.1)
+
+                    local eggName = getEggName(child)
+
+                    notifyEgg(eggName)
+                    updateUI(eggName)
+                end
+            end)
+
+            while Options.NotifyEggs.Value do
+                task.wait(1)
+            end
+
+            if connection then
+                connection:Disconnect()
+            end
+        end)
+    end
+end)
 local auraData = {
     Chronos = {
         Chance = 0.1,
