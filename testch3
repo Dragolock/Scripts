@@ -273,6 +273,13 @@ Tabs.easter:CreateToggle("CollectEggs", {
     end
 end)
 
+local EggParagraph = Tabs.stats:CreateParagraph("Egg Notify Display", {
+    Title = "Egg Status",
+    Content = "Waiting for eggs...",
+    TitleAlignment = "Left",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
+
 Tabs.easter:CreateToggle("NotifyEggs", {
     Title = "Notify Eggs",
     Default = false
@@ -297,20 +304,17 @@ Tabs.easter:CreateToggle("NotifyEggs", {
                 return "Unknown Egg"
             end
 
-            local function updateUI(eggName)
-                EggParagraph:Set({
-                    Title = "EGG NOTIFIER",
-                    Content = "EGG SPAWNED - " .. eggName
-                })
-            end
-
             local function notifyEgg(eggName)
                 Library:Notify{
                     Title = "EGG NOTIFIER",
-                    Content = "New Egg Spawned!",
+                    Content = "New Egg Spawned!!!",
                     SubContent = eggName,
                     Duration = 5
                 }
+            end
+
+            local function updateParagraph(eggName)
+                EggParagraph:SetValue("EGG SPAWNED - " .. eggName)
             end
 
             local connection
@@ -321,7 +325,7 @@ Tabs.easter:CreateToggle("NotifyEggs", {
                     local eggName = getEggName(child)
 
                     notifyEgg(eggName)
-                    updateUI(eggName)
+                    updateParagraph(eggName)
                 end
             end)
 
@@ -335,6 +339,7 @@ Tabs.easter:CreateToggle("NotifyEggs", {
         end)
     end
 end)
+
 local auraData = {
     Chronos = {
         Chance = 0.1,
