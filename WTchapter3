@@ -23,9 +23,10 @@ local Window = Library:Window{
 
 local Tabs = {
     mainTab = Window:CreateTab{Title = "Main Game", Icon = "phosphor-game-controller-bold"},
-    fruits = Window:CreateTab{Title = "Fruits", Icon = "phosphor-game-controller-bold"},
+    easter = Window:CreateTab{Title = "Easter", Icon = "phosphor-egg"},
+    upgrades = Window:CreateTab{Title = "Upgrades", Icon = "phosphor-game-controller-bold"},
     tp = Window:CreateTab{Title = "Teleports", Icon = "phosphor-fast-forward-bold"},
-    stats = Window:CreateTab{Title = "Stats", Icon = "phosphor-fast-forward-bold"},
+    stats = Window:CreateTab{Title = "Stats", Icon = "phosphor-trend-up"},
     player = Window:CreateTab{Title = "Player", Icon = "phosphor-person-bold"},
     performance = Window:CreateTab{Title = "Performance", Icon = "phosphor-device-tablet-bold"},
     Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-gear-bold"}
@@ -90,12 +91,74 @@ Tabs.mainTab:CreateToggle("FarmDayNightPad", {
 
             while Options.FarmDayNightPad.Value do
                 DayRemote:FireServer()
-                task.wait(0.05)
-
                 NightRemote:FireServer()
-                task.wait(0.05)
+                
+                task.wait(0.1)
             end
         end)
+    end
+end)
+
+local RunService = game:GetService("RunService")
+local START_POSITION2 = Vector3.new(-660, 996, -7103)
+local TARGET_POSITION2 = Vector3.new(-630, 997.7, -7083)
+
+local connection = nil
+
+Tabs.mainTab:CreateToggle("TPDarkEssence", {
+    Title = "TP Dark Essence Area",
+    Default = false
+}):OnChanged(function(state)
+    if state then
+        local character = LocalPlayer.Character
+        if not character then return end
+        
+        local humanoid = getHumanoid(character)
+        local root = getRoot(character)
+        if not humanoid or not root then return end
+
+        root.CFrame = CFrame.new(START_POSITION2)
+        task.wait(0.1)
+
+        local path = PathfindingService:CreatePath()
+        path:ComputeAsync(root.Position, TARGET_POSITION2)
+
+        local waypoints = path:GetWaypoints()
+        for _, waypoint in ipairs(waypoints) do
+            if not Options.TPDarkEssence.Value then return end
+
+            humanoid:MoveTo(waypoint.Position)
+            if waypoint.Action == Enum.PathWaypointAction.Jump then
+                humanoid.Jump = true
+            end
+            humanoid.MoveToFinished:Wait()
+        end
+
+        if Options.TPDarkEssence.Value then
+            connection = RunService.Heartbeat:Connect(function()
+                if root.Parent then  -- Ensure root still exists
+                    root.CFrame = CFrame.new(TARGET_POSITION2)
+                end
+            end)
+        end
+
+    else
+        if connection then
+            connection:Disconnect()
+            connection = nil
+        end
+
+        local character = LocalPlayer.Character
+        if character then
+            local humanoid = getHumanoid(character)
+            local root = getRoot(character)
+
+            if humanoid then
+                humanoid.WalkSpeed = 16
+                humanoid.JumpPower = 50
+                humanoid.AutoRotate = true
+            end
+        end
     end
 end)
 
@@ -169,8 +232,218 @@ Tabs.mainTab:Paragraph("AutoAllNote", {
     ContentAlignment = Enum.TextXAlignment.Left
 })
 
-Tabs.fruits:CreateToggle("UpgradeFruits", {
-    Title = "Upgrade Fruits",
+Tabs.easter:CreateToggle("CollectEggs", {
+    Title = "Collect Eggs",
+    Default = false
+}):OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            local folder = workspace:WaitForChild("ActiveEggs")
+            local prompts = {}
+
+            for _, obj in ipairs(folder:GetDescendants()) do
+                if obj:IsA("ProximityPrompt") then
+                    table.insert(prompts, obj)
+                end
+            end
+
+            local connection
+            connection = folder.DescendantAdded:Connect(function(obj)
+                if obj:IsA("ProximityPrompt") then
+                    table.insert(prompts, obj)
+                end
+            end)
+
+            while Options.CollectEggs.Value do
+                for i = #prompts, 1, -1 do
+                    local prompt = prompts[i]
+
+                    if not prompt or not prompt.Parent then
+                        table.remove(prompts, i)
+                    else
+                        fireproximityprompt(prompt)
+                    end
+                end
+                task.wait(10)
+            end
+            if connection then
+                connection:Disconnect()
+            end
+        end)
+    end
+end)
+
+local EggParagraph = Tabs.easter:CreateParagraph("Egg Notify Display", {
+    Title = "Egg Status",
+    Content = "Waiting for eggs...",
+    TitleAlignment = "Left",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
+
+Tabs.easter:CreateToggle("NotifyEggs", {
+    Title = "Notify Eggs",
+    Default = false
+}):OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            local folder = workspace:WaitForChild("ActiveEggs")
+
+            local function getEggName(lobbyPart)
+                local eggNameGui = lobbyPart:FindFirstChild("EggName")
+                if not eggNameGui then return "Unknown Egg" end
+
+                local shadow = eggNameGui:FindFirstChild("Shadow")
+                if not shadow then return "Unknown Egg" end
+
+                if shadow:IsA("TextLabel") or shadow:IsA("TextButton") then
+                    return shadow.Text
+                elseif shadow:IsA("StringValue") then
+                    return shadow.Value
+                end
+
+                return "Unknown Egg"
+            end
+
+            local function notifyEgg(eggName)
+                Library:Notify{
+                    Title = "EGG NOTIFIER",
+                    Content = "New Egg Spawned!!",
+                    SubContent = eggName,
+                    Duration = 5
+                }
+            end
+
+            local function updateParagraph(eggName)
+                EggParagraph:SetValue("EGG SPAWNED - " .. eggName)
+            end
+
+            local connection
+            connection = folder.ChildAdded:Connect(function(child)
+                if child.Name == "Lobby" then
+                    task.wait(0.1)
+
+                    local eggName = getEggName(child)
+
+                    notifyEgg(eggName)
+                    updateParagraph(eggName)
+                end
+            end)
+
+            while Options.NotifyEggs.Value do
+                task.wait(1)
+            end
+
+            if connection then
+                connection:Disconnect()
+            end
+        end)
+    end
+end)
+
+local auraData = {
+    Chronos = {
+        Chance = 0.1,
+        Name = "Chronos",
+        Reward = { Type = "Rank", Value = "Chronos", BackupAmount = 35 }
+    },
+    Ethereal = {
+        Chance = 0.5,
+        Name = "Ethereal",
+        Reward = { Type = "Rank", Value = "Ethereal", BackupAmount = 15 }
+    },
+    Poseidon = {
+        Chance = 2,
+        Name = "Poseidon",
+        Reward = { Type = "Rank", Value = "Poseidon", BackupAmount = 8 }
+    },
+    Flame = {
+        Chance = 5,
+        Name = "Flame",
+        Reward = { Type = "Rank", Value = "Flame", BackupAmount = 5 }
+    }
+}
+
+local MultiDropdown = Tabs.easter:CreateDropdown("AuraSelect", {
+    Title = "Select Auras",
+    Description = "Pick the auras you want",
+    Values = {"Chronos", "Ethereal", "Poseidon", "Flame"},
+    Multi = true,
+    Default = {}
+})
+
+Tabs.easter:CreateButton({
+    Title = "Give Aura",
+    Callback = function()
+        local selected = Options.AuraSelect.Value
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local EggEvent = ReplicatedStorage:WaitForChild("EggEvent")
+
+        local fired = {}
+
+        for auraName, isSelected in pairs(selected) do
+            if isSelected and auraData[auraName] and not fired[auraName] then
+                fired[auraName] = true
+                EggEvent:FireServer("CollectTest", auraData[auraName])
+            end
+        end
+    end
+})
+
+local rerollLockAmount = 100
+
+Tabs.easter:CreateInput("RangeInput", {
+    Title = "Roll/Lock Amount",
+    Default = "10000",
+    Placeholder = "Enter amount",
+    Numeric = true,
+    Finished = false,
+    Callback = function(Value)
+        local num = tonumber(Value)
+        if num and num > 0 then
+            rerollLockAmount = num
+        end
+    end
+})
+
+Tabs.easter:CreateButton({
+    Title = "Give Locks/Rolls",
+    Callback = function()
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local EggEvent = ReplicatedStorage:WaitForChild("EggEvent")
+
+        local lockArgs = {
+            "CollectTest",
+            {
+                Chance = 67.4,
+                ModelName = "NormalEgg",
+                Name = "Normal",
+                Reward = {
+                    Range = {1, rerollLockAmount},
+                    Type = "Lock"
+                }
+            }
+        }
+
+        local rerollArgs = {
+            "CollectTest",
+            {
+                Chance = 67.4,
+                ModelName = "NormalEgg",
+                Name = "Normal",
+                Reward = {
+                    Range = {1, rerollLockAmount},
+                    Type = "Reroll"
+                }
+            }
+        }
+
+        EggEvent:FireServer(unpack(lockArgs))
+        EggEvent:FireServer(unpack(rerollArgs))
+    end
+})
+
+Tabs.upgrades:CreateToggle("UpgradeApples", {
+    Title = "Upgrade Apples",
     Default = false
 }):OnChanged(function(state)
     if state then
@@ -178,45 +451,110 @@ Tabs.fruits:CreateToggle("UpgradeFruits", {
             local ReplicatedStorage = game:GetService("ReplicatedStorage")
             local UpgradeEvent = ReplicatedStorage:WaitForChild("Events"):WaitForChild("UpgradeEvent")
 
-            while Options.UpgradeFruits.Value do
+            while Options.UpgradeApples.Value do
                 UpgradeEvent:FireServer("PillarUpgrade", "Apples")
-                UpgradeEvent:FireServer("PillarUpgrade", "Berries")
-                
                 task.wait(0.001)
             end
         end)
     end
 end)
 
-Tabs.tp:CreateButton({
-    Title = "TP Level",
-    Callback = function()
-        local _, _, root = getCharacter()
-        root.CFrame = CFrame.new(110, 90, -236)
+Tabs.upgrades:CreateToggle("UpgradeBerries", {
+    Title = "Upgrade Berries",
+    Default = false
+}):OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            local ReplicatedStorage = game:GetService("ReplicatedStorage")
+            local UpgradeEvent = ReplicatedStorage:WaitForChild("Events"):WaitForChild("UpgradeEvent")
+
+            while Options.UpgradeBerries.Value do
+                UpgradeEvent:FireServer("PillarUpgrade", "Berries")
+                task.wait(0.001)
+            end
+        end)
+    end
+end)
+
+local essenceEnabled = false
+local statsEnabled = false
+
+local function fireNamedProx(name)
+    for _, descendant in ipairs(workspace:GetDescendants()) do
+        if descendant:IsA("ProximityPrompt") and (descendant.Name == name or descendant.Parent.Name == name) then
+            fireproximityprompt(descendant)
+        end
+    end
+end
+
+Tabs.upgrades:CreateToggle("UpgradeDarkEssence", {
+    Title = "Upgrade Dark Essence",
+    Default = false,
+    Callback = function(value)
+        essenceEnabled = value
+        if value then
+            spawn(function()
+                while essenceEnabled do
+                    fireNamedProx("EssenceProx")
+                    task.wait(5)
+                end
+            end)
+        end
     end
 })
 
-Tabs.tp:CreateButton({
-    Title = "TP Lanterns",
-    Callback = function()
-        local _, _, root = getCharacter()
-        root.CFrame = CFrame.new(259, 103, -240)
+Tabs.upgrades:CreateToggle("UpgradeMoreStats", {
+    Title = "Upgrade More Stats",
+    Default = false,
+    Callback = function(value)
+        statsEnabled = value
+        if value then
+            spawn(function()
+                while statsEnabled do
+                    fireNamedProx("MoreStatsProx")
+                    task.wait(5)
+                end
+            end)
+        end
     end
 })
 
-Tabs.tp:CreateButton({
-    Title = "TP Day and Night",
-    Callback = function()
-        local _, _, root = getCharacter()
-        root.CFrame = CFrame.new(339, 148, -172)
-    end
+local ZonesDropdown = Tabs.tp:CreateDropdown("ZoneSelect", {
+    Title = "Zones",
+    Values = {
+        "Level",
+        "Lanterns", 
+        "Day and Night",
+        "Fruits/Automation",
+        "Ruined-Scapes Portal",
+        "Dark Essence Converter",
+        "Dark Essence Zone"
+    },
+    Default = "Level"
 })
 
+local ZonePositions = {
+    ["Level"] = Vector3.new(110, 90, -236),
+    ["Lanterns"] = Vector3.new(259, 103, -240),
+    ["Day and Night"] = Vector3.new(339, 148, -172),
+    ["Fruits/Automation"] = Vector3.new(191, 174, -165),
+    ["Ruined-Scapes Portal"] = Vector3.new(288, 181, 36),
+    ["Dark Essence Converter"] = Vector3.new(-668, 955, -6985),
+    ["Dark Essence Zone"] = Vector3.new(-658, 996, -7101)
+}
+
 Tabs.tp:CreateButton({
-    Title = "TP Fruits",
+    Title = "Teleport",
+    Description = "Teleport to selected zone",
     Callback = function()
-        local _, _, root = getCharacter()
-        root.CFrame = CFrame.new(191, 174, -165)
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        local root = character and character:FindFirstChild("HumanoidRootPart")
+        
+        local position = ZonePositions[ZonesDropdown.Value]
+        if position and root then
+            root.CFrame = CFrame.new(position)
+        end
     end
 })
 
