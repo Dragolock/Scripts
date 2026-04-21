@@ -389,7 +389,7 @@ Tabs.easter:CreateButton({
     end
 })
 
-local rerollLockAmount = 100
+local rerollLockAmount = 10000000000000000000
 
 Tabs.easter:CreateInput("RangeInput", {
     Title = "Roll/Lock Amount",
