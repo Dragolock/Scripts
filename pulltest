@@ -25,7 +25,7 @@ local PortalEvent = Events:WaitForChild("PortalC")
 local WinBossEvent = EventFolder:WaitForChild("WinBossEvent")
 local WinEvent = EventFolder:WaitForChild("WinEvent")
 
-local MAX_RADIUS = 100
+local MAX_RADIUS = 130
 local offsetX = 0
 local offsetY = 0
 local offsetZ = 0
