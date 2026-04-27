@@ -397,7 +397,7 @@ local Remotes = game:GetService("ReplicatedStorage")
     :WaitForChild("Events")
     :WaitForChild("OnUpgradedRequests")
 
-Tabs.apex:CreateButton{
+Tabs.dungeon:CreateButton{
     Title = "Upgrade Damage",
     Description = "Upgrade your damage stat",
     Callback = function()
@@ -406,16 +406,7 @@ Tabs.apex:CreateButton{
     end
 }
 
-Tabs.apex:CreateButton{
-    Title = "Upgrade Health",
-    Description = "Upgrade your health stat",
-    Callback = function()
-        local args = { "Health" }
-        Remotes:FireServer(unpack(args))
-    end
-}
-
-Tabs.apex:CreateButton{
+Tabs.dungeon:CreateButton{
     Title = "Delete NPC (!!!IMPORTANT!!!)",
     Description = "Deletes CelestialFlyMission entities",
     Callback = function()
@@ -437,13 +428,23 @@ Tabs.apex:CreateButton{
     end
 }
 
+Tabs.dungeon:CreateButton{
+    Title = "Upgrade Health",
+    Description = "Upgrade your health stat",
+    Callback = function()
+        local args = { "Health" }
+        Remotes:FireServer(unpack(args))
+    end
+}
+
 local ZonesDropdown = Tabs.zone:CreateDropdown("ZoneSelect", {
     Title = "Zones",
     Values = {
         "Zone 1",
         "Zone 2", 
         "Zone 3",
-        "Zone 4 (Tower)"
+        "Zone 4 (Tower)",
+        "Zone 5 (Arena)"
     },
     Default = "Zone 1"
 })
@@ -452,7 +453,8 @@ local ZonePositions = {
     ["Zone 1"] = Vector3.new(4677, 336, 9796),
     ["Zone 2"] = Vector3.new(4674, 336, 10074),
     ["Zone 3"] = Vector3.new(4805, 336, 10205),
-    ["Zone 4 (Tower)"] = Vector3.new(4673, 336, 10289)
+    ["Zone 4 (Tower)"] = Vector3.new(4673, 336, 10289),
+    ["Zone 5 (Arena)"] = Vector3.new(4805, 336, 10205)
 }
 
 Tabs.zone:CreateButton({
