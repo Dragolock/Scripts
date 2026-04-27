@@ -272,7 +272,7 @@ Tabs.dungeon:CreateToggle("DungeonFastAttack", {Title = "Dungeon Fast Attack", D
     end
 end)
 
-Tabs.Dungeon:CreateToggle("TPHolyEnemies", {Title = "TP Holy Enemies", Default = false})
+Tabs.dungeon:CreateToggle("TPHolyEnemies", {Title = "TP Holy Enemies", Default = false})
 :OnChanged(function(state)
 
     local player = game.Players.LocalPlayer
@@ -580,7 +580,7 @@ Tabs.player:CreateButton({
     end
 })
 
-Tabs.dungeon:CreateSlider("DungeonAttackSpeed", {
+Tabs.customization:CreateSlider("DungeonAttackSpeed", {
     Title = "Attack Speed",
     Description = "Higher = faster attacks",
     Default = 5,
