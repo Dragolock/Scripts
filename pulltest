@@ -25,6 +25,7 @@ local PortalEvent = Events:WaitForChild("PortalC")
 local WinBossEvent = EventFolder:WaitForChild("WinBossEvent")
 local WinEvent = EventFolder:WaitForChild("WinEvent")
 
+local MAX_RADIUS = 200
 local offsetX = 0
 local offsetY = 0
 local offsetZ = 0
@@ -34,7 +35,7 @@ local Window = Library:Window{
     Title = "CHub - Pull A Sword",
     SubTitle = "By secret",
     TabWidth = 100,
-    Size = UDim2.fromOffset(430, 320),
+    Size = UDim2.fromOffset(425, 375),
     Resize = false,
     Theme = "United GNOME",
     MinimizeKey = Enum.KeyCode.LeftShift
@@ -252,14 +253,6 @@ Tabs.apex:CreateButton({
     end
 })
 
-Tabs.apex:CreateButton{
-    Title = "Use Celestial Portal",
-    Description = "Teleports you to Celestial World",
-    Callback = function()
-        PortalEvent:FireServer("-50", false)
-    end
-}
-
 Tabs.dungeon:CreateToggle("DungeonFastAttack", {Title = "Dungeon Fast Attack", Default = false})
 :OnChanged(function(state)
     if state then
@@ -305,29 +298,32 @@ Tabs.dungeon:CreateToggle("TPHolyEnemies", {Title = "TP Holy Enemies", Default =
     local removedConn = workspace.DescendantRemoving:Connect(removeTorso)
 
     task.spawn(function()
-        while Options.TPHolyEnemies.Value and character.Parent do
-            local nearest, shortest = nil, math.huge
+     while Options.TPHolyEnemies.Value and character.Parent do
+    local nearest, shortest = nil, MAX_RADIUS
 
-            for torso in pairs(torsos) do
-                local dist = (hrp.Position - torso.Position).Magnitude
-                if dist < shortest then
-                    shortest = dist
-                    nearest = torso
-                end
+    for torso in pairs(torsos) do
+        if torso and torso.Parent then
+            local dist = (hrp.Position - torso.Position).Magnitude
+
+            if dist <= MAX_RADIUS and dist < shortest then
+                shortest = dist
+                nearest = torso
             end
-
-            if nearest then
-                if humanoid and humanoid.Sit then
-                    humanoid.Sit = false
-                end
-
-                hrp.CFrame = CFrame.new(
-                    nearest.Position + Vector3.new(offsetX, offsetY, offsetZ)
-                )
-            end
-
-            task.wait(0.01)
         end
+    end
+
+    if nearest then
+        if humanoid and humanoid.Sit then
+            humanoid.Sit = false
+        end
+
+        hrp.CFrame = CFrame.new(
+            nearest.Position + Vector3.new(offsetX, offsetY, offsetZ)
+        )
+    end
+
+    task.wait(0.01)
+end
 
         addedConn:Disconnect()
         removedConn:Disconnect()
@@ -335,138 +331,65 @@ Tabs.dungeon:CreateToggle("TPHolyEnemies", {Title = "TP Holy Enemies", Default =
     end)
 end)
 
-Tabs.dungeon:CreateToggle("GenerateGoldFeather", {
-    Title = "Generate Gold Feather",
-    Default = false
-}):OnChanged(function(state)
-
-    local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-    local hrp = character:WaitForChild("HumanoidRootPart")
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-
-    local DungeonRemotes = Remotes:WaitForChild("Events"):WaitForChild("Dungeon")
-    local Join = DungeonRemotes:WaitForChild("OnJoinDungeon")
-    local Click = DungeonRemotes:WaitForChild("OnDungeonClick")
-    local Leave = DungeonRemotes:WaitForChild("OnLeaveDungeon")
-
-    if not state then
-        if hrp:FindFirstChild("SketVelocity") then
-            hrp.SketVelocity:Destroy()
-        end
-        if sketAddedConnection then
-            sketAddedConnection:Disconnect()
-            sketAddedConnection = nil
-        end
-        return
-    end
-
-    if not hrp:FindFirstChild("SketVelocity") then
-        local bv = Instance.new("BodyVelocity")
-        bv.Name = "SketVelocity"
-        bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-        bv.Velocity = Vector3.zero
-        bv.Parent = hrp
-    end
-
-    local skets = {}
-
-    local function add(v)
-        if v:IsA("Model") and v.Name:lower() == "sket" then
-            skets[v] = true
-        end
-    end
-
-    local function remove(v)
-        skets[v] = nil
-    end
-
-    for _, v in ipairs(workspace:GetDescendants()) do
-        add(v)
-    end
-
-    sketAddedConnection = workspace.DescendantAdded:Connect(add)
-    local sketRemovedConnection = workspace.DescendantRemoving:Connect(remove)
-
-    task.spawn(function()
-        while Options.GenerateGoldFeather.Value and character.Parent do
-
-            Join:FireServer("Normal")
-
-            local start = tick()
-
-            while tick() - start < 1 and Options.GenerateGoldFeather.Value do
-
-                local nearest, dist = nil, math.huge
-
-                for sket in pairs(skets) do
-                    local part = sket.PrimaryPart
-                    if part then
-                        local d = (hrp.Position - part.Position).Magnitude
-                        if d < dist then
-                            dist = d
-                            nearest = part
-                        end
-                    end
-                end
-
-                if nearest then
-                    if humanoid and humanoid.Sit then
-                        humanoid.Sit = false
-                    end
-
-                    hrp.CFrame = CFrame.new(
-                        nearest.Position + Vector3.new(offsetX, offsetY, offsetZ)
-                    )
-                end
-
-                Click:FireServer()
-                task.wait(attackDelay)
-            end
-
-            Leave:FireServer(true)
-            task.wait(0.1)
-        end
-
-        if hrp:FindFirstChild("SketVelocity") then
-            hrp.SketVelocity:Destroy()
-        end
-
-        if sketAddedConnection then
-            sketAddedConnection:Disconnect()
-            sketAddedConnection = nil
-        end
-
-        if sketRemovedConnection then
-            sketRemovedConnection:Disconnect()
-            sketRemovedConnection = nil
-        end
-
-        table.clear(skets)
-    end)
-end)
-
 local joinToggle = Tabs.dungeon:CreateToggle("Join Dungeon", {
-Title = "Join Dungeon",
-Default = false
+    Title = "Join Dungeon",
+    Default = false
 })
 
-local Remotes = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("Dungeon")
+local Remotes = game:GetService("ReplicatedStorage")
+    :WaitForChild("Remotes")
+    :WaitForChild("Events")
+    :WaitForChild("Dungeon")
 
 local joinDropdown = Tabs.dungeon:CreateDropdown("Select Dungeon", {
-Title = "Join Dungeon mode",
-Values = {"Normal", "Hard", "Chaos"},
-Default = "Normal"
+    Title = "Join Dungeon mode",
+    Values = {"Normal", "Hard", "Chaos"},
+    Default = "Normal"
 })
 
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+
+local targetPosition = Vector3.new(4547, 336, 10203)
+local triggerDistance = 100
+
+local triggered = false
+
 local function fireJoinDungeon(mode)
-local args = {mode}
-Remotes.OnJoinDungeon:FireServer(unpack(args))
+    Remotes.OnJoinDungeon:FireServer(mode)
 end
 
 joinToggle:OnChanged(function(state)
-if state then
-fireJoinDungeon(joinDropdown.Value)
-end
+    triggered = false
+
+    if not state then return end
+
+    RunService.Heartbeat:Connect(function()
+        if not joinToggle.Value or triggered then return end
+
+        local character = player.Character
+        if not character then return end
+
+        local hrp = character:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+
+        local distance = (hrp.Position - targetPosition).Magnitude
+
+        if distance <= triggerDistance then
+            triggered = true
+
+            task.wait(2)
+
+            if joinToggle.Value then
+                fireJoinDungeon(joinDropdown.Value)
+            end
+
+            task.wait(1)
+            triggered = false
+        end
+    end)
 end)
 
 local ZonesDropdown = Tabs.zone:CreateDropdown("ZoneSelect", {
@@ -501,6 +424,14 @@ Tabs.zone:CreateButton({
         end
     end
 })
+
+Tabs.zone:CreateButton{
+    Title = "Use Celestial Portal",
+    Description = "Teleports you to Celestial World",
+    Callback = function()
+        PortalEvent:FireServer("-50", false)
+    end
+}
 
 local tpwalking
 local tpSpeed = 1
@@ -578,6 +509,13 @@ Tabs.player:CreateButton({
 
         notify("FullBright", "FullBright enabled!")
     end
+})
+
+Tabs.customization:Paragraph("Dungeon Settings Below", {
+    Title = "Note",
+    Content = "",
+    TitleAlignment = "Middle",
+    ContentAlignment = Enum.TextXAlignment.Left
 })
 
 Tabs.customization:CreateSlider("DungeonAttackSpeed", {
