@@ -392,20 +392,6 @@ joinToggle:OnChanged(function(state)
     end)
 end)
 
-local Remotes = game:GetService("ReplicatedStorage")
-    :WaitForChild("Remotes")
-    :WaitForChild("Events")
-    :WaitForChild("OnUpgradedRequests")
-
-Tabs.dungeon:CreateButton{
-    Title = "Upgrade Damage",
-    Description = "Upgrade your damage stat",
-    Callback = function()
-        local args = { "Damage" }
-        Remotes:FireServer(unpack(args))
-    end
-}
-
 Tabs.dungeon:CreateButton{
     Title = "Delete NPC (!!!IMPORTANT!!!)",
     Description = "Deletes CelestialFlyMission entities",
@@ -425,6 +411,20 @@ Tabs.dungeon:CreateButton{
             deleteIfMatch(obj)
         end)
 
+    end
+}
+
+local Remotes = game:GetService("ReplicatedStorage")
+    :WaitForChild("Remotes")
+    :WaitForChild("Events")
+    :WaitForChild("OnUpgradedRequests")
+
+Tabs.dungeon:CreateButton{
+    Title = "Upgrade Damage",
+    Description = "Upgrade your damage stat",
+    Callback = function()
+        local args = { "Damage" }
+        Remotes:FireServer(unpack(args))
     end
 }
 
@@ -454,7 +454,7 @@ local ZonePositions = {
     ["Zone 2"] = Vector3.new(4674, 336, 10074),
     ["Zone 3"] = Vector3.new(4805, 336, 10205),
     ["Zone 4 (Tower)"] = Vector3.new(4673, 336, 10289),
-    ["Zone 5 (Arena)"] = Vector3.new(4805, 336, 10205)
+    ["Zone 5 (Arena)"] = Vector3.new(4542, 336, 10204)
 }
 
 Tabs.zone:CreateButton({
@@ -558,9 +558,9 @@ Tabs.player:CreateButton({
     end
 })
 
-Tabs.customization:Paragraph("Dungeon Settings Below", {
+Tabs.customization:Paragraph("DungeonNote", {
     Title = "Note",
-    Content = "",
+    Content = "Dungeon Settings Below",
     TitleAlignment = "Middle",
     ContentAlignment = Enum.TextXAlignment.Left
 })
@@ -579,7 +579,7 @@ Tabs.customization:CreateSlider("DungeonAttackSpeed", {
 
 Tabs.customization:CreateSlider("OffsetX", {
     Title = "X Axis (Left / Right)",
-    Description = "Moves sideways",
+    Description = "TPS sideways",
     Default = 0,
     Min = 0,
     Max = 10,
@@ -592,7 +592,7 @@ Tabs.customization:CreateSlider("OffsetX", {
 Tabs.customization:CreateSlider("OffsetY", {
     Title = "Y Axis (Up / Down)",
     Description = "Controls height",
-    Default = 0,
+    Default = 10,
     Min = 0,
     Max = 10,
     Rounding = 1,
@@ -603,7 +603,7 @@ Tabs.customization:CreateSlider("OffsetY", {
 
 Tabs.customization:CreateSlider("OffsetZ", {
     Title = "Z Axis (Forward / Backward)",
-    Description = "Moves in front/behind target",
+    Description = "TPS front/behind target",
     Default = 0,
     Min = 0,
     Max = 5,
