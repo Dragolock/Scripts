@@ -25,7 +25,7 @@ local PortalEvent = Events:WaitForChild("PortalC")
 local WinBossEvent = EventFolder:WaitForChild("WinBossEvent")
 local WinEvent = EventFolder:WaitForChild("WinEvent")
 
-local MAX_RADIUS = 200
+local MAX_RADIUS = 100
 local offsetX = 0
 local offsetY = 0
 local offsetZ = 0
@@ -391,6 +391,51 @@ joinToggle:OnChanged(function(state)
         end
     end)
 end)
+
+local Remotes = game:GetService("ReplicatedStorage")
+    :WaitForChild("Remotes")
+    :WaitForChild("Events")
+    :WaitForChild("OnUpgradedRequests")
+
+Tabs.apex:CreateButton{
+    Title = "Upgrade Damage",
+    Description = "Upgrade your damage stat",
+    Callback = function()
+        local args = { "Damage" }
+        Remotes:FireServer(unpack(args))
+    end
+}
+
+Tabs.apex:CreateButton{
+    Title = "Upgrade Health",
+    Description = "Upgrade your health stat",
+    Callback = function()
+        local args = { "Health" }
+        Remotes:FireServer(unpack(args))
+    end
+}
+
+Tabs.apex:CreateButton{
+    Title = "Delete NPC (!!!IMPORTANT!!!)",
+    Description = "Deletes CelestialFlyMission entities",
+    Callback = function()
+
+        local function deleteIfMatch(obj)
+            if obj.Name == "CelestialFlyMission" or obj.Name == "CelestialFlyMissions" then
+                obj:Destroy()
+            end
+        end
+
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            deleteIfMatch(obj)
+        end
+
+        workspace.DescendantAdded:Connect(function(obj)
+            deleteIfMatch(obj)
+        end)
+
+    end
+}
 
 local ZonesDropdown = Tabs.zone:CreateDropdown("ZoneSelect", {
     Title = "Zones",
