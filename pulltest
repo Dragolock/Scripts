@@ -25,6 +25,11 @@ local PortalEvent = Events:WaitForChild("PortalC")
 local WinBossEvent = EventFolder:WaitForChild("WinBossEvent")
 local WinEvent = EventFolder:WaitForChild("WinEvent")
 
+local offsetX = 0
+local offsetY = 0
+local offsetZ = 0
+local attackDelay = 0.05
+
 local Window = Library:Window{
     Title = "CHub - Pull A Sword",
     SubTitle = "By secret",
@@ -37,8 +42,10 @@ local Window = Library:Window{
 
 local Tabs = {
     apex = Window:CreateTab{Title = "Celestial", Icon = "phosphor-sword-bold"},
+    dungeon = Window:CreateTab{Title = "Dungeon", Icon = "phosphor-sword-bold"},
     zone = Window:CreateTab{Title = "Zones", Icon = "phosphor-sword-bold"},
     player = Window:CreateTab{Title = "Player", Icon = "phosphor-person-bold"},
+    customization = Window:CreateTab{Title = "Customization", Icon = "phosphor-device-tablet-bold"},
     performance = Window:CreateTab{Title = "Performance", Icon = "phosphor-device-tablet-bold"},
     Settings = Window:CreateTab{Title = "Settings", Icon = "phosphor-sword-bold"}
 }
@@ -60,17 +67,17 @@ end
 local BossDropdown = Tabs.apex:CreateDropdown("Boss Select", {
     Title = "Select Boss",
     Values = {
-        "Celestial Scout",
-        "Celestial Guardian",
-        "Celestial Warden"
+        "Celestial Scout [20k]",
+        "Celestial Guardian [1M]",
+        "Celestial Warden [150M]"
     },
-    Default = "Celestial Scout"
+    Default = "Celestial Scout [20k]"
 })
 
 local BossMap = {
-    ["Celestial Scout"] = "FixedBoss-1",
-    ["Celestial Guardian"] = "FixedBoss-2",
-    ["Celestial Warden"] = "FixedBoss-3"
+    ["Celestial Scout [20k]"] = "FixedBoss-1",
+    ["Celestial Guardian [1M]"] = "FixedBoss-2",
+    ["Celestial Warden [150M]"] = "FixedBoss-3"
 }
 
 local SwordDropdown = Tabs.apex:CreateDropdown("SwordSelect", {
@@ -143,6 +150,31 @@ Tabs.apex:CreateToggle("AutoSword", {
     end
 end)
 
+Tabs.apex:CreateToggle("AutoTower", {
+    Title = "Auto Tower",
+    Default = false
+}):OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            local towerEvent = game:GetService("ReplicatedStorage"):WaitForChild("TowerEventRemotes"):WaitForChild("TowerRewardsEvent")
+
+            local lastFalse = tick()
+
+            while Options.AutoTower.Value do
+                for i = 1, 20 do
+                    if not Options.AutoTower.Value then break end
+                    towerEvent:FireServer("-20", true)
+                    task.wait(1.5 / 20)
+                end
+                if tick() - lastFalse >= 1.5 then
+                    towerEvent:FireServer("-20", false)
+                    lastFalse = tick()
+                end
+            end
+        end)
+    end
+end)
+
 Tabs.apex:CreateToggle("HitBarrels", {
     Title = "Break Barrels",
     Default = false
@@ -160,11 +192,52 @@ Tabs.apex:CreateToggle("HitBarrels", {
     end
 end)
 
+Tabs.apex:CreateToggle("CollectScribes", {
+    Title = "Collect Scribes",
+    Default = false
+}):OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            local player = game.Players.LocalPlayer
+
+            local function getHRP()
+                local char = player.Character or player.CharacterAdded:Wait()
+                return char:WaitForChild("HumanoidRootPart")
+            end
+
+            local function getOrb()
+                return workspace:FindFirstChild("FlyingOrb", true)
+            end
+
+            while Options.CollectScribes.Value do
+                local hrp = getHRP()
+                local orb = getOrb()
+
+                if orb and orb:IsA("BasePart") then
+                    firetouchinterest(hrp, orb, 0)
+                    task.wait()
+                    firetouchinterest(hrp, orb, 1)
+                end
+
+                task.wait(5)
+            end
+        end)
+    end
+end)
+
 Tabs.apex:CreateButton{
     Title = "Open Shop",
     Description = "Opens the Event Shop",
     Callback = function()
         UI_Group.EventShop.Visible = true
+    end
+}
+
+Tabs.apex:CreateButton{
+    Title = "Open Merchant Menu",
+    Description = "Opens the Merchant Menu",
+    Callback = function()
+        UI_Group.CelestialMerchant.Visible = true
     end
 }
 
@@ -186,6 +259,215 @@ Tabs.apex:CreateButton{
         PortalEvent:FireServer("-50", false)
     end
 }
+
+Tabs.dungeon:CreateToggle("DungeonFastAttack", {Title = "Dungeon Fast Attack", Default = false})
+:OnChanged(function(state)
+    if state then
+        task.spawn(function()
+            while Options.DungeonFastAttack.Value do
+                game:GetService("ReplicatedStorage").Remotes.Events.Dungeon.OnDungeonClick:FireServer()
+                task.wait(attackDelay)
+            end
+        end)
+    end
+end)
+
+Tabs.Dungeon:CreateToggle("TPHolyEnemies", {Title = "TP Holy Enemies", Default = false})
+:OnChanged(function(state)
+
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local hrp = character:WaitForChild("HumanoidRootPart")
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+    if not state then return end
+
+    local torsos = {}
+
+    local function addTorso(v)
+        if v:IsA("BasePart") and v.Name == "UpperTorso" then
+            local model = v:FindFirstAncestorOfClass("Model")
+            if model and not game.Players:GetPlayerFromCharacter(model) then
+                torsos[v] = true
+            end
+        end
+    end
+
+    local function removeTorso(v)
+        torsos[v] = nil
+    end
+
+    for _, v in ipairs(workspace:GetDescendants()) do
+        addTorso(v)
+    end
+
+    local addedConn = workspace.DescendantAdded:Connect(addTorso)
+    local removedConn = workspace.DescendantRemoving:Connect(removeTorso)
+
+    task.spawn(function()
+        while Options.TPHolyEnemies.Value and character.Parent do
+            local nearest, shortest = nil, math.huge
+
+            for torso in pairs(torsos) do
+                local dist = (hrp.Position - torso.Position).Magnitude
+                if dist < shortest then
+                    shortest = dist
+                    nearest = torso
+                end
+            end
+
+            if nearest then
+                if humanoid and humanoid.Sit then
+                    humanoid.Sit = false
+                end
+
+                hrp.CFrame = CFrame.new(
+                    nearest.Position + Vector3.new(offsetX, offsetY, offsetZ)
+                )
+            end
+
+            task.wait(0.01)
+        end
+
+        addedConn:Disconnect()
+        removedConn:Disconnect()
+        table.clear(torsos)
+    end)
+end)
+
+Tabs.dungeon:CreateToggle("GenerateGoldFeather", {
+    Title = "Generate Gold Feather",
+    Default = false
+}):OnChanged(function(state)
+
+    local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local hrp = character:WaitForChild("HumanoidRootPart")
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+    local DungeonRemotes = Remotes:WaitForChild("Events"):WaitForChild("Dungeon")
+    local Join = DungeonRemotes:WaitForChild("OnJoinDungeon")
+    local Click = DungeonRemotes:WaitForChild("OnDungeonClick")
+    local Leave = DungeonRemotes:WaitForChild("OnLeaveDungeon")
+
+    if not state then
+        if hrp:FindFirstChild("SketVelocity") then
+            hrp.SketVelocity:Destroy()
+        end
+        if sketAddedConnection then
+            sketAddedConnection:Disconnect()
+            sketAddedConnection = nil
+        end
+        return
+    end
+
+    if not hrp:FindFirstChild("SketVelocity") then
+        local bv = Instance.new("BodyVelocity")
+        bv.Name = "SketVelocity"
+        bv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+        bv.Velocity = Vector3.zero
+        bv.Parent = hrp
+    end
+
+    local skets = {}
+
+    local function add(v)
+        if v:IsA("Model") and v.Name:lower() == "sket" then
+            skets[v] = true
+        end
+    end
+
+    local function remove(v)
+        skets[v] = nil
+    end
+
+    for _, v in ipairs(workspace:GetDescendants()) do
+        add(v)
+    end
+
+    sketAddedConnection = workspace.DescendantAdded:Connect(add)
+    local sketRemovedConnection = workspace.DescendantRemoving:Connect(remove)
+
+    task.spawn(function()
+        while Options.GenerateGoldFeather.Value and character.Parent do
+
+            Join:FireServer("Normal")
+
+            local start = tick()
+
+            while tick() - start < 1 and Options.GenerateGoldFeather.Value do
+
+                local nearest, dist = nil, math.huge
+
+                for sket in pairs(skets) do
+                    local part = sket.PrimaryPart
+                    if part then
+                        local d = (hrp.Position - part.Position).Magnitude
+                        if d < dist then
+                            dist = d
+                            nearest = part
+                        end
+                    end
+                end
+
+                if nearest then
+                    if humanoid and humanoid.Sit then
+                        humanoid.Sit = false
+                    end
+
+                    hrp.CFrame = CFrame.new(
+                        nearest.Position + Vector3.new(offsetX, offsetY, offsetZ)
+                    )
+                end
+
+                Click:FireServer()
+                task.wait(attackDelay)
+            end
+
+            Leave:FireServer(true)
+            task.wait(0.1)
+        end
+
+        if hrp:FindFirstChild("SketVelocity") then
+            hrp.SketVelocity:Destroy()
+        end
+
+        if sketAddedConnection then
+            sketAddedConnection:Disconnect()
+            sketAddedConnection = nil
+        end
+
+        if sketRemovedConnection then
+            sketRemovedConnection:Disconnect()
+            sketRemovedConnection = nil
+        end
+
+        table.clear(skets)
+    end)
+end)
+
+local joinToggle = Tabs.dungeon:CreateToggle("Join Dungeon", {
+Title = "Join Dungeon",
+Default = false
+})
+
+local Remotes = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Events"):WaitForChild("Dungeon")
+
+local joinDropdown = Tabs.dungeon:CreateDropdown("Select Dungeon", {
+Title = "Join Dungeon mode",
+Values = {"Normal", "Hard", "Chaos"},
+Default = "Normal"
+})
+
+local function fireJoinDungeon(mode)
+local args = {mode}
+Remotes.OnJoinDungeon:FireServer(unpack(args))
+end
+
+joinToggle:OnChanged(function(state)
+if state then
+fireJoinDungeon(joinDropdown.Value)
+end
+end)
 
 local ZonesDropdown = Tabs.zone:CreateDropdown("ZoneSelect", {
     Title = "Zones",
@@ -295,6 +577,54 @@ Tabs.player:CreateButton({
         Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
 
         notify("FullBright", "FullBright enabled!")
+    end
+})
+
+Tabs.dungeon:CreateSlider("DungeonAttackSpeed", {
+    Title = "Attack Speed",
+    Description = "Higher = faster attacks",
+    Default = 5,
+    Min = 1,
+    Max = 10,
+    Rounding = 1,
+    Callback = function(Value)
+        attackDelay = 0.2 - (Value * 0.018)
+    end
+})
+
+Tabs.customization:CreateSlider("OffsetX", {
+    Title = "X Axis (Left / Right)",
+    Description = "Moves sideways",
+    Default = 0,
+    Min = 0,
+    Max = 10,
+    Rounding = 1,
+    Callback = function(Value)
+        offsetX = Value
+    end
+})
+
+Tabs.customization:CreateSlider("OffsetY", {
+    Title = "Y Axis (Up / Down)",
+    Description = "Controls height",
+    Default = 0,
+    Min = 0,
+    Max = 10,
+    Rounding = 1,
+    Callback = function(Value)
+        offsetY = Value
+    end
+})
+
+Tabs.customization:CreateSlider("OffsetZ", {
+    Title = "Z Axis (Forward / Backward)",
+    Description = "Moves in front/behind target",
+    Default = 0,
+    Min = 0,
+    Max = 5,
+    Rounding = 1,
+    Callback = function(Value)
+        offsetZ = Value
     end
 })
 
